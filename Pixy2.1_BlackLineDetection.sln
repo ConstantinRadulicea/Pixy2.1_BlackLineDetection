@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pixy2.1_BlackLineDetection", "Pixy2.1_BlackLineDetection.vcxproj", "{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Debug|x64.ActiveCfg = Debug|x64
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Debug|x64.Build.0 = Debug|x64
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Debug|x86.ActiveCfg = Debug|Win32
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Debug|x86.Build.0 = Debug|Win32
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Release|x64.ActiveCfg = Release|x64
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Release|x64.Build.0 = Release|x64
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Release|x86.ActiveCfg = Release|Win32
+		{D0C7AB0C-25D8-479F-A9F7-804832FF5FFF}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E3560416-796A-46CC-B601-248FE29CF166}
+	EndGlobalSection
+EndGlobal
