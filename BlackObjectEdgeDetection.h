@@ -39,12 +39,23 @@ public:
 
 
 
-	ObjectEdges findEdges(int x, int y) {
+	std::vector<PixelCoordinates> findEdges(int x, int y) {
 		std::unordered_map<PixelCoordinates, bool> edges;
 		ObjectEdges objectEdges;
 		edges = floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y);
 
-		return objectEdges;
+		std::vector<PixelCoordinates> keys;
+		keys.reserve(edges.size());
+
+		for (auto kv : edges) {
+			if (kv.second == true)
+			{
+				keys.push_back(kv.first);
+			}
+		}
+		keys.shrink_to_fit();
+
+		return keys;
 	}
 
 	
@@ -150,6 +161,64 @@ private:
 			else
 			{
 				edges[PixelCoordinates{ posX, posY - 1 }] = true;
+			}
+
+
+
+			if (body[PixelCoordinates{ posX + 1, posY + 1 }] != true && edges[PixelCoordinates{ posX + 1, posY + 1 }] != true && isValid(getPixelLuminosity(posX + 1, posY + 1), m, n, posX + 1, posY + 1)) {
+				// Color with newC
+				// if valid and enqueue
+				//screen[posX + 1][posY] = newC;
+				p.first = posX + 1;
+				p.second = posY + 1;
+				queue.push(p);
+				body[PixelCoordinates{ posX + 1, posY + 1 }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX + 1, posY + 1 }] = true;
+			}
+
+			if (body[PixelCoordinates{ posX + 1, posY - 1 }] != true && edges[PixelCoordinates{ posX + 1, posY - 1 }] != true && isValid(getPixelLuminosity(posX + 1, posY - 1), m, n, posX + 1, posY - 1)) {
+				// Color with newC
+				// if valid and enqueue
+				//screen[posX + 1][posY] = newC;
+				p.first = posX + 1;
+				p.second = posY - 1;
+				queue.push(p);
+				body[PixelCoordinates{ posX + 1, posY - 1 }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX + 1, posY - 1 }] = true;
+			}
+
+			if (body[PixelCoordinates{ posX - 1, posY - 1 }] != true && edges[PixelCoordinates{ posX - 1, posY - 1 }] != true && isValid(getPixelLuminosity(posX - 1, posY - 1), m, n, posX - 1, posY - 1)) {
+				// Color with newC
+				// if valid and enqueue
+				//screen[posX + 1][posY] = newC;
+				p.first = posX - 1;
+				p.second = posY - 1;
+				queue.push(p);
+				body[PixelCoordinates{ posX - 1, posY - 1 }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX - 1, posY - 1 }] = true;
+			}
+
+			if (body[PixelCoordinates{ posX - 1, posY + 1 }] != true && edges[PixelCoordinates{ posX - 1, posY + 1 }] != true && isValid(getPixelLuminosity(posX - 1, posY + 1), m, n, posX - 1, posY + 1)) {
+				// Color with newC
+				// if valid and enqueue
+				//screen[posX + 1][posY] = newC;
+				p.first = posX - 1;
+				p.second = posY + 1;
+				queue.push(p);
+				body[PixelCoordinates{ posX - 1, posY + 1 }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX - 1, posY + 1 }] = true;
 			}
 		}
 		return edges;

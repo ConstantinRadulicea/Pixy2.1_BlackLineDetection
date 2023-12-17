@@ -36,4 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="edges.csv" />
+    <None Include="gg.m" />
+    <None Include="image.csv" />
+  </ItemGroup>
 </Project>

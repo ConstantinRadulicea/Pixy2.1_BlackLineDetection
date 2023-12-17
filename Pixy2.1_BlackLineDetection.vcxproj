@@ -136,6 +136,11 @@
     <ClInclude Include="Pixy2BlackLineDetectionService.h" />
     <ClInclude Include="rgb2hsv.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="edges.csv" />
+    <None Include="gg.m" />
+    <None Include="image.csv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
