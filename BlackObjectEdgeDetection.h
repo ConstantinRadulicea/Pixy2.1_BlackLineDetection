@@ -4,6 +4,9 @@
 #include"ObjectEdges.h"
 #include"rgb2hsv.h"
 #include <unordered_map>
+#include <queue>
+
+using namespace std;
 
 
 class BlackObjectEdgeDetection
@@ -33,91 +36,13 @@ public:
 		return rgb2hsv(getPixel(x, y)).V;
 	}
 
+
+
+
 	ObjectEdges findEdges(int x, int y) {
 		std::unordered_map<PixelCoordinates, bool> edges;
 		ObjectEdges objectEdges;
-		int x_i = 0, y_i = 0;
-		int x_1 = x, y_1 = y;
-
-		if (!isBlack(getPixelLuminosity(x, y))) {
-			return objectEdges;
-		}
-
-		for (y_i = y; y_i < pixyService.getHeight(); y_i++)		// pixel y++
-		{
-			y_1 = y_i;
-			x_1 = x + 1;
-			for (x_i = x_1; x_i < pixyService.getWidth(); x_i++)	// pixel x++
-			{
-				if (!isBlack(getPixelLuminosity(x_i, y_i)))
-				{
-					edges[PixelCoordinates{ x_1, y_1 }] = true;
-					break;
-				}
-				x_1 = x_i;
-			}
-			if (x_i == pixyService.getWidth())
-			{
-				edges[PixelCoordinates{ x_1, y_1 }] = true;
-			}
-
-			x_1 = x - 1;
-			for (x_i = x_1; x_i >= 0; x_i--)	// x-- pixel
-			{
-				if (!isBlack(getPixelLuminosity(x_i, y_i)))
-				{
-					edges[PixelCoordinates{ x_1, y_1 }] = true;
-					break;
-				}
-				x_1 = x_i;
-			}
-			if (x_i == -1)
-			{
-				edges[PixelCoordinates{ x_1, y_1 }] = true;
-			}
-		}
-		if (y_i == pixyService.getHeight())
-		{
-			edges[PixelCoordinates{ x_1, y_1 }] = true;
-		}
-
-
-		for (y_i = y; y_i >= 0; y_i--)		// pixel y--
-		{
-			y_1 = y_i;
-			x_1 = x + 1;
-			for (x_i = x_1; x_i < pixyService.getWidth(); x_i++)	// pixel x++
-			{
-				if (!isBlack(getPixelLuminosity(x_i, y_i)))
-				{
-					edges[PixelCoordinates{ x_1, y_1 }] = true;
-					break;
-				}
-				x_1 = x_i;
-			}
-			if (x_i == pixyService.getWidth())
-			{
-				edges[PixelCoordinates{ x_1, y_1 }] = true;
-			}
-			x_1 = x - 1;
-			for (x_i = x_1; x_i >= 0; x_i--)	// x-- pixel
-			{
-				if (!isBlack(getPixelLuminosity(x_i, y_i)))
-				{
-					edges[PixelCoordinates{ x_1, y_1 }] = true;
-					break;
-				}
-				x_1 = x_i;
-			}
-			if (x_i == -1)
-			{
-				edges[PixelCoordinates{ x_1, y_1 }] = true;
-			}
-		}
-		if (y_i == -1)
-		{
-			edges[PixelCoordinates{ x_1, y_1 }] = true;
-		}
+		edges = floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y);
 
 		return objectEdges;
 	}
@@ -127,5 +52,108 @@ public:
 private:
 	Pixy2BlackLineDetectionService &pixyService;
 	float blackColorThreshold;
+
+
+	// Function that returns true if
+	// the given pixel is valid
+	bool isValid(float pixel, int m, int n, int x, int y)
+	{
+		if (x < 0 || x >= m || y < 0 || y >= n || (!isBlack(pixel))) {
+			return false;
+		}
+		return true;
+	}
+
+	// FloodFill function
+	std::unordered_map<PixelCoordinates, bool> floodFill(int m, int n, int x, int y)
+	{
+		std::unordered_map<PixelCoordinates, bool> edges;
+		std::unordered_map<PixelCoordinates, bool> body;
+		queue<pair<int, int> > queue;
+
+		if (!isValid(getPixelLuminosity(x, y), m, n, x, y)) {
+			return edges;
+		}
+		body[PixelCoordinates{ x, y }] = true;
+
+		// Append the position of starting
+		// pixel of the component
+		pair<int, int> p(x, y);
+		queue.push(p);
+
+		// Color the pixel with the new color
+		//screen[x][y] = newC;
+
+		// While the queue is not empty i.e. the
+		// whole component having prevC color
+		// is not colored with newC color
+		while (queue.size() > 0) {
+			// Dequeue the front node
+			pair<int, int> currPixel = queue.front();
+			queue.pop();
+
+			int posX = currPixel.first;
+			int posY = currPixel.second;
+
+			// Check if the adjacent
+			// pixels are valid
+
+			if (body[PixelCoordinates{ posX + 1, posY }] != true && edges[PixelCoordinates{ posX + 1, posY }] != true && isValid(getPixelLuminosity(posX + 1, posY), m, n, posX + 1, posY)) {
+				// Color with newC
+				// if valid and enqueue
+				//screen[posX + 1][posY] = newC;
+				p.first = posX + 1;
+				p.second = posY;
+				queue.push(p);
+				body[PixelCoordinates{ posX + 1, posY }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX + 1, posY }] = true;
+			}
+
+
+			if (body[PixelCoordinates{ posX - 1, posY }] != true && edges[PixelCoordinates{ posX - 1, posY }] != true && isValid(getPixelLuminosity(posX - 1, posY), m, n, posX - 1, posY)) {
+				//screen[posX - 1][posY] = newC;
+				p.first = posX - 1;
+				p.second = posY;
+				queue.push(p);
+				body[PixelCoordinates{ posX - 1, posY }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX - 1, posY }] = true;
+			}
+
+
+
+			if (body[PixelCoordinates{ posX, posY + 1 }] != true && edges[PixelCoordinates{ posX, posY + 1 }] != true && isValid(getPixelLuminosity(posX, posY + 1), m, n, posX, posY + 1)) {
+				//screen[posX][posY + 1] = newC;
+				p.first = posX;
+				p.second = posY + 1;
+				queue.push(p);
+				body[PixelCoordinates{ posX, posY + 1 }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX, posY + 1 }] = true;
+			}
+
+
+			if (body[PixelCoordinates{ posX, posY - 1 }] != true && edges[PixelCoordinates{ posX, posY - 1 }] != true && isValid(getPixelLuminosity(posX, posY - 1), m, n, posX, posY - 1)) {
+				//screen[posX][posY - 1] = newC;
+				p.first = posX;
+				p.second = posY - 1;
+				queue.push(p);
+				body[PixelCoordinates{ posX, posY - 1 }] = true;
+			}
+			else
+			{
+				edges[PixelCoordinates{ posX, posY - 1 }] = true;
+			}
+		}
+		return edges;
+	}
+
 };
 
