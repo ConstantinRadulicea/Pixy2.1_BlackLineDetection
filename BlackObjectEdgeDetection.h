@@ -28,18 +28,18 @@ public:
 	}
 	~BlackObjectEdgeDetection() {}
 
-	RGBcolor getPixel(int x, int y) {
+	RGBcolor getPixel(int16_t x, int16_t y) {
 		return pixyService.getPixel(x, y);
 	}
 
-	float getPixelLuminosity(int x, int y) {
+	float getPixelLuminosity(int16_t x, int16_t y) {
 		return rgb2hsv(getPixel(x, y)).V;
 	}
 
 
 
 
-	std::vector<PixelCoordinates> findEdges(int x, int y) {
+	std::vector<PixelCoordinates> findEdges(int16_t x, int16_t y) {
 		std::unordered_map<PixelCoordinates, bool> edges;
 		ObjectEdges objectEdges;
 		edges = floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y);
@@ -67,7 +67,7 @@ private:
 
 	// Function that returns true if
 	// the given pixel is valid
-	bool isValid(float pixel, int m, int n, int x, int y)
+	bool isValid(float pixel, int16_t m, int16_t n, int16_t x, int16_t y)
 	{
 		if (x < 0 || x >= m || y < 0 || y >= n || (!isBlack(pixel))) {
 			return false;
@@ -76,11 +76,11 @@ private:
 	}
 
 	// FloodFill function
-	std::unordered_map<PixelCoordinates, bool> floodFill(int m, int n, int x, int y)
+	std::unordered_map<PixelCoordinates, bool> floodFill(int16_t m, int16_t n, int16_t x, int16_t y)
 	{
 		std::unordered_map<PixelCoordinates, bool> edges;
 		std::unordered_map<PixelCoordinates, bool> body;
-		queue<pair<int, int> > queue;
+		queue<pair<int16_t, int16_t> > queue;
 
 		if (!isValid(getPixelLuminosity(x, y), m, n, x, y)) {
 			return edges;
@@ -89,7 +89,7 @@ private:
 
 		// Append the position of starting
 		// pixel of the component
-		pair<int, int> p(x, y);
+		pair<int16_t, int16_t> p(x, y);
 		queue.push(p);
 
 		// Color the pixel with the new color
@@ -100,125 +100,125 @@ private:
 		// is not colored with newC color
 		while (queue.size() > 0) {
 			// Dequeue the front node
-			pair<int, int> currPixel = queue.front();
+			pair<int16_t, int16_t> currPixel = queue.front();
 			queue.pop();
 
-			int posX = currPixel.first;
-			int posY = currPixel.second;
+			int16_t posX = currPixel.first;
+			int16_t posY = currPixel.second;
 
 			// Check if the adjacent
 			// pixels are valid
 
-			if (body[PixelCoordinates{ posX + 1, posY }] != true && edges[PixelCoordinates{ posX + 1, posY }] != true && isValid(getPixelLuminosity(posX + 1, posY), m, n, posX + 1, posY)) {
+			if (body[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] != true && edges[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] != true && isValid(getPixelLuminosity((int16_t)(posX + 1), posY), m, n, (int16_t)(posX + 1), posY)) {
 				// Color with newC
 				// if valid and enqueue
-				//screen[posX + 1][posY] = newC;
-				p.first = posX + 1;
+				//screen[(int16_t)(posX + 1)][posY] = newC;
+				p.first = (int16_t)(posX + 1);
 				p.second = posY;
 				queue.push(p);
-				body[PixelCoordinates{ posX + 1, posY }] = true;
+				body[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX + 1, posY }] = true;
+				edges[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
 			}
 
 
-			if (body[PixelCoordinates{ posX - 1, posY }] != true && edges[PixelCoordinates{ posX - 1, posY }] != true && isValid(getPixelLuminosity(posX - 1, posY), m, n, posX - 1, posY)) {
-				//screen[posX - 1][posY] = newC;
-				p.first = posX - 1;
+			if (body[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] != true && edges[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] != true && isValid(getPixelLuminosity((int16_t)(posX - 1), posY), m, n, (int16_t)(posX - 1), posY)) {
+				//screen[(int16_t)(posX - 1)][posY] = newC;
+				p.first = (int16_t)(posX - 1);
 				p.second = posY;
 				queue.push(p);
-				body[PixelCoordinates{ posX - 1, posY }] = true;
+				body[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX - 1, posY }] = true;
+				edges[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
 			}
 
 
 
-			if (body[PixelCoordinates{ posX, posY + 1 }] != true && edges[PixelCoordinates{ posX, posY + 1 }] != true && isValid(getPixelLuminosity(posX, posY + 1), m, n, posX, posY + 1)) {
-				//screen[posX][posY + 1] = newC;
+			if (body[PixelCoordinates{ posX, (int16_t)(posY + 1) }] != true && edges[PixelCoordinates{ posX, (int16_t)(posY + 1) }] != true && isValid(getPixelLuminosity(posX, (int16_t)(posY + 1)), m, n, posX, (int16_t)(posY + 1))) {
+				//screen[posX][(int16_t)(posY + 1)] = newC;
 				p.first = posX;
-				p.second = posY + 1;
+				p.second = (int16_t)(posY + 1);
 				queue.push(p);
-				body[PixelCoordinates{ posX, posY + 1 }] = true;
+				body[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX, posY + 1 }] = true;
+				edges[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
 			}
 
 
-			if (body[PixelCoordinates{ posX, posY - 1 }] != true && edges[PixelCoordinates{ posX, posY - 1 }] != true && isValid(getPixelLuminosity(posX, posY - 1), m, n, posX, posY - 1)) {
-				//screen[posX][posY - 1] = newC;
+			if (body[PixelCoordinates{ posX, (int16_t)(posY - 1) }] != true && edges[PixelCoordinates{ posX, (int16_t)(posY - 1) }] != true && isValid(getPixelLuminosity(posX, (int16_t)(posY - 1)), m, n, posX, (int16_t)(posY - 1))) {
+				//screen[posX][(int16_t)(posY - 1)] = newC;
 				p.first = posX;
-				p.second = posY - 1;
+				p.second = (int16_t)(posY - 1);
 				queue.push(p);
-				body[PixelCoordinates{ posX, posY - 1 }] = true;
+				body[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX, posY - 1 }] = true;
+				edges[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
 			}
 
 
 
-			if (body[PixelCoordinates{ posX + 1, posY + 1 }] != true && edges[PixelCoordinates{ posX + 1, posY + 1 }] != true && isValid(getPixelLuminosity(posX + 1, posY + 1), m, n, posX + 1, posY + 1)) {
+			if (body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY + 1))) {
 				// Color with newC
 				// if valid and enqueue
-				//screen[posX + 1][posY] = newC;
-				p.first = posX + 1;
-				p.second = posY + 1;
+				//screen[(int16_t)(posX + 1)][posY] = newC;
+				p.first = (int16_t)(posX + 1);
+				p.second = (int16_t)(posY + 1);
 				queue.push(p);
-				body[PixelCoordinates{ posX + 1, posY + 1 }] = true;
+				body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX + 1, posY + 1 }] = true;
+				edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
 			}
 
-			if (body[PixelCoordinates{ posX + 1, posY - 1 }] != true && edges[PixelCoordinates{ posX + 1, posY - 1 }] != true && isValid(getPixelLuminosity(posX + 1, posY - 1), m, n, posX + 1, posY - 1)) {
+			if (body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY - 1))) {
 				// Color with newC
 				// if valid and enqueue
-				//screen[posX + 1][posY] = newC;
-				p.first = posX + 1;
-				p.second = posY - 1;
+				//screen[(int16_t)(posX + 1)][posY] = newC;
+				p.first = (int16_t)(posX + 1);
+				p.second = (int16_t)(posY - 1);
 				queue.push(p);
-				body[PixelCoordinates{ posX + 1, posY - 1 }] = true;
+				body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX + 1, posY - 1 }] = true;
+				edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
 			}
 
-			if (body[PixelCoordinates{ posX - 1, posY - 1 }] != true && edges[PixelCoordinates{ posX - 1, posY - 1 }] != true && isValid(getPixelLuminosity(posX - 1, posY - 1), m, n, posX - 1, posY - 1)) {
+			if (body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY - 1))) {
 				// Color with newC
 				// if valid and enqueue
-				//screen[posX + 1][posY] = newC;
-				p.first = posX - 1;
-				p.second = posY - 1;
+				//screen[(int16_t)(posX + 1)][posY] = newC;
+				p.first = (int16_t)(posX - 1);
+				p.second = (int16_t)(posY - 1);
 				queue.push(p);
-				body[PixelCoordinates{ posX - 1, posY - 1 }] = true;
+				body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX - 1, posY - 1 }] = true;
+				edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
 			}
 
-			if (body[PixelCoordinates{ posX - 1, posY + 1 }] != true && edges[PixelCoordinates{ posX - 1, posY + 1 }] != true && isValid(getPixelLuminosity(posX - 1, posY + 1), m, n, posX - 1, posY + 1)) {
+			if (body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY + 1))) {
 				// Color with newC
 				// if valid and enqueue
-				//screen[posX + 1][posY] = newC;
-				p.first = posX - 1;
-				p.second = posY + 1;
+				//screen[(int16_t)(posX + 1)][posY] = newC;
+				p.first = (int16_t)(posX - 1);
+				p.second = (int16_t)(posY + 1);
 				queue.push(p);
-				body[PixelCoordinates{ posX - 1, posY + 1 }] = true;
+				body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
 			}
 			else
 			{
-				edges[PixelCoordinates{ posX - 1, posY + 1 }] = true;
+				edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
 			}
 		}
 		return edges;

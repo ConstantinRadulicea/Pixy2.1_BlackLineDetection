@@ -98,7 +98,7 @@ int main() {
 
 	Pixy2BlackLineDetectionService pixy2BlackLineDetectionService(Untitled, UNTITLED_WIDTH, UNTITLED_HEIGHT);
 	BlackObjectEdgeDetection blackObjectEdgeDetection(pixy2BlackLineDetectionService, 0.1);
-	writeMatlabEdges("edges.csv", blackObjectEdgeDetection.findEdges(4, 21));
+	writeMatlabEdges("edges.csv", blackObjectEdgeDetection.findEdges(259, 174));
 	
 	//CloseHandle(serialHandle);
 

@@ -4,14 +4,13 @@ close;
 
 img = readmatrix("image.csv", "Delimiter",",");
 img = img .* 100;
-newA = zeros(size(img)+2);
-newA = newA + 255;
-newA(2:end-1,2:end-1)=img;
-img = newA;
+img(end+1, :) = 255;
+img(:, end+1) = 255;
+img(1, end+1) = 255;
 image(img)
 
 
-edges = readmatrix("edges.csv", "Delimiter",",");
+edges = readmatrix("edges.csv", "Delimiter",",")
 A = zeros(size(img));
 if ~isempty(edges)
     edges = edges + [2 2];

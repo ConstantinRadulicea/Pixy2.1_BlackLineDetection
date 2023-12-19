@@ -7,14 +7,14 @@
 class Pixy2BlackLineDetectionService
 {
 public:
-	Pixy2BlackLineDetectionService(const int *_image, int width, int height) {
+	Pixy2BlackLineDetectionService(const int *_image, int16_t width, int16_t height) {
 		this->height = height;
 		this->width = width;
 		this->image = _image;
 	}
 	~Pixy2BlackLineDetectionService(){}
 
-	RGBcolor getPixel(int x, int y) {
+	RGBcolor getPixel(int16_t x, int16_t y) {
 		int offset = (y * this->width) + x;
 		RGBcolor ff;
 		ff.R = (this->image[offset] >> 0) & (int)0xff;
@@ -23,17 +23,17 @@ public:
 		return ff;
 	}
 
-	int getWidth() {
+	int16_t getWidth() {
 		return width;
 	}
-	int getHeight() {
+	int16_t getHeight() {
 		return height;
 	}
 
 
 private:
-	int width;
-	int height;
+	int16_t width;
+	int16_t height;
 	const int*image;
 
 };
