@@ -109,116 +109,147 @@ private:
 			// Check if the adjacent
 			// pixels are valid
 
-			if (body[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] != true && edges[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] != true && isValid(getPixelLuminosity((int16_t)(posX + 1), posY), m, n, (int16_t)(posX + 1), posY)) {
-				// Color with newC
-				// if valid and enqueue
-				//screen[(int16_t)(posX + 1)][posY] = newC;
-				p.first = (int16_t)(posX + 1);
-				p.second = posY;
-				queue.push(p);
-				body[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
-			}
-
-
-			if (body[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] != true && edges[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] != true && isValid(getPixelLuminosity((int16_t)(posX - 1), posY), m, n, (int16_t)(posX - 1), posY)) {
-				//screen[(int16_t)(posX - 1)][posY] = newC;
-				p.first = (int16_t)(posX - 1);
-				p.second = posY;
-				queue.push(p);
-				body[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
+			if ((body.find(PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }) == body.end()) && (edges.find(PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }) == edges.end()) ) {
+				if (isValid(getPixelLuminosity((int16_t)(posX + 1), posY), m, n, (int16_t)(posX + 1), posY))
+				{
+					// Color with newC
+					// if valid and enqueue
+					//screen[(int16_t)(posX + 1)][posY] = newC;
+					p.first = (int16_t)(posX + 1);
+					p.second = posY;
+					queue.push(p);
+					body[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
+				}
 			}
 
 
 
-			if (body[PixelCoordinates{ posX, (int16_t)(posY + 1) }] != true && edges[PixelCoordinates{ posX, (int16_t)(posY + 1) }] != true && isValid(getPixelLuminosity(posX, (int16_t)(posY + 1)), m, n, posX, (int16_t)(posY + 1))) {
-				//screen[posX][(int16_t)(posY + 1)] = newC;
-				p.first = posX;
-				p.second = (int16_t)(posY + 1);
-				queue.push(p);
-				body[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
-			}
-
-
-			if (body[PixelCoordinates{ posX, (int16_t)(posY - 1) }] != true && edges[PixelCoordinates{ posX, (int16_t)(posY - 1) }] != true && isValid(getPixelLuminosity(posX, (int16_t)(posY - 1)), m, n, posX, (int16_t)(posY - 1))) {
-				//screen[posX][(int16_t)(posY - 1)] = newC;
-				p.first = posX;
-				p.second = (int16_t)(posY - 1);
-				queue.push(p);
-				body[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
+			if ((body.find(PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }) == body.end()) && (edges.find(PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }) == edges.end()) ) {
+				if (isValid(getPixelLuminosity((int16_t)(posX - 1), posY), m, n, (int16_t)(posX - 1), posY))
+				{
+					//screen[(int16_t)(posX - 1)][posY] = newC;
+					p.first = (int16_t)(posX - 1);
+					p.second = posY;
+					queue.push(p);
+					body[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
+				}
 			}
 
 
 
-			if (body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY + 1))) {
-				// Color with newC
-				// if valid and enqueue
-				//screen[(int16_t)(posX + 1)][posY] = newC;
-				p.first = (int16_t)(posX + 1);
-				p.second = (int16_t)(posY + 1);
-				queue.push(p);
-				body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
+
+			if ((body.find(PixelCoordinates{ posX, (int16_t)(posY + 1) }) == body.end()) && (edges.find(PixelCoordinates{ posX, (int16_t)(posY + 1) }) == edges.end())) {
+				if (isValid(getPixelLuminosity(posX, (int16_t)(posY + 1)), m, n, posX, (int16_t)(posY + 1)))
+				{
+					//screen[posX][(int16_t)(posY + 1)] = newC;
+					p.first = posX;
+					p.second = (int16_t)(posY + 1);
+					queue.push(p);
+					body[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
+				}
 			}
 
-			if (body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY - 1))) {
-				// Color with newC
-				// if valid and enqueue
-				//screen[(int16_t)(posX + 1)][posY] = newC;
-				p.first = (int16_t)(posX + 1);
-				p.second = (int16_t)(posY - 1);
-				queue.push(p);
-				body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
+
+
+			if ((body.find(PixelCoordinates{ posX, (int16_t)(posY - 1) }) == body.end()) && (edges.find(PixelCoordinates{ posX, (int16_t)(posY - 1) }) == edges.end())) {
+				if (isValid(getPixelLuminosity(posX, (int16_t)(posY - 1)), m, n, posX, (int16_t)(posY - 1)))
+				{
+					//screen[posX][(int16_t)(posY - 1)] = newC;
+					p.first = posX;
+					p.second = (int16_t)(posY - 1);
+					queue.push(p);
+					body[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
+				}
 			}
 
-			if (body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY - 1))) {
-				// Color with newC
-				// if valid and enqueue
-				//screen[(int16_t)(posX + 1)][posY] = newC;
-				p.first = (int16_t)(posX - 1);
-				p.second = (int16_t)(posY - 1);
-				queue.push(p);
-				body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
-			}
-			else
-			{
-				edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
+
+
+
+			if ((body.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }) == body.end()) && (edges.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }) == edges.end()) ) {
+				if (isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY + 1)))
+				{
+					// Color with newC
+					// if valid and enqueue
+					//screen[(int16_t)(posX + 1)][posY] = newC;
+					p.first = (int16_t)(posX + 1);
+					p.second = (int16_t)(posY + 1);
+					queue.push(p);
+					body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
+				}
 			}
 
-			if (body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] != true && edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] != true && isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY + 1))) {
-				// Color with newC
-				// if valid and enqueue
-				//screen[(int16_t)(posX + 1)][posY] = newC;
-				p.first = (int16_t)(posX - 1);
-				p.second = (int16_t)(posY + 1);
-				queue.push(p);
-				body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
+
+			if ((body.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }) == body.end()) && (edges.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }) == edges.end()) ) {
+				if (isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY - 1)))
+				{
+					// Color with newC
+					// if valid and enqueue
+					//screen[(int16_t)(posX + 1)][posY] = newC;
+					p.first = (int16_t)(posX + 1);
+					p.second = (int16_t)(posY - 1);
+					queue.push(p);
+					body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
+				}
 			}
-			else
-			{
-				edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
+
+
+			if ((body.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }) == body.end()) && (edges.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }) == edges.end())) {
+				if (isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY - 1)))
+				{
+					// Color with newC
+					// if valid and enqueue
+					//screen[(int16_t)(posX + 1)][posY] = newC;
+					p.first = (int16_t)(posX - 1);
+					p.second = (int16_t)(posY - 1);
+					queue.push(p);
+					body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
+				}
+			}
+
+
+			if ((body.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }) == body.end()) && (edges.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }) == edges.end()) ) {
+				if (isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY + 1)))
+				{
+					// Color with newC
+					// if valid and enqueue
+					//screen[(int16_t)(posX + 1)][posY] = newC;
+					p.first = (int16_t)(posX - 1);
+					p.second = (int16_t)(posY + 1);
+					queue.push(p);
+					body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
+				}
+				else
+				{
+					edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
+				}
 			}
 		}
 		return edges;

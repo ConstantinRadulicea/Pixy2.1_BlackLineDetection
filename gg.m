@@ -15,7 +15,8 @@ edges = readmatrix("edges.csv", "Delimiter",",");
 A = zeros(size(img));
 if ~isempty(edges)
     edges = edges + [2 2];
-    A(sub2ind(size(img),edges(:, 2),edges(:, 1))) = 50;
+    ind = sub2ind(size(img),edges(:, 2),edges(:, 1));
+    A(ind) = 50;
 end
 
 
@@ -23,5 +24,5 @@ end
 
 
 img = img + A;
-image(img)
+image(A)
 
