@@ -16,13 +16,14 @@ A = zeros(size(img));
 if ~isempty(edges)
     edges = edges + [2 2];
     ind = sub2ind(size(img),edges(:, 2),edges(:, 1));
-    A(ind) = 50;
+    A(ind) = 1;
 end
 
 
 
 
 
-img = img + A;
-image(A)
+
+img = img + (A.*50);
+image(img)
 

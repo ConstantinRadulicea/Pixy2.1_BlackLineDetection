@@ -48,10 +48,7 @@ public:
 		keys.reserve(edges.size());
 
 		for (auto kv : edges) {
-			if (kv.second == true)
-			{
-				keys.push_back(kv.first);
-			}
+			keys.push_back(kv.first);
 		}
 		keys.shrink_to_fit();
 
