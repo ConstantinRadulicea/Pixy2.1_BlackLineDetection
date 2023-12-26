@@ -35,6 +35,9 @@
     <ClInclude Include="img1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="thinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="edges.csv" />

@@ -9,6 +9,8 @@
 using namespace std;
 
 
+
+
 class BlackObjectEdgeDetection
 {
 public:
@@ -46,7 +48,7 @@ public:
 
 		std::vector<PixelCoordinates> keys;
 		keys.reserve(edges.size());
-
+		
 		for (auto kv : edges) {
 			keys.push_back(kv.first);
 		}

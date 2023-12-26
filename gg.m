@@ -1,14 +1,22 @@
 clear;
 clc;
-close;
+close all;
 
 img = readmatrix("image.csv", "Delimiter",",");
+logical_img = cos(img.*(pi/2));
+logical_img = round(logical_img);
+logical_img = logical(logical_img);
+skel = bwskel(logical_img);
+figure
+imshow(skel)
+figure
+imshow(bwmorph(logical_img,'skel',Inf))
+
 img = img .* 100;
 newA = zeros(size(img)+2);
 newA = newA + 255;
 newA(2:end-1,2:end-1)=img;
 img = newA;
-image(img)
 
 
 edges = readmatrix("edges.csv", "Delimiter",",");
@@ -24,6 +32,9 @@ end
 
 
 
+
+
 img = img + (A.*50);
+figure
 image(img)
 
