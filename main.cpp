@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "thinning.h"
 #include "BlackObjectEdgeDetection.h"
 #include "img1.h"
 
@@ -56,12 +55,7 @@ int main() {
 	
 
 	start = clock();
-	objectBody = blackObjectEdgeDetection.findEdges(0, 0);
-	stop = clock();
-	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
-
-	start = clock();
-	thinning(objectBody, result);
+	blackObjectEdgeDetection.getObjectSkeleton(0, 0, result);
 	stop = clock();
 	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
 

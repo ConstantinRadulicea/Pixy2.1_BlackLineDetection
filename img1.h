@@ -1,3 +1,4 @@
+#pragma once
 #define UNTITLED_HEIGHT 200
 #define UNTITLED_WIDTH 320
 

@@ -3,6 +3,7 @@
 #include"Pixy2BlackLineDetectionService.h"
 #include"ObjectEdges.h"
 #include"rgb2hsv.h"
+#include "thinning.h"
 #include <unordered_map>
 #include <queue>
 
@@ -101,25 +102,20 @@ public:
 		return rgb2hsv(getPixel(x, y)).V;
 	}
 
-
-
-
-	std::unordered_map<PixelCoordinates, bool> findEdges(int16_t x, int16_t y) {
-		std::unordered_map<PixelCoordinates, bool> edges;
-		edges = floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y);
-
-		return edges;
+	void getObject(int16_t x, int16_t y, std::unordered_map<PixelCoordinates, bool> &objectBody) {
+		floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y, objectBody);
 	}
 
-
-
-
-	
+	void getObjectSkeleton(int16_t x, int16_t y, std::unordered_map<PixelCoordinates, bool> &objectSkeleton) {
+		std::unordered_map<PixelCoordinates, bool> objectBody;
+		objectSkeleton.clear();
+		getObject(x, y, objectBody);
+		thinning(objectBody, objectSkeleton);
+	}
 
 private:
 	Pixy2BlackLineDetectionService &pixyService;
 	float blackColorThreshold;
-
 
 	// Function that returns true if
 	// the given pixel is valid
@@ -132,14 +128,15 @@ private:
 	}
 
 	// FloodFill function
-	std::unordered_map<PixelCoordinates, bool> floodFill(int16_t m, int16_t n, int16_t x, int16_t y)
+	void floodFill(int16_t m, int16_t n, int16_t x, int16_t y, std::unordered_map<PixelCoordinates, bool> & body)
 	{
 		std::unordered_map<PixelCoordinates, bool> edges;
-		std::unordered_map<PixelCoordinates, bool> body;
+		//std::unordered_map<PixelCoordinates, bool> body;
 		queue<pair<int16_t, int16_t> > queue;
+		body.clear();
 
 		if (!isValid(getPixelLuminosity(x, y), m, n, x, y)) {
-			return edges;
+			return;
 		}
 		body[PixelCoordinates{ x, y }] = true;
 
@@ -308,7 +305,7 @@ private:
 				}
 			}
 		}
-		return body;
+		//return body;
 	}
 
 };

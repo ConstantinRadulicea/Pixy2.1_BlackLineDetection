@@ -42,7 +42,7 @@ bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
     }
 }
 
-static ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
+ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
     ObjectEdgeInfo info;
     memset(&info, 0, sizeof(ObjectEdgeInfo));
 
@@ -55,7 +55,7 @@ static ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, boo
     return info;
 }
 
-static size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
+size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
     size_t count = 0;
 
     for (auto kv : map) {
@@ -74,7 +74,7 @@ static size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
  0 - 0 = 0
  dsti = saturate( | src1 - src2 | )
 */
-static void absdiff(
+void absdiff(
     std::unordered_map<PixelCoordinates, bool>& src1,                      // First input array or matrix
     std::unordered_map<PixelCoordinates, bool>& src2,                     // Second input array or matrix
     std::unordered_map<PixelCoordinates, bool>& dst                    // Result array or matrix
@@ -118,7 +118,7 @@ static void absdiff(
 
 }
 
-static void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
+void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
     for (auto it = map.begin(); it != map.end();)
     {
         if (it->second == false)
@@ -137,7 +137,7 @@ static void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
 0 & ~(1) = 0 & 0 = 0;
 0 & ~(0) = 0 & 1 = 0;
 */
-static void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<PixelCoordinates, bool>& B) {
+void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<PixelCoordinates, bool>& B) {
 
     for (auto coordA : A) {
         auto coordB_found = B.find(coordA.first);
@@ -166,7 +166,7 @@ static void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unorder
   * 		im    Binary image with range = [0,1]
   * 		iter  0=even, 1=odd
   */
-static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter)
+void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter)
 {
     
     ObjectEdgeInfo imgInfo;
@@ -291,7 +291,7 @@ static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, i
  * 		src  The source image, binary with range = [0,255]
  * 		dst  The destination image
  */
-void thinning(std::unordered_map<PixelCoordinates, bool>& src, std::unordered_map<PixelCoordinates, bool>& dst)
+static void thinning(std::unordered_map<PixelCoordinates, bool>& src, std::unordered_map<PixelCoordinates, bool>& dst)
 {
     dst = src;
     //dst /= 255;         // convert to binary image
