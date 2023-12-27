@@ -7,10 +7,10 @@ logical_img = cos(img.*(pi/2));
 logical_img = round(logical_img);
 logical_img = logical(logical_img);
 skel = bwskel(logical_img);
-figure
-imshow(skel)
-figure
-imshow(bwmorph(logical_img,'skel',Inf))
+% figure
+% imshow(skel)
+% figure
+% imshow(bwmorph(logical_img,'skel',Inf))
 
 img = img .* 100;
 newA = zeros(size(img)+2);
@@ -33,8 +33,8 @@ end
 
 
 
-
-img = img + (A.*50);
+A = A.* 50;
+img = img + A;
 figure
-image(img)
+image(A)
 

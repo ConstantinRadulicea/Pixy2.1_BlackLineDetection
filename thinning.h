@@ -10,6 +10,7 @@
 
 #include <unordered_map>
 #include"Pixy2BlackLineDetectionService.h"
+#include "BlackObjectEdgeDetection.h"
 #include"ObjectEdges.h"
 
 using namespace std;
@@ -24,6 +25,22 @@ typedef struct ObjectEdgeInfo
     size_t maxX;
     size_t maxY;
 };
+
+bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
+    PixelCoordinates coord;
+    coord.x = x;
+    coord.y = y;
+
+    auto foundCoord = map.find(coord);
+
+    if (foundCoord != map.end()) {
+        return foundCoord->second;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 static ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
     ObjectEdgeInfo info;
@@ -84,15 +101,18 @@ static void absdiff(
             {
                 valueDst = false;
             }
+        }
+        if (valueDst)
+        {
             dst[coordSrc1.first] = valueDst;
         }
     }
 
     for (auto coordSrc2 : src2) {
-        auto dst_not_found = dst.find(coordSrc2.first);
+        auto src1_not_found = src1.find(coordSrc2.first);
 
-        if (dst_not_found == dst.end()) {
-            dst[dst_not_found->first] = dst_not_found->second;
+        if (src1_not_found == src1.end()) {
+            dst[coordSrc2.first] = coordSrc2.second;
         }
     }
 
@@ -125,12 +145,13 @@ static void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unorder
         if (coordB_found != B.end()) {		// if found A in B
             A[coordA.first] &= !(coordB_found->second);
         }
-
-        if (A[coordA.first] == false)
+        else
         {
-            A.erase(coordA.first);
+            A[coordA.first] &= !(false);
         }
     }
+
+    removeZeros(A);
 }
 
 
@@ -152,6 +173,8 @@ static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, i
     imgInfo = getObjectEdgeInfo(img);
     int nRows = imgInfo.maxY;
     int nCols = imgInfo.maxX;
+    int rowOffset = imgInfo.minY;
+    int colOffset = imgInfo.minX;
 
     if (!(nRows > 3 && nCols > 3)) return;
 
@@ -159,58 +182,101 @@ static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, i
     std::unordered_map<PixelCoordinates, bool> marker;
 
     int x, y;
-    uchar* pAbove;
-    uchar* pCurr;
-    uchar* pBelow;
-    uchar* nw, * no, * ne;    // north (pAbove)
-    uchar* we, * me, * ea;
-    uchar* sw, * so, * se;    // south (pBelow)
+    PixelCoordinates pAbove;
+    PixelCoordinates pCurr;
+    PixelCoordinates pBelow;
+    PixelCoordinates tempCoord;
+    int nw, no, ne;    // north (pAbove)
+    int we, me, ea;
+    int sw, so, se;    // south (pBelow)
 
-    uchar* pDst;
+    PixelCoordinates pDst;
 
     // initialize row pointers
-    pAbove = NULL;
-    pCurr = img.ptr<uchar>(0);
-    pBelow = img.ptr<uchar>(1);
+    //pAbove = NULL;
+    pAbove.x = -1;
+    pAbove.y = -1;
 
-    for (y = 1; y < img.rows - 1; ++y) {
+    //pCurr = img.ptr<uchar>(0);
+    pCurr.x = colOffset;
+    pCurr.y = rowOffset;
+
+    //pBelow = img.ptr<uchar>(1);
+    pBelow.x = colOffset;
+    pBelow.y = rowOffset+1;
+
+    for (y = rowOffset+1; y < rowOffset + nRows - 1; ++y) {
         // shift the rows up by one
         pAbove = pCurr;
         pCurr = pBelow;
-        pBelow = img.ptr<uchar>(y + 1);
 
-        pDst = marker.ptr<uchar>(y);
+        //pBelow = img.ptr<uchar>(y + 1);
+        pBelow.x = colOffset;
+        pBelow.y = y + 1;
+
+        
+        //pDst = marker.ptr<uchar>(y);
+        pDst.x = colOffset;
+        pDst.y = y;
 
         // initialize col pointers
-        no = &(pAbove[0]);
-        ne = &(pAbove[1]);
-        me = &(pCurr[0]);
-        ea = &(pCurr[1]);
-        so = &(pBelow[0]);
-        se = &(pBelow[1]);
 
-        for (x = 1; x < img.cols - 1; ++x) {
+        //no = &(pAbove[0]);
+        //ne = &(pAbove[1]);
+        //me = &(pCurr[0]);
+        //ea = &(pCurr[1]);
+        //so = &(pBelow[0]);
+        //se = &(pBelow[1]);
+
+        no = (int)getCoord(img, pAbove.x, pAbove.y);
+        ne = (int)getCoord(img, pAbove.x+1, pAbove.y);
+        me = (int)getCoord(img, pCurr.x, pCurr.y);
+        ea = (int)getCoord(img, pCurr.x+1, pCurr.y);
+        so = (int)getCoord(img, pBelow.x, pBelow.y);
+        se = (int)getCoord(img, pBelow.x+1, pBelow.y);
+        
+
+        for (x = colOffset + 1; x < colOffset + nCols - 1; ++x) {
             // shift col pointers left by one (scan left to right)
             nw = no;
             no = ne;
-            ne = &(pAbove[x + 1]);
+            //ne = &(pAbove[x + 1]);
+            ne = (int)getCoord(img, x + 1, pAbove.y);
             we = me;
             me = ea;
-            ea = &(pCurr[x + 1]);
+            //ea = &(pCurr[x + 1]);
+            ea = (int)getCoord(img, x + 1, pCurr.y);
             sw = so;
             so = se;
-            se = &(pBelow[x + 1]);
+            //se = &(pBelow[x + 1]);
+            se = (int)getCoord(img, x + 1, pBelow.y);
 
-            int A = (*no == 0 && *ne == 1) + (*ne == 0 && *ea == 1) +
-                (*ea == 0 && *se == 1) + (*se == 0 && *so == 1) +
-                (*so == 0 && *sw == 1) + (*sw == 0 && *we == 1) +
-                (*we == 0 && *nw == 1) + (*nw == 0 && *no == 1);
-            int B = *no + *ne + *ea + *se + *so + *sw + *we + *nw;
-            int m1 = iter == 0 ? (*no * *ea * *so) : (*no * *ea * *we);
-            int m2 = iter == 0 ? (*ea * *so * *we) : (*no * *so * *we);
+            //int A = (*no == 0 && *ne == 1) + (*ne == 0 && *ea == 1) +
+            //    (*ea == 0 && *se == 1) + (*se == 0 && *so == 1) +
+            //    (*so == 0 && *sw == 1) + (*sw == 0 && *we == 1) +
+            //    (*we == 0 && *nw == 1) + (*nw == 0 && *no == 1);
+            //int B = *no + *ne + *ea + *se + *so + *sw + *we + *nw;
+            //int m1 = iter == 0 ? (*no * *ea * *so) : (*no * *ea * *we);
+            //int m2 = iter == 0 ? (*ea * *so * *we) : (*no * *so * *we);
+
+
+            int A = (no == 0 && ne == 1) + (ne == 0 && ea == 1) +
+                (ea == 0 && se == 1) + (se == 0 && so == 1) +
+                (so == 0 && sw == 1) + (sw == 0 && we == 1) +
+                (we == 0 && nw == 1) + (nw == 0 && no == 1);
+            int B = no + ne + ea + se + so + sw + we + nw;
+            int m1 = iter == 0 ? (no * ea * so) : (no * ea * we);
+            int m2 = iter == 0 ? (ea * so * we) : (no * so * we);
 
             if (A == 1 && (B >= 2 && B <= 6) && m1 == 0 && m2 == 0)
-                pDst[x] = 1;
+            {
+                //pDst[x] = 1;
+                tempCoord = pDst;
+                tempCoord.x = x;
+                marker[tempCoord] = true;
+            }
+                
+
         }
     }
     
@@ -236,10 +302,11 @@ void thinning(std::unordered_map<PixelCoordinates, bool>& src, std::unordered_ma
     std::unordered_map<PixelCoordinates, bool> diff;
 
     do {
-        thinningIteration(dst, 0);
-        thinningIteration(dst, 1);
+        thinningIteration(dst, 2);
+        //thinningIteration(dst, 1);
         //cv::absdiff(dst, prev, diff);
         absdiff(dst, prev, diff);
+        writeMatlabEdges("edges.csv", mapToVector(dst));
         //dst.copyTo(prev);
         prev = dst;
     }// while (cv::countNonZero(diff) > 0);

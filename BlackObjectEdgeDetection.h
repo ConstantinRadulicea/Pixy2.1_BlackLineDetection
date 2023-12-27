@@ -8,7 +8,70 @@
 
 using namespace std;
 
+static void writeMatlabImage(string filename, const int* image, int width, int height) {
+	std::ofstream myfile;
+	int offset;
+	RGBcolor pixel;
 
+
+	myfile.open(filename, ios::out | ios::trunc);
+
+
+	for (int y = 0; y < height; y++)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			offset = (y * width) + x;
+			pixel.R = (image[offset] >> 0) & (int)0xff;
+			pixel.G = (image[offset] >> 8) & (int)0xff;
+			pixel.B = (image[offset] >> 16) & (int)0xff;
+			if (x < width - 1)
+			{
+				myfile << to_string(rgb2hsv(pixel).V) + ",";
+			}
+			else
+			{
+				myfile << to_string(rgb2hsv(pixel).V);
+			}
+		}
+		if (y < height - 1)
+		{
+			myfile << "\n";
+		}
+	}
+
+	myfile.close();
+}
+
+static void writeMatlabEdges(string filename, std::vector<PixelCoordinates> vector) {
+	std::ofstream myfile;
+
+	myfile.open(filename, ios::out | ios::trunc);
+
+	for (size_t i = 0; i < vector.size(); i++)
+	{
+		myfile << to_string(vector[i].x) + "," + to_string(vector[i].y);
+		if ((i + 1) < vector.size())
+		{
+			myfile << "\n";
+		}
+	}
+
+	myfile.close();
+}
+
+
+static std::vector<PixelCoordinates> mapToVector(std::unordered_map<PixelCoordinates, bool>& map) {
+	std::vector<PixelCoordinates> keys;
+	keys.reserve(map.size());
+
+	for (auto kv : map) {
+		keys.push_back(kv.first);
+	}
+	keys.shrink_to_fit();
+
+	return keys;
+}
 
 
 class BlackObjectEdgeDetection
@@ -41,21 +104,15 @@ public:
 
 
 
-	std::vector<PixelCoordinates> findEdges(int16_t x, int16_t y) {
+	std::unordered_map<PixelCoordinates, bool> findEdges(int16_t x, int16_t y) {
 		std::unordered_map<PixelCoordinates, bool> edges;
-		ObjectEdges objectEdges;
 		edges = floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y);
 
-		std::vector<PixelCoordinates> keys;
-		keys.reserve(edges.size());
-		
-		for (auto kv : edges) {
-			keys.push_back(kv.first);
-		}
-		keys.shrink_to_fit();
-
-		return keys;
+		return edges;
 	}
+
+
+
 
 	
 
@@ -251,7 +308,7 @@ private:
 				}
 			}
 		}
-		return edges;
+		return body;
 	}
 
 };
