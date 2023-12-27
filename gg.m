@@ -36,5 +36,5 @@ end
 A = A.* 50;
 img = img + A;
 figure
-image(A)
+image(img)
 

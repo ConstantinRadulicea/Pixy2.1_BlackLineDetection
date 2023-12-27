@@ -171,8 +171,8 @@ static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, i
     
     ObjectEdgeInfo imgInfo;
     imgInfo = getObjectEdgeInfo(img);
-    int nRows = imgInfo.maxY;
-    int nCols = imgInfo.maxX;
+    int nRows = imgInfo.maxY+1;
+    int nCols = imgInfo.maxX+1;
     int rowOffset = imgInfo.minY;
     int colOffset = imgInfo.minX;
 
@@ -205,7 +205,7 @@ static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, i
     pBelow.x = colOffset;
     pBelow.y = rowOffset+1;
 
-    for (y = rowOffset+1; y < rowOffset + nRows - 1; ++y) {
+    for (y = rowOffset+1; y < rowOffset + nRows; ++y) {
         // shift the rows up by one
         pAbove = pCurr;
         pCurr = pBelow;
@@ -236,7 +236,7 @@ static void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, i
         se = (int)getCoord(img, pBelow.x+1, pBelow.y);
         
 
-        for (x = colOffset + 1; x < colOffset + nCols - 1; ++x) {
+        for (x = colOffset + 1; x < colOffset + nCols; ++x) {
             // shift col pointers left by one (scan left to right)
             nw = no;
             no = ne;
@@ -302,15 +302,16 @@ void thinning(std::unordered_map<PixelCoordinates, bool>& src, std::unordered_ma
     std::unordered_map<PixelCoordinates, bool> diff;
 
     do {
-        thinningIteration(dst, 2);
-        //thinningIteration(dst, 1);
+        thinningIteration(dst, 0);
+        thinningIteration(dst, 1);
         //cv::absdiff(dst, prev, diff);
         absdiff(dst, prev, diff);
-        writeMatlabEdges("edges.csv", mapToVector(dst));
+        //writeMatlabEdges("edges.csv", mapToVector(dst));
         //dst.copyTo(prev);
         prev = dst;
     }// while (cv::countNonZero(diff) > 0);
-    while (countNonZero(diff) > 0);
+    //while (countNonZero(diff) > 0);
+    while (diff.size() > 0);
 
     //dst *= 255;
 }

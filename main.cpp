@@ -15,6 +15,8 @@ using namespace std;
 
 
 int main() {
+	clock_t start, stop, delta;
+
 	std::unordered_map<PixelCoordinates, bool> result;
 	std::unordered_map<PixelCoordinates, bool> objectBody;
 	// Open serial port
@@ -51,8 +53,17 @@ int main() {
 
 	Pixy2BlackLineDetectionService pixy2BlackLineDetectionService(Untitled, UNTITLED_WIDTH, UNTITLED_HEIGHT);
 	BlackObjectEdgeDetection blackObjectEdgeDetection(pixy2BlackLineDetectionService, 0.1);
-	objectBody = blackObjectEdgeDetection.findEdges(59, 59);
+	
+
+	start = clock();
+	objectBody = blackObjectEdgeDetection.findEdges(0, 0);
+	stop = clock();
+	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
+
+	start = clock();
 	thinning(objectBody, result);
+	stop = clock();
+	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
 
 
 	writeMatlabEdges("edges.csv", mapToVector(result));
