@@ -38,6 +38,12 @@
     <ClInclude Include="thinning.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BitMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="edges.csv" />
