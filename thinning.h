@@ -12,6 +12,7 @@
 #include"Pixy2BlackLineDetectionService.h"
 #include "BlackObjectEdgeDetection.h"
 #include"ObjectEdges.h"
+#include "BitMatrix.h"
 
 using namespace std;
 
@@ -166,20 +167,26 @@ void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<
   * 		im    Binary image with range = [0,1]
   * 		iter  0=even, 1=odd
   */
-void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter)
+void thinningIteration(BitMatrix& img, int iter)
 {
     
-    ObjectEdgeInfo imgInfo;
-    imgInfo = getObjectEdgeInfo(img);
-    int nRows = imgInfo.maxY+1;
-    int nCols = imgInfo.maxX+1;
-    int rowOffset = imgInfo.minY;
-    int colOffset = imgInfo.minX;
+    //ObjectEdgeInfo imgInfo;
+    //imgInfo = getObjectEdgeInfo(img);
+    //int nRows = imgInfo.maxY+1;
+    //int nCols = imgInfo.maxX+1;
+    //int rowOffset = imgInfo.minY;
+    //int colOffset = imgInfo.minX;
+
+
+    int nRows = img.maxY() + 1;
+    int nCols = img.maxX() + 1;
+    int rowOffset = img.minY();
+    int colOffset = img.minX();
 
     if (!(nRows > 3 && nCols > 3)) return;
 
     //cv::Mat marker = cv::Mat::zeros(img.size(), CV_8UC1);
-    std::unordered_map<PixelCoordinates, bool> marker;
+    BitMatrix marker(img.getRows(), img.getColumns());
 
     int x, y;
     PixelCoordinates pAbove;
@@ -228,12 +235,19 @@ void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter
         //so = &(pBelow[0]);
         //se = &(pBelow[1]);
 
-        no = (int)getCoord(img, pAbove.x, pAbove.y);
-        ne = (int)getCoord(img, pAbove.x+1, pAbove.y);
-        me = (int)getCoord(img, pCurr.x, pCurr.y);
-        ea = (int)getCoord(img, pCurr.x+1, pCurr.y);
-        so = (int)getCoord(img, pBelow.x, pBelow.y);
-        se = (int)getCoord(img, pBelow.x+1, pBelow.y);
+        //no = (int)getCoord(img, pAbove.x, pAbove.y);
+        //ne = (int)getCoord(img, pAbove.x + 1, pAbove.y);
+        //me = (int)getCoord(img, pCurr.x, pCurr.y);
+        //ea = (int)getCoord(img, pCurr.x + 1, pCurr.y);
+        //so = (int)getCoord(img, pBelow.x, pBelow.y);
+        //se = (int)getCoord(img, pBelow.x + 1, pBelow.y);
+
+        no = (int)img.getBitXY(pAbove.x, pAbove.y);
+        ne = (int)img.getBitXY(pAbove.x + 1, pAbove.y);
+        me = (int)img.getBitXY(pCurr.x, pCurr.y);
+        ea = (int)img.getBitXY(pCurr.x + 1, pCurr.y);
+        so = (int)img.getBitXY(pBelow.x, pBelow.y);
+        se = (int)img.getBitXY(pBelow.x + 1, pBelow.y);
         
 
         for (x = colOffset + 1; x < colOffset + nCols; ++x) {
@@ -241,15 +255,19 @@ void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter
             nw = no;
             no = ne;
             //ne = &(pAbove[x + 1]);
-            ne = (int)getCoord(img, x + 1, pAbove.y);
+            //ne = (int)getCoord(img, x + 1, pAbove.y);
+            ne = (int)img.getBitXY(x + 1, pAbove.y);
             we = me;
             me = ea;
             //ea = &(pCurr[x + 1]);
-            ea = (int)getCoord(img, x + 1, pCurr.y);
+            //ea = (int)getCoord(img, x + 1, pCurr.y);
+            ea = (int)img.getBitXY(x + 1, pCurr.y);
+
             sw = so;
             so = se;
             //se = &(pBelow[x + 1]);
-            se = (int)getCoord(img, x + 1, pBelow.y);
+            //se = (int)getCoord(img, x + 1, pBelow.y);
+            se = (int)img.getBitXY(x + 1, pBelow.y);
 
             //int A = (*no == 0 && *ne == 1) + (*ne == 0 && *ea == 1) +
             //    (*ea == 0 && *se == 1) + (*se == 0 && *so == 1) +
@@ -273,7 +291,9 @@ void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter
                 //pDst[x] = 1;
                 tempCoord = pDst;
                 tempCoord.x = x;
-                marker[tempCoord] = true;
+                
+                //marker[tempCoord] = true;
+                marker.setBitValueXY(tempCoord.x, tempCoord.y, true);
             }
                 
 
@@ -281,7 +301,8 @@ void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter
     }
     
     //img &= ~marker;
-    AandNotB(img, marker);
+    //AandNotB(img, marker);
+    BitMatrix::AandNotB(img, marker);
 }
 
 /**
@@ -291,27 +312,28 @@ void thinningIteration(std::unordered_map<PixelCoordinates, bool>& img, int iter
  * 		src  The source image, binary with range = [0,255]
  * 		dst  The destination image
  */
-static void thinning(std::unordered_map<PixelCoordinates, bool>& src, std::unordered_map<PixelCoordinates, bool>& dst)
+static void thinning(BitMatrix& src, BitMatrix& dst)
 {
     dst = src;
     //dst /= 255;         // convert to binary image
 
     //cv::Mat prev = cv::Mat::zeros(dst.size(), CV_8UC1);
-    std::unordered_map<PixelCoordinates, bool> prev;
+    BitMatrix prev(src.getRows(), src.getColumns());
     //cv::Mat diff;
-    std::unordered_map<PixelCoordinates, bool> diff;
+    BitMatrix diff(src.getRows(), src.getColumns());
 
     do {
         thinningIteration(dst, 0);
         thinningIteration(dst, 1);
         //cv::absdiff(dst, prev, diff);
-        absdiff(dst, prev, diff);
+        //absdiff(dst, prev, diff);
+        BitMatrix::absdiff(dst, prev, diff);
         //writeMatlabEdges("edges.csv", mapToVector(dst));
         //dst.copyTo(prev);
         prev = dst;
     }// while (cv::countNonZero(diff) > 0);
     //while (countNonZero(diff) > 0);
-    while (diff.size() > 0);
+    while (diff.countNonZero() > 0);
 
     //dst *= 255;
 }

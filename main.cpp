@@ -4,6 +4,7 @@
 
 #include "BlackObjectEdgeDetection.h"
 #include "img1.h"
+#include "BitMatrix.h"
 
 using namespace std;
 
@@ -16,8 +17,7 @@ using namespace std;
 int main() {
 	clock_t start, stop, delta;
 
-	std::unordered_map<PixelCoordinates, bool> result;
-	std::unordered_map<PixelCoordinates, bool> objectBody;
+	BitMatrix result(UNTITLED_HEIGHT, UNTITLED_WIDTH);
 	// Open serial port
 	//HANDLE serialHandle;
 	//char buffer[] = "ciao\n";
@@ -60,7 +60,7 @@ int main() {
 	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
 
 
-	writeMatlabEdges("edges.csv", mapToVector(result));
+	writeMatlabEdges("edges.csv", bitMatrixToVector(result));
 	
 	//CloseHandle(serialHandle);
 

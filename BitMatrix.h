@@ -3,6 +3,8 @@
 #include <vector>
 #include <stdint.h>
 
+
+
 #define BITARRAY_DATATYPE unsigned int
 #define BITARRAY_DATATYPE_BITS	(sizeof(BITARRAY_DATATYPE) * 8)
 
@@ -48,6 +50,13 @@ public:
 		else {
 			this->unsetBit(row, col);
 		}
+	}
+
+	void setBitValueXY(size_t x, size_t y, bool value) {
+		this->setBitValue(y, x, value);
+	}
+	bool getBitXY(size_t x, size_t y) {
+		return this->getBit(y, x);
 	}
 
 	void setBit(size_t row, size_t col) {
