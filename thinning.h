@@ -6,6 +6,7 @@
  *
  * Author:  Nash (nash [at] opencv-code [dot] com)
  * Website: http://opencv-code.com
+ * 
  */
 
 #include <unordered_map>
@@ -73,7 +74,7 @@ size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
  1 - 0 = 1
  0 - 1 = 1
  0 - 0 = 0
- dsti = saturate( | src1 - src2 | )
+ dst = saturate( | src1 - src2 | )
 */
 void absdiff(
     std::unordered_map<PixelCoordinates, bool>& src1,                      // First input array or matrix
@@ -307,6 +308,7 @@ void thinningIteration(BitMatrix& img, int iter)
 
 /**
  * Function for thinning the given binary image
+ * you need 5 BitMatrix-es of the same size simoultaneously
  *
  * Parameters:
  * 		src  The source image, binary with range = [0,255]
@@ -334,29 +336,4 @@ static void thinning(BitMatrix& src, BitMatrix& dst)
     }// while (cv::countNonZero(diff) > 0);
     //while (countNonZero(diff) > 0);
     while (diff.countNonZero() > 0);
-
-    //dst *= 255;
 }
-
-/**
- * This is an example on how to call the thinning funciton above
- */
-/*
-int main()
-{
-    cv::Mat src = cv::imread("image.png");
-    if (!src.data)
-        return -1;
-
-    cv::Mat bw;
-    cv::cvtColor(src, bw, CV_BGR2GRAY);
-    cv::threshold(bw, bw, 10, 255, CV_THRESH_BINARY);
-
-    thinning(bw, bw);
-
-    cv::imshow("src", src);
-    cv::imshow("dst", bw);
-    cv::waitKey();
-    return 0;
-}
-*/

@@ -162,7 +162,7 @@ private:
 		BitMatrix edges(n, m);
 		//std::unordered_map<PixelCoordinates, bool> body;
 		queue<pair<int16_t, int16_t> > queue;
-		body.clear();
+		//body.clear();
 
 		if (!isValid(getPixelLuminosity(x, y), m, n, x, y)) {
 			return;
