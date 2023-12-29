@@ -7,7 +7,6 @@
 #include "img2.h"
 #include "img3.h"
 #include "img4.h"
-//#include "403647780_349539491154334_1837665137385227264_n.h"
 #include "BitMatrix.h"
 
 #define IMG img1
