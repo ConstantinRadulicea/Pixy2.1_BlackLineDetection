@@ -54,7 +54,7 @@ end
 white_pixels_readden = white_pixels_readden .* 200;
 edges = edges.* 50;
 pixels_readden = pixels_readden .* 20;
-img = img + edges + pixels_readden + white_pixels_readden;
+img = edges + pixels_readden + white_pixels_readden;
 figure
 image(img)
 

@@ -130,6 +130,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="403647780_349539491154334_1837665137385227264_n.h" />
     <ClInclude Include="BitMatrix.h" />
     <ClInclude Include="bits.h" />
     <ClInclude Include="BlackObjectEdgeDetection.h" />

@@ -7,9 +7,10 @@
 #include "img2.h"
 #include "img3.h"
 #include "img4.h"
+//#include "403647780_349539491154334_1837665137385227264_n.h"
 #include "BitMatrix.h"
 
-#define IMG img4
+#define IMG img1
 
 using namespace std;
 
@@ -56,7 +57,7 @@ int main() {
 	writeMatlabImage("image.csv", IMG, UNTITLED_WIDTH, UNTITLED_HEIGHT);
 
 	Pixy2BlackLineDetectionService pixy2BlackLineDetectionService(IMG, UNTITLED_WIDTH, UNTITLED_HEIGHT);
-	BlackObjectEdgeDetection blackObjectEdgeDetection(pixy2BlackLineDetectionService, 0.1);
+	BlackObjectEdgeDetection blackObjectEdgeDetection(pixy2BlackLineDetectionService, 0.25f);
 	
 
 	start = clock();
