@@ -184,7 +184,9 @@ void thinningIteration(BitMatrix& img, int iter)
     int rowOffset = img.minY();
     int colOffset = img.minX();
 
-    if (!(nRows > 3 && nCols > 3)) return;
+    if (!(nRows - rowOffset > 3 && nCols - colOffset > 3)) {
+        return;
+    }
 
     //cv::Mat marker = cv::Mat::zeros(img.size(), CV_8UC1);
     BitMatrix marker(img.getRows(), img.getColumns());
@@ -200,29 +202,20 @@ void thinningIteration(BitMatrix& img, int iter)
 
     PixelCoordinates pDst;
 
-    // initialize row pointers
-    //pAbove = NULL;
-    pAbove.x = -1;
-    pAbove.y = -1;
+    for (y = rowOffset; y < nRows; y++) {
+        //// shift the rows up by one
 
-    //pCurr = img.ptr<uchar>(0);
-    pCurr.x = colOffset;
-    pCurr.y = rowOffset;
+        pAbove.x = colOffset;
+        pAbove.y = y - 1;
 
-    //pBelow = img.ptr<uchar>(1);
-    pBelow.x = colOffset;
-    pBelow.y = rowOffset+1;
+        //pCurr = img.ptr<uchar>(0);
+        pCurr.x = colOffset;
+        pCurr.y = y;
 
-    for (y = rowOffset+1; y < rowOffset + nRows; ++y) {
-        // shift the rows up by one
-        pAbove = pCurr;
-        pCurr = pBelow;
-
-        //pBelow = img.ptr<uchar>(y + 1);
+        //pBelow = img.ptr<uchar>(1);
         pBelow.x = colOffset;
         pBelow.y = y + 1;
 
-        
         //pDst = marker.ptr<uchar>(y);
         pDst.x = colOffset;
         pDst.y = y;
@@ -236,48 +229,25 @@ void thinningIteration(BitMatrix& img, int iter)
         //so = &(pBelow[0]);
         //se = &(pBelow[1]);
 
-        //no = (int)getCoord(img, pAbove.x, pAbove.y);
-        //ne = (int)getCoord(img, pAbove.x + 1, pAbove.y);
-        //me = (int)getCoord(img, pCurr.x, pCurr.y);
-        //ea = (int)getCoord(img, pCurr.x + 1, pCurr.y);
-        //so = (int)getCoord(img, pBelow.x, pBelow.y);
-        //se = (int)getCoord(img, pBelow.x + 1, pBelow.y);
 
-        no = (int)img.getBitXY(pAbove.x, pAbove.y);
-        ne = (int)img.getBitXY(pAbove.x + 1, pAbove.y);
-        me = (int)img.getBitXY(pCurr.x, pCurr.y);
+        (pAbove.y < rowOffset || pAbove.x < colOffset) ?    no = 0 : no = (int)img.getBitXY(pAbove.x, pAbove.y);
+        (pAbove.y < rowOffset) ?                            ne = 0 : ne = (int)img.getBitXY(pAbove.x + 1, pAbove.y);
+        (pCurr.x < colOffset) ?                            me = 0 : me = (int)img.getBitXY(pCurr.x, pCurr.y);
         ea = (int)img.getBitXY(pCurr.x + 1, pCurr.y);
-        so = (int)img.getBitXY(pBelow.x, pBelow.y);
-        se = (int)img.getBitXY(pBelow.x + 1, pBelow.y);
-        
+        (pBelow.y >= nRows || pBelow.x < colOffset) ?        so = 0 : so = (int)img.getBitXY(pBelow.x, pBelow.y);
+        (pBelow.y >= nRows) ?                                se = 0 : se = (int)img.getBitXY(pBelow.x + 1, pBelow.y);
 
-        for (x = colOffset + 1; x < colOffset + nCols; ++x) {
+        for (x = colOffset; x < nCols; x++) {
             // shift col pointers left by one (scan left to right)
             nw = no;
             no = ne;
-            //ne = &(pAbove[x + 1]);
-            //ne = (int)getCoord(img, x + 1, pAbove.y);
-            ne = (int)img.getBitXY(x + 1, pAbove.y);
+            ((x + 1 >= nCols) || pAbove.y >= nRows || pAbove.y < rowOffset) ?   ne = 0 : ne = (int)img.getBitXY(x + 1, pAbove.y);
             we = me;
             me = ea;
-            //ea = &(pCurr[x + 1]);
-            //ea = (int)getCoord(img, x + 1, pCurr.y);
-            ea = (int)img.getBitXY(x + 1, pCurr.y);
-
+            (x + 1 >= nCols) ?                                                  ea = 0 : ea = (int)img.getBitXY(x + 1, pCurr.y);
             sw = so;
             so = se;
-            //se = &(pBelow[x + 1]);
-            //se = (int)getCoord(img, x + 1, pBelow.y);
-            se = (int)img.getBitXY(x + 1, pBelow.y);
-
-            //int A = (*no == 0 && *ne == 1) + (*ne == 0 && *ea == 1) +
-            //    (*ea == 0 && *se == 1) + (*se == 0 && *so == 1) +
-            //    (*so == 0 && *sw == 1) + (*sw == 0 && *we == 1) +
-            //    (*we == 0 && *nw == 1) + (*nw == 0 && *no == 1);
-            //int B = *no + *ne + *ea + *se + *so + *sw + *we + *nw;
-            //int m1 = iter == 0 ? (*no * *ea * *so) : (*no * *ea * *we);
-            //int m2 = iter == 0 ? (*ea * *so * *we) : (*no * *so * *we);
-
+            (pBelow.y >= nRows || (x + 1 >= nCols)) ?                           se = 0 : se = (int)img.getBitXY(x + 1, pBelow.y);
 
             int A = (no == 0 && ne == 1) + (ne == 0 && ea == 1) +
                 (ea == 0 && se == 1) + (se == 0 && so == 1) +
@@ -296,8 +266,6 @@ void thinningIteration(BitMatrix& img, int iter)
                 //marker[tempCoord] = true;
                 marker.setBitValueXY(tempCoord.x, tempCoord.y, true);
             }
-                
-
         }
     }
     

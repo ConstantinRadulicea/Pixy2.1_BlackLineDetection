@@ -102,7 +102,11 @@ class BlackObjectEdgeDetection
 public:
 	BlackObjectEdgeDetection(Pixy2BlackLineDetectionService &_pixyService, float blackColorThreshold) : pixyService(_pixyService) {
 		this->blackColorThreshold = blackColorThreshold;
+
+		this->blackPixels.init(this->pixyService.getHeight(), this->pixyService.getWidth());
+		this->whitePixels.init(this->pixyService.getHeight(), this->pixyService.getWidth());
 	}
+	~BlackObjectEdgeDetection() {}
 
 	bool isBlack(float pixel) {
 		if (pixel <= this->blackColorThreshold)
@@ -114,14 +118,37 @@ public:
 			return false;
 		}
 	}
-	~BlackObjectEdgeDetection() {}
 
-	RGBcolor getPixel(int16_t x, int16_t y) {
-		return pixyService.getPixel(x, y);
+	bool isBlackAt(int16_t x, int16_t y) {
+		float luminosity;
+
+		if (this->blackPixels.getBitXY(x, y))
+		{
+			return true;
+		}
+		else if (this->whitePixels.getBitXY(x, y)) {
+			return false;
+		}
+		else {
+			luminosity = this->getPixelLuminosity(x, y);
+
+			if (this->isBlack(luminosity)) {
+				this->blackPixels.setBitValueXY(x, y, true);
+				return true;
+			}
+			else {
+				this->whitePixels.setBitValueXY(x, y, true);
+				return false;
+			}
+		}
+	}
+
+	RGBcolor getRgbPixel(int16_t x, int16_t y) {
+		return pixyService.getRgbPixel(x, y);
 	}
 
 	float getPixelLuminosity(int16_t x, int16_t y) {
-		return rgb2hsv(getPixel(x, y)).V;
+		return rgb2hsv(getRgbPixel(x, y)).V;
 	}
 
 	void getObject(int16_t x, int16_t y, BitMatrix&objectBody) {
@@ -135,8 +162,16 @@ public:
 		thinning(objectBody, objectSkeleton);
 	}
 
+
+	void clear() {
+		this->blackPixels.clear();
+		this->whitePixels.clear();
+	}
+
 private:
 	Pixy2BlackLineDetectionService &pixyService;
+	BitMatrix blackPixels;
+	BitMatrix whitePixels;
 	float blackColorThreshold;
 
 	// Function that returns true if
@@ -164,7 +199,7 @@ private:
 		queue<pair<int16_t, int16_t> > queue;
 		//body.clear();
 
-		if (!isValid(getPixelLuminosity(x, y), m, n, x, y)) {
+		if ( !isInsideBoundaries(x, y) || !isBlackAt(x, y) ) {
 			return;
 		}
 		//body[PixelCoordinates{ x, y }] = true;
@@ -189,202 +224,74 @@ private:
 			int16_t posX = currPixel.first;
 			int16_t posY = currPixel.second;
 
-
 			// Check if the adjacent
 			// pixels are valid
 
-			//if ((body.find(PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }) == edges.end()) )
-			if (isInsideBoundaries((int16_t)(posX + 1), posY) && (body.getBitXY((int16_t)((int16_t)(posX + 1)), posY) == false) &&
-				(edges.getBitXY((int16_t)((int16_t)(posX + 1)), posY) == false) )
+			if (isInsideBoundaries((int16_t)(posX + 1), posY) && !body.getBitXY((int16_t)(posX + 1), posY) && isBlackAt((int16_t)(posX + 1), posY))
 			{
-				if (isValid(getPixelLuminosity((int16_t)(posX + 1), posY), m, n, (int16_t)(posX + 1), posY))
-				{
-					// Color with newC
-					// if valid and enqueue
-					//screen[(int16_t)(posX + 1)][posY] = newC;
-					p.first = (int16_t)(posX + 1);
-					p.second = posY;
-					queue.push(p);
-					//body[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
-					body.setBitValueXY((int16_t)((int16_t)(posX + 1)), posY, true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ (int16_t)((int16_t)(posX + 1)), posY }] = true;
-					edges.setBitValueXY((int16_t)((int16_t)(posX + 1)), posY, true);
-				}
+				p.first = (int16_t)(posX + 1);
+				p.second = posY;
+				queue.push(p);
+				body.setBitValueXY((int16_t)((int16_t)(posX + 1)), posY, true);
 			}
 
-
-			//if ((body.find(PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }) == edges.end()) ) 
-			if (isInsideBoundaries((int16_t)(posX - 1), posY) && (body.getBitXY((int16_t)(posX - 1), posY) == false) &&
-				(edges.getBitXY(((int16_t)(posX - 1)), posY) == false))
+			if (isInsideBoundaries((int16_t)(posX - 1), posY) && !body.getBitXY((int16_t)(posX - 1), posY) && isBlackAt((int16_t)(posX - 1), posY))
 			{
-				if (isValid(getPixelLuminosity((int16_t)(posX - 1), posY), m, n, (int16_t)(posX - 1), posY))
-				{
-					//screen[(int16_t)(posX - 1)][posY] = newC;
-					p.first = (int16_t)(posX - 1);
-					p.second = posY;
-					queue.push(p);
-					//body[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
-					body.setBitValueXY((int16_t)((int16_t)(posX - 1)), posY, true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ (int16_t)((int16_t)(posX - 1)), posY }] = true;
-					edges.setBitValueXY((int16_t)((int16_t)(posX - 1)), posY, true);
-				}
+				p.first = (int16_t)(posX - 1);
+				p.second = posY;
+				queue.push(p);
+				body.setBitValueXY((int16_t)(posX - 1), posY, true);
 			}
 
-
-
-
-			//if ((body.find(PixelCoordinates{ posX, (int16_t)(posY + 1) }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ posX, (int16_t)(posY + 1) }) == edges.end()))
-			if (isInsideBoundaries(posX, (int16_t)(posY + 1)) && (body.getBitXY(posX, (int16_t)(posY + 1)) == false) &&
-				(edges.getBitXY(posX, (int16_t)(posY + 1)) == false))
+			if (isInsideBoundaries(posX, (int16_t)(posY + 1)) && !body.getBitXY(posX, (int16_t)(posY + 1)) && isBlackAt(posX, (int16_t)(posY + 1)))
 			{
-				if (isValid(getPixelLuminosity(posX, (int16_t)(posY + 1)), m, n, posX, (int16_t)(posY + 1)))
-				{
-					//screen[posX][(int16_t)(posY + 1)] = newC;
-					p.first = posX;
-					p.second = (int16_t)(posY + 1);
-					queue.push(p);
-					//body[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
-					body.setBitValueXY(posX, (int16_t)(posY + 1), true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ posX, (int16_t)(posY + 1) }] = true;
-					edges.setBitValueXY(posX, (int16_t)(posY + 1), true);
-				}
+				//screen[posX][(int16_t)(posY + 1)] = newC;
+				p.first = posX;
+				p.second = (int16_t)(posY + 1);
+				queue.push(p);
+				body.setBitValueXY(posX, (int16_t)(posY + 1), true);
 			}
 
-
-
-			//if ((body.find(PixelCoordinates{ posX, (int16_t)(posY - 1) }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ posX, (int16_t)(posY - 1) }) == edges.end()))
-			if (isInsideBoundaries(posX, (int16_t)(posY - 1)) && (body.getBitXY(posX, (int16_t)(posY - 1)) == false) &&
-				(edges.getBitXY(posX, (int16_t)(posY - 1)) == false))
+			if (isInsideBoundaries(posX, (int16_t)(posY - 1)) && !body.getBitXY(posX, (int16_t)(posY - 1)) && isBlackAt(posX, (int16_t)(posY - 1)))
 			{
-				if (isValid(getPixelLuminosity(posX, (int16_t)(posY - 1)), m, n, posX, (int16_t)(posY - 1)))
-				{
-					//screen[posX][(int16_t)(posY - 1)] = newC;
-					p.first = posX;
-					p.second = (int16_t)(posY - 1);
-					queue.push(p);
-					//body[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
-					body.setBitValueXY(posX, (int16_t)(posY - 1), true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ posX, (int16_t)(posY - 1) }] = true;
-					edges.setBitValueXY(posX, (int16_t)(posY - 1), true);
-				}
+				p.first = posX;
+				p.second = (int16_t)(posY - 1);
+				queue.push(p);
+				body.setBitValueXY(posX, (int16_t)(posY - 1), true);
 			}
 
-
-
-
-			//if ((body.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }) == edges.end()) )
-			if (isInsideBoundaries((int16_t)(posX + 1), (int16_t)(posY + 1)) && (body.getBitXY((int16_t)(posX + 1), (int16_t)(posY + 1)) == false) &&
-				(edges.getBitXY((int16_t)(posX + 1), (int16_t)(posY + 1)) == false))
+			if (isInsideBoundaries((int16_t)(posX + 1), (int16_t)(posY + 1)) && !body.getBitXY((int16_t)(posX + 1), (int16_t)(posY + 1)) && isBlackAt((int16_t)(posX + 1), (int16_t)(posY + 1)))
 			{
-				if (isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY + 1)))
-				{
-					// Color with newC
-					// if valid and enqueue
-					//screen[(int16_t)(posX + 1)][posY] = newC;
-					p.first = (int16_t)(posX + 1);
-					p.second = (int16_t)(posY + 1);
-					queue.push(p);
-					//body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
-					body.setBitValueXY((int16_t)(posX + 1), (int16_t)(posY + 1), true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY + 1) }] = true;
-					edges.setBitValueXY((int16_t)(posX + 1), (int16_t)(posY + 1), true);
-				}
+				p.first = (int16_t)(posX + 1);
+				p.second = (int16_t)(posY + 1);
+				queue.push(p);
+				body.setBitValueXY((int16_t)(posX + 1), (int16_t)(posY + 1), true);
 			}
 
-
-			//if ((body.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }) == edges.end()) )
-			if (isInsideBoundaries((int16_t)(posX + 1), (int16_t)(posY - 1)) && (body.getBitXY((int16_t)(posX + 1), (int16_t)(posY - 1)) == false) &&
-				(edges.getBitXY((int16_t)(posX + 1), (int16_t)(posY - 1)) == false))
+			if (isInsideBoundaries((int16_t)(posX + 1), (int16_t)(posY - 1)) && !body.getBitXY((int16_t)(posX + 1), (int16_t)(posY - 1)) && isBlackAt((int16_t)(posX + 1), (int16_t)(posY - 1)))
 			{
-				if (isValid(getPixelLuminosity((int16_t)(posX + 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX + 1), (int16_t)(posY - 1)))
-				{
-					// Color with newC
-					// if valid and enqueue
-					//screen[(int16_t)(posX + 1)][posY] = newC;
-					p.first = (int16_t)(posX + 1);
-					p.second = (int16_t)(posY - 1);
-					queue.push(p);
-					//body[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
-					body.setBitValueXY((int16_t)(posX + 1), (int16_t)(posY - 1), true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ (int16_t)(posX + 1), (int16_t)(posY - 1) }] = true;
-					edges.setBitValueXY((int16_t)(posX + 1), (int16_t)(posY - 1), true);
-				}
+				p.first = (int16_t)(posX + 1);
+				p.second = (int16_t)(posY - 1);
+				queue.push(p);
+				body.setBitValueXY((int16_t)(posX + 1), (int16_t)(posY - 1), true);
 			}
 
-
-			//if ((body.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }) == edges.end()))
-			if (isInsideBoundaries((int16_t)(posX - 1), (int16_t)(posY - 1)) && (body.getBitXY((int16_t)(posX - 1), (int16_t)(posY - 1)) == false) &&
-				(edges.getBitXY((int16_t)(posX - 1), (int16_t)(posY - 1)) == false))
+			if (isInsideBoundaries((int16_t)(posX - 1), (int16_t)(posY - 1)) && !body.getBitXY((int16_t)(posX - 1), (int16_t)(posY - 1)) && isBlackAt((int16_t)(posX - 1), (int16_t)(posY - 1)))
 			{
-				if (isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY - 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY - 1)))
-				{
-					// Color with newC
-					// if valid and enqueue
-					//screen[(int16_t)(posX + 1)][posY] = newC;
-					p.first = (int16_t)(posX - 1);
-					p.second = (int16_t)(posY - 1);
-					queue.push(p);
-					//body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
-					body.setBitValueXY((int16_t)(posX - 1), (int16_t)(posY - 1), true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY - 1) }] = true;
-					edges.setBitValueXY((int16_t)(posX - 1), (int16_t)(posY - 1), true);
-				}
+				p.first = (int16_t)(posX - 1);
+				p.second = (int16_t)(posY - 1);
+				queue.push(p);
+				body.setBitValueXY((int16_t)(posX - 1), (int16_t)(posY - 1), true);
 			}
 
-
-			//if ((body.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }) == body.end()) &&
-			//	(edges.find(PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }) == edges.end()) )
-			if (isInsideBoundaries((int16_t)(posX - 1), (int16_t)(posY + 1)) && (body.getBitXY((int16_t)(posX - 1), (int16_t)(posY + 1)) == false) &&
-				(edges.getBitXY((int16_t)(posX - 1), (int16_t)(posY + 1)) == false))
+			if (isInsideBoundaries((int16_t)(posX - 1), (int16_t)(posY + 1)) && !body.getBitXY((int16_t)(posX - 1), (int16_t)(posY + 1)) && isBlackAt((int16_t)(posX - 1), (int16_t)(posY + 1)))
 			{
-				if (isValid(getPixelLuminosity((int16_t)(posX - 1), (int16_t)(posY + 1)), m, n, (int16_t)(posX - 1), (int16_t)(posY + 1)))
-				{
-					// Color with newC
-					// if valid and enqueue
-					//screen[(int16_t)(posX + 1)][posY] = newC;
-					p.first = (int16_t)(posX - 1);
-					p.second = (int16_t)(posY + 1);
-					queue.push(p);
-					//body[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
-					body.setBitValueXY((int16_t)(posX - 1), (int16_t)(posY + 1), true);
-				}
-				else
-				{
-					//edges[PixelCoordinates{ (int16_t)(posX - 1), (int16_t)(posY + 1) }] = true;
-					edges.setBitValueXY((int16_t)(posX - 1), (int16_t)(posY + 1), true);
-				}
+				p.first = (int16_t)(posX - 1);
+				p.second = (int16_t)(posY + 1);
+				queue.push(p);
+				body.setBitValueXY((int16_t)(posX - 1), (int16_t)(posY + 1), true);
 			}
 		}
-		//return body;
 	}
-
 };
 

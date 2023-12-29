@@ -56,6 +56,7 @@ int main() {
 
 	start = clock();
 	blackObjectEdgeDetection.getObjectSkeleton(0, 0, result);
+	//blackObjectEdgeDetection.getObjectSkeleton(0, 199, result);
 	stop = clock();
 	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
 

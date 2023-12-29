@@ -6,6 +6,7 @@
 
 
 #define BITARRAY_DATATYPE unsigned int
+#define BITARRAY_DATATYPE_MAX_VALUE UINT_MAX
 #define BITARRAY_DATATYPE_BITS	(sizeof(BITARRAY_DATATYPE) * 8)
 
 
@@ -13,6 +14,12 @@ class BitMatrix
 {
 public:
 	BitMatrix(size_t nRows, size_t nColumns) {
+		this->init(nRows, nColumns);
+	}
+	BitMatrix() {
+	}
+
+	void init(size_t nRows, size_t nColumns) {
 		this->nRows = nRows;
 		this->nColumns = nColumns;
 		this->clear();
@@ -26,14 +33,27 @@ public:
 		return this->nColumns;
 	}
 
-	size_t size() {
+	size_t totBlocks() {
 		return data.size();
 	}
 
+	size_t bitSize() {
+		return this->nRows * this->nColumns;
+	}
+
 	void clear() {
+		size_t arrSize = 0;
 		this->data.clear();
-		data.reserve(((nRows * nColumns) / BITARRAY_DATATYPE_BITS) + 1);
-		data.resize(((nRows * nColumns) / BITARRAY_DATATYPE_BITS) + 1);
+
+		if (this->bitSize() % BITARRAY_DATATYPE_BITS) {
+			arrSize = ((nRows * nColumns) / BITARRAY_DATATYPE_BITS) + 1;
+		}
+		else {
+			arrSize = ((nRows * nColumns) / BITARRAY_DATATYPE_BITS);
+		}
+		data.reserve(arrSize);
+		data.resize(arrSize);
+		this->setToZeros();
 		this->settedBits = 0;
 	}
 
@@ -78,12 +98,20 @@ public:
 	}
 
 	BITARRAY_DATATYPE getBlockValue(size_t index) {
-		return this->data[index];
+		if (index == (this->totBlocks()-1))
+		{
+			return this->data[index] & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
+		}
+		else {
+			return this->data[index];
+		}
 	}
 
 	void setBlockValue(size_t index, BITARRAY_DATATYPE value) {
 		BITARRAY_DATATYPE oldValue;
 		oldValue = this->getBlockValue(index);
+
+		value &= (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
 
 		this->settedBits += ((int)(this->countSettedBits(value)) - (int)(this->countSettedBits(oldValue)));
 		this->data[index] = value;
@@ -148,7 +176,7 @@ public:
 	static void absdiff(BitMatrix& src1, BitMatrix& src2, BitMatrix& dst) {
 		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
 
-		for (size_t i = 0; i < src1.size(); i++)
+		for (size_t i = 0; i < src1.totBlocks(); i++)
 		{
 			valueSrc1 = src1.getBlockValue(i);
 			valueSrc2 = src2.getBlockValue(i);
@@ -161,12 +189,26 @@ public:
 	{
 		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
 
-		for (size_t i = 0; i < A.size(); i++)
+		for (size_t i = 0; i < A.totBlocks(); i++)
 		{
 			valueSrc1 = A.getBlockValue(i);
 			valueSrc2 = B.getBlockValue(i);
 			newValue = valueSrc1 & (~valueSrc2);
 			A.setBlockValue(i, newValue);
+		}
+	}
+
+	void setToZeros() {
+		for (size_t i = 0; i < this->totBlocks(); i++)
+		{
+			this->setBlockValue(i, (BITARRAY_DATATYPE)0);
+		}
+	}
+
+	void setToOnes() {
+		for (size_t i = 0; i < this->totBlocks(); i++)
+		{
+			this->setBlockValue(i, (BITARRAY_DATATYPE)1);
 		}
 	}
 

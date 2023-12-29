@@ -16,7 +16,7 @@ public:
 	}
 	~Pixy2BlackLineDetectionService(){}
 
-	RGBcolor getPixel(int16_t x, int16_t y) {
+	RGBcolor getRgbPixel(int16_t x, int16_t y) {
 		int offset = (y * this->width) + x;
 		RGBcolor ff;
 		ff.R = (this->image[offset] >> 0) & (int)0xff;

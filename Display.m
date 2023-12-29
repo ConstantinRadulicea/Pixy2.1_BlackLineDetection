@@ -13,16 +13,16 @@ skel = bwskel(logical_img);
 % imshow(bwmorph(logical_img,'skel',Inf))
 
 img = img .* 100;
-newA = zeros(size(img)+2);
-newA = newA + 255;
-newA(2:end-1,2:end-1)=img;
-img = newA;
+% newA = zeros(size(img)+2);
+% newA = newA + 255;
+% newA(2:end-1,2:end-1)=img;
+% img = newA;
 
 
 edges = readmatrix("edges.csv", "Delimiter",",");
 A = zeros(size(img));
 if ~isempty(edges)
-    edges = edges + [2 2];
+     edges = edges + [1 1];
     ind = sub2ind(size(img),edges(:, 2),edges(:, 1));
     A(ind) = 1;
 end
