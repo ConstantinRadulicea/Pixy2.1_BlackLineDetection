@@ -198,6 +198,30 @@ public:
 		}
 	}
 
+	void logicAnd(BitMatrix& B) {
+		BITARRAY_DATATYPE valueSrc, valueB, newValue;
+
+		for (size_t i = 0; i < this->totBlocks(); i++)
+		{
+			valueSrc = this->getBlockValue(i);
+			valueB = B.getBlockValue(i);
+			newValue = valueSrc & valueB;
+			this->setBlockValue(i, newValue);
+		}
+	}
+
+	void logicOr(BitMatrix& B) {
+		BITARRAY_DATATYPE valueSrc, valueB, newValue;
+
+		for (size_t i = 0; i < this->totBlocks(); i++)
+		{
+			valueSrc = this->getBlockValue(i);
+			valueB = B.getBlockValue(i);
+			newValue = valueSrc | valueB;
+			this->setBlockValue(i, newValue);
+		}
+	}
+
 	void setToZeros() {
 		for (size_t i = 0; i < this->totBlocks(); i++)
 		{

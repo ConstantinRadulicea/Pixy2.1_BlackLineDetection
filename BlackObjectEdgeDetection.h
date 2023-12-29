@@ -106,6 +106,7 @@ public:
 		this->blackPixels.init(this->pixyService.getHeight(), this->pixyService.getWidth());
 		this->whitePixels.init(this->pixyService.getHeight(), this->pixyService.getWidth());
 	}
+	
 	~BlackObjectEdgeDetection() {}
 
 	bool isBlack(float pixel) {
@@ -162,13 +163,100 @@ public:
 		thinning(objectBody, objectSkeleton);
 	}
 
+	size_t readHorizontalLines(size_t numLines) {
+		PixelCoordinates coord;
+		int16_t y;
+		float heightOffsetPercent = 0.15f;
+		float frameHeight = (float)this->pixyService.getHeight();
+		float distanceBetweenLines = (frameHeight - (frameHeight * heightOffsetPercent)) / ((float)numLines - 1.0f);
+
+		for (int i = numLines-1; i >= 0; i--)
+		{
+			y = (int16_t)((frameHeight * (heightOffsetPercent / 2.0f)) + ((float)i * distanceBetweenLines));
+			coord.y = y;
+			for (size_t x = 0; x < this->pixyService.getWidth(); x++)
+			{
+				if (this->isBlackAt(x, y))
+				{
+					coord.x = x;
+					this->randomBlackPixels.push_back(coord);
+				}
+			}
+		}
+		return this->randomBlackPixels.size();
+	}
+
+	bool alreadyCheckedPixel(int16_t x, int16_t y) {
+		if (this->blackPixels.getBitXY(x, y))
+		{
+			return true;
+		}
+		else if (this->whitePixels.getBitXY(x, y)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	bool alreadyCheckedAreaAroundPixel(int16_t x, int16_t y) {
+		int checkedPixels = 0;
+		if (isInsideBoundaries(x + (int16_t)1, y) && !alreadyCheckedPixel(x + (int16_t)1, y)) {
+			return false;
+		}
+		if (isInsideBoundaries(x + (int16_t)-1, y) && !alreadyCheckedPixel(x + (int16_t)-1, y)) {
+			return false;
+		}
+		if (isInsideBoundaries(x, y + (int16_t)1) && !alreadyCheckedPixel(x, y + (int16_t)1)) {
+			return false;
+		}
+		if (isInsideBoundaries(x, y + (int16_t)-1) && !alreadyCheckedPixel(x, y + (int16_t)-1)) {
+			return false;
+		}
+		if (isInsideBoundaries(x + (int16_t)1, y + (int16_t)1) && !alreadyCheckedPixel(x + (int16_t)1, y + (int16_t)1)) {
+			return false;
+		}
+		if (isInsideBoundaries(x + (int16_t)-1, y + (int16_t)1) && !alreadyCheckedPixel(x + (int16_t)-1, y + (int16_t)1)) {
+			return false;
+		}
+		if (isInsideBoundaries(x + (int16_t)1, y + (int16_t)-1) && !alreadyCheckedPixel(x + (int16_t)1, y + (int16_t)-1)) {
+			return false;
+		}
+		if (isInsideBoundaries(x + (int16_t)-1, y + (int16_t)-1) && !alreadyCheckedPixel(x + (int16_t)-1, y + (int16_t)-1)) {
+			return false;
+		}
+		return true;
+	}
+
+	void fillRandomBlackPixels() {
+		PixelCoordinates coord;
+		BitMatrix result(this->pixyService.getHeight(), this->pixyService.getWidth());
+		BitMatrix skeletons(this->pixyService.getHeight(), this->pixyService.getWidth());
+		for (size_t i = 0; i < randomBlackPixels.size(); i++)
+		{
+			coord = randomBlackPixels[i];
+			if (!alreadyCheckedAreaAroundPixel(coord.x, coord.y))
+			{
+				this->getObjectSkeleton(coord.x, coord.y, result);
+				//writeMatlabEdges("edges.csv", bitMatrixToVector(result));
+				skeletons.logicOr(result);
+			}
+		}
+		writeMatlabEdges("edges.csv", bitMatrixToVector(skeletons));
+		writeMatlabEdges("black_pixels_readden.csv", bitMatrixToVector(this->blackPixels));
+		writeMatlabEdges("white_pixels_readden.csv", bitMatrixToVector(this->whitePixels));
+
+	}
 
 	void clear() {
 		this->blackPixels.clear();
 		this->whitePixels.clear();
+		this->randomBlackPixels.clear();
+		this->randomBlackPixels.shrink_to_fit();
 	}
 
 private:
+	std::vector<PixelCoordinates> randomBlackPixels;
 	Pixy2BlackLineDetectionService &pixyService;
 	BitMatrix blackPixels;
 	BitMatrix whitePixels;

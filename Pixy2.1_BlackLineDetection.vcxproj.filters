@@ -44,6 +44,15 @@
     <ClInclude Include="bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="img2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="img3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="img4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="edges.csv" />

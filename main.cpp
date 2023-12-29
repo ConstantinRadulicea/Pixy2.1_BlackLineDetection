@@ -4,7 +4,12 @@
 
 #include "BlackObjectEdgeDetection.h"
 #include "img1.h"
+#include "img2.h"
+#include "img3.h"
+#include "img4.h"
 #include "BitMatrix.h"
+
+#define IMG img4
 
 using namespace std;
 
@@ -48,20 +53,23 @@ int main() {
 	//WriteFile(serialHandle, buffer, sizeof(buffer), NULL, NULL);
 
 
-	writeMatlabImage("image.csv", Untitled, UNTITLED_WIDTH, UNTITLED_HEIGHT);
+	writeMatlabImage("image.csv", IMG, UNTITLED_WIDTH, UNTITLED_HEIGHT);
 
-	Pixy2BlackLineDetectionService pixy2BlackLineDetectionService(Untitled, UNTITLED_WIDTH, UNTITLED_HEIGHT);
+	Pixy2BlackLineDetectionService pixy2BlackLineDetectionService(IMG, UNTITLED_WIDTH, UNTITLED_HEIGHT);
 	BlackObjectEdgeDetection blackObjectEdgeDetection(pixy2BlackLineDetectionService, 0.1);
 	
 
 	start = clock();
-	blackObjectEdgeDetection.getObjectSkeleton(0, 0, result);
+	blackObjectEdgeDetection.readHorizontalLines(3);
+	blackObjectEdgeDetection.fillRandomBlackPixels();
+
+	//blackObjectEdgeDetection.getObjectSkeleton(0, 0, result);
 	//blackObjectEdgeDetection.getObjectSkeleton(0, 199, result);
 	stop = clock();
 	std::cout << "Thinning Clocks passed: " << stop - start << std::endl;
 
 
-	writeMatlabEdges("edges.csv", bitMatrixToVector(result));
+	//writeMatlabEdges("edges.csv", bitMatrixToVector(result));
 	
 	//CloseHandle(serialHandle);
 

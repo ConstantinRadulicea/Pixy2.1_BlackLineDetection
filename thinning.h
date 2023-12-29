@@ -184,7 +184,7 @@ void thinningIteration(BitMatrix& img, int iter)
     int rowOffset = img.minY();
     int colOffset = img.minX();
 
-    if (!(nRows - rowOffset > 3 && nCols - colOffset > 3)) {
+    if (!(nRows - rowOffset >= 1 && nCols - colOffset >= 1)) {
         return;
     }
 
@@ -205,19 +205,19 @@ void thinningIteration(BitMatrix& img, int iter)
     for (y = rowOffset; y < nRows; y++) {
         //// shift the rows up by one
 
-        pAbove.x = colOffset;
+        pAbove.x = colOffset-1;
         pAbove.y = y - 1;
 
         //pCurr = img.ptr<uchar>(0);
-        pCurr.x = colOffset;
+        pCurr.x = colOffset-1;
         pCurr.y = y;
 
         //pBelow = img.ptr<uchar>(1);
-        pBelow.x = colOffset;
+        pBelow.x = colOffset-1;
         pBelow.y = y + 1;
 
         //pDst = marker.ptr<uchar>(y);
-        pDst.x = colOffset;
+        pDst.x = colOffset-1;
         pDst.y = y;
 
         // initialize col pointers
@@ -276,7 +276,7 @@ void thinningIteration(BitMatrix& img, int iter)
 
 /**
  * Function for thinning the given binary image
- * you need 5 BitMatrix-es of the same size simoultaneously
+ * you need 4 BitMatrix-es of the same size simoultaneously
  *
  * Parameters:
  * 		src  The source image, binary with range = [0,255]

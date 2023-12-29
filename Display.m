@@ -25,6 +25,25 @@ if ~isempty(edges)
      edges = edges + [1 1];
     ind = sub2ind(size(img),edges(:, 2),edges(:, 1));
     A(ind) = 1;
+    edges = A;
+end
+
+pixels_readden = readmatrix("black_pixels_readden.csv", "Delimiter",",");
+A = zeros(size(img));
+if ~isempty(pixels_readden)
+     pixels_readden = pixels_readden + [1 1];
+    ind = sub2ind(size(img),pixels_readden(:, 2),pixels_readden(:, 1));
+    A(ind) = 1;
+    pixels_readden = A;
+end
+
+white_pixels_readden = readmatrix("white_pixels_readden.csv", "Delimiter",",");
+A = zeros(size(img));
+if ~isempty(white_pixels_readden)
+     white_pixels_readden = white_pixels_readden + [1 1];
+    ind = sub2ind(size(img),white_pixels_readden(:, 2),white_pixels_readden(:, 1));
+    A(ind) = 1;
+    white_pixels_readden = A;
 end
 
 
@@ -32,9 +51,10 @@ end
 
 
 
-
-A = A.* 50;
-img = img + A;
+white_pixels_readden = white_pixels_readden .* 200;
+edges = edges.* 50;
+pixels_readden = pixels_readden .* 20;
+img = img + edges + pixels_readden + white_pixels_readden;
 figure
 image(img)
 
