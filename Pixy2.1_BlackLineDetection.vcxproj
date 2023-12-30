@@ -137,6 +137,7 @@
     <ClInclude Include="img2.h" />
     <ClInclude Include="img3.h" />
     <ClInclude Include="img4.h" />
+    <ClInclude Include="img5.h" />
     <ClInclude Include="ObjectEdges.h" />
     <ClInclude Include="Pixy2BlackLineDetectionService.h" />
     <ClInclude Include="rgb2hsv.h" />

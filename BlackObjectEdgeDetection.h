@@ -156,10 +156,15 @@ public:
 		floodFill(this->pixyService.getWidth(), this->pixyService.getHeight(), x, y, objectBody);
 	}
 
-	void getObjectSkeleton(int16_t x, int16_t y, BitMatrix&objectSkeleton) {
+	void getObjectSkeleton(int16_t x, int16_t y, BitMatrix& objectSkeleton) {
 		BitMatrix objectBody(this->pixyService.getHeight(), this->pixyService.getWidth());
 		objectSkeleton.clear();
 		getObject(x, y, objectBody);
+		thinning(objectBody, objectSkeleton);
+	}
+
+	void getObjectSkeleton(BitMatrix& objectBody, BitMatrix& objectSkeleton) {
+		objectSkeleton.clear();
 		thinning(objectBody, objectSkeleton);
 	}
 
@@ -228,18 +233,22 @@ public:
 		return true;
 	}
 
-	void fillRandomBlackPixels() {
+	void fillRandomBlackPixels(size_t segmentMinLength) {
 		PixelCoordinates coord;
 		BitMatrix result(this->pixyService.getHeight(), this->pixyService.getWidth());
+		BitMatrix objectBody(this->pixyService.getHeight(), this->pixyService.getWidth());
 		BitMatrix skeletons(this->pixyService.getHeight(), this->pixyService.getWidth());
 		for (size_t i = 0; i < randomBlackPixels.size(); i++)
 		{
 			coord = randomBlackPixels[i];
 			if (!alreadyCheckedAreaAroundPixel(coord.x, coord.y))
 			{
-				this->getObjectSkeleton(coord.x, coord.y, result);
+				this->getObject(coord.x, coord.y, objectBody);
+				this->getObjectSkeleton(objectBody, result);
+				if (result.countNonZero() >= segmentMinLength) {
+					skeletons.logicOr(result);
+				}
 				//writeMatlabEdges("edges.csv", bitMatrixToVector(result));
-				skeletons.logicOr(result);
 			}
 		}
 		writeMatlabEdges("edges.csv", bitMatrixToVector(skeletons));
@@ -285,7 +294,7 @@ private:
 		BitMatrix edges(n, m);
 		//std::unordered_map<PixelCoordinates, bool> body;
 		queue<pair<int16_t, int16_t> > queue;
-		//body.clear();
+		body.clear();
 
 		if ( !isInsideBoundaries(x, y) || !isBlackAt(x, y) ) {
 			return;

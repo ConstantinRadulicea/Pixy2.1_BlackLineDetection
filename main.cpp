@@ -7,9 +7,10 @@
 #include "img2.h"
 #include "img3.h"
 #include "img4.h"
+#include "img5.h"
 #include "BitMatrix.h"
 
-#define IMG img1
+#define IMG img5
 
 using namespace std;
 
@@ -60,8 +61,8 @@ int main() {
 	
 
 	start = clock();
-	blackObjectEdgeDetection.readHorizontalLines(3);
-	blackObjectEdgeDetection.fillRandomBlackPixels();
+	blackObjectEdgeDetection.readHorizontalLines(4);
+	blackObjectEdgeDetection.fillRandomBlackPixels(20);
 
 	//blackObjectEdgeDetection.getObjectSkeleton(0, 0, result);
 	//blackObjectEdgeDetection.getObjectSkeleton(0, 199, result);
