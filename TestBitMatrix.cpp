@@ -64,6 +64,26 @@ cv::Mat bitMatrixToMat(BitMatrix &bit_matrix) {
     return image;
 }
 
+std::vector<cv::Point> bitMatrixToArray(BitMatrix& bit_matrix) {
+    std::vector<cv::Point> arr;
+
+    for (int row = 0; row < bit_matrix.getRows(); ++row) {
+        for (int col = 0; col < bit_matrix.getColumns(); ++col) {
+
+
+            if (bit_matrix.getBit(row, col) == true) {
+                cv::Point point;
+                point.x = col;
+                point.y = row;
+                arr.push_back(point);
+            }
+ 
+        }
+    }
+    return arr;
+}
+
+
 
 void TestBitMatrix() {
     BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
@@ -86,6 +106,7 @@ void TestBitMatrix() {
     std::vector<cv::Point> approxCurve;
     double epsilon = 5.0;  // Tolerance value for approximation
     cv::approxPolyDP(contours[0], approxCurve, epsilon, false);  // Simplify the first contour
+    //cv::approxPolyDP(bitMatrixToArray(temp_skeleton_bitmatrix), approxCurve, epsilon, false);  // Simplify the first contour
 
 
     cv::Mat result = cv::Mat::zeros(skeleton.size(), CV_8UC3);  // Create a blank canvas
