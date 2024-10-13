@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <string>
+#include <vector>
 
 
 #define IMG_PATH "img1.png"
@@ -66,7 +67,7 @@ cv::Mat bitMatrixToMat(BitMatrix &bit_matrix) {
 
 void TestBitMatrix() {
     BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
-    cv::Mat image;
+    cv::Mat image, skeleton;
     bitmatrix_img = imgToBitMatrix(IMG_PATH, 0.25);
     image = bitMatrixToMat(bitmatrix_img);
     cv::imshow("image", image);
@@ -77,6 +78,25 @@ void TestBitMatrix() {
     temp_bitmatrix = bitmatrix_img.floodFillOnes(0, 0);
     thinning(temp_bitmatrix, temp_skeleton_bitmatrix);
     cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
+
+
+    std::vector<std::vector<cv::Point>> contours;
+    skeleton = bitMatrixToMat(temp_skeleton_bitmatrix);
+    cv::findContours(skeleton, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+    std::vector<cv::Point> approxCurve;
+    double epsilon = 5.0;  // Tolerance value for approximation
+    cv::approxPolyDP(contours[0], approxCurve, epsilon, false);  // Simplify the first contour
+
+
+    cv::Mat result = cv::Mat::zeros(skeleton.size(), CV_8UC3);  // Create a blank canvas
+
+    // Draw the simplified skeleton using the approximate curve
+    for (size_t i = 0; i < approxCurve.size() - 1; ++i) {
+        cv::line(result, approxCurve[i], approxCurve[i + 1], cv::Scalar(0, 255, 0), 1);
+    }
+
+    // Display the result
+    cv::imshow("Simplified Skeleton", result);
     
     cv::waitKey(0);  // Wait for a key press before closing the window
 }

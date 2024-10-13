@@ -2,7 +2,6 @@
 #define __THINNING_H__
 
 
-
 /**
  * Code for thinning a binary image using Zhang-Suen algorithm.
  *
