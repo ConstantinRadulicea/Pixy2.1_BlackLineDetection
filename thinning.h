@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __THINNING_H__
+#define __THINNING_H__
+
 
 
 /**
@@ -11,7 +13,7 @@
 
 #include <unordered_map>
 #include"Pixy2BlackLineDetectionService.h"
-#include "BlackObjectEdgeDetection.h"
+//#include "BlackObjectEdgeDetection.h"
 #include"ObjectEdges.h"
 #include "BitMatrix.h"
 
@@ -28,7 +30,7 @@ typedef struct ObjectEdgeInfo
     size_t maxY;
 };
 
-bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
+static bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
     PixelCoordinates coord;
     coord.x = x;
     coord.y = y;
@@ -44,7 +46,7 @@ bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
     }
 }
 
-ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
+static ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
     ObjectEdgeInfo info;
     memset(&info, 0, sizeof(ObjectEdgeInfo));
 
@@ -57,7 +59,7 @@ ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map
     return info;
 }
 
-size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
+static size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
     size_t count = 0;
 
     for (auto kv : map) {
@@ -76,7 +78,7 @@ size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
  0 - 0 = 0
  dst = saturate( | src1 - src2 | )
 */
-void absdiff(
+static void absdiff(
     std::unordered_map<PixelCoordinates, bool>& src1,                      // First input array or matrix
     std::unordered_map<PixelCoordinates, bool>& src2,                     // Second input array or matrix
     std::unordered_map<PixelCoordinates, bool>& dst                    // Result array or matrix
@@ -120,7 +122,7 @@ void absdiff(
 
 }
 
-void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
+static void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
     for (auto it = map.begin(); it != map.end();)
     {
         if (it->second == false)
@@ -139,7 +141,7 @@ void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
 0 & ~(1) = 0 & 0 = 0;
 0 & ~(0) = 0 & 1 = 0;
 */
-void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<PixelCoordinates, bool>& B) {
+static void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<PixelCoordinates, bool>& B) {
 
     for (auto coordA : A) {
         auto coordB_found = B.find(coordA.first);
@@ -168,7 +170,7 @@ void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<
   * 		im    Binary image with range = [0,1]
   * 		iter  0=even, 1=odd
   */
-void thinningIteration(BitMatrix& img, int iter)
+static void thinningIteration(BitMatrix& img, int iter)
 {
     
     //ObjectEdgeInfo imgInfo;
@@ -276,7 +278,7 @@ void thinningIteration(BitMatrix& img, int iter)
 
 /**
  * Function for thinning the given binary image
- * you need 4 BitMatrix-es of the same size simoultaneously
+ * you need 3 more BitMatrix-es of the same size simoultaneously
  *
  * Parameters:
  * 		src  The source image, binary with range = [0,255]
@@ -305,3 +307,6 @@ static void thinning(BitMatrix& src, BitMatrix& dst)
     //while (countNonZero(diff) > 0);
     while (diff.countNonZero() > 0);
 }
+
+
+#endif // !__THINNING_H__

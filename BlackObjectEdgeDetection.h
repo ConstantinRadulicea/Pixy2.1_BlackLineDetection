@@ -1,22 +1,27 @@
-#pragma once
+#ifndef __BLACKOBJECTEDGEDETECTION_H__
+#define __BLACKOBJECTEDGEDETECTION_H__
 
-#include"Pixy2BlackLineDetectionService.h"
-#include"ObjectEdges.h"
-#include"rgb2hsv.h"
+
+
+#include "Pixy2BlackLineDetectionService.h"
+#include "ObjectEdges.h"
+#include "rgb2hsv.h"
 #include "thinning.h"
 #include "BitMatrix.h"
 #include <unordered_map>
 #include <queue>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
-static void writeMatlabImage(string filename, const int* image, int width, int height) {
+static void writeMatlabImage(std::string filename, const int* image, int width, int height) {
 	std::ofstream myfile;
 	int offset;
 	RGBcolor pixel;
 
 
-	myfile.open(filename, ios::out | ios::trunc);
+	myfile.open(filename, std::ios::out | std::ios::trunc);
 
 
 	for (int y = 0; y < height; y++)
@@ -45,10 +50,10 @@ static void writeMatlabImage(string filename, const int* image, int width, int h
 	myfile.close();
 }
 
-static void writeMatlabEdges(string filename, std::vector<PixelCoordinates> vector) {
+static void writeMatlabEdges(std::string filename, std::vector<PixelCoordinates> vector) {
 	std::ofstream myfile;
 
-	myfile.open(filename, ios::out | ios::trunc);
+	myfile.open(filename, std::ios::out | std::ios::trunc);
 
 	for (size_t i = 0; i < vector.size(); i++)
 	{
@@ -392,3 +397,4 @@ private:
 	}
 };
 
+#endif // !__BLACKOBJECTEDGEDETECTION_H__

@@ -89,7 +89,7 @@ static void serial_write_uint16_t(HANDLE serialHandle, uint16_t val) {
 
 
 
-int main() {
+int main2() {
 	clock_t start, stop, delta;
 	HANDLE serialHandle;
 

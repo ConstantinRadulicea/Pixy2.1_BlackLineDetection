@@ -1,4 +1,7 @@
-﻿#pragma once
+﻿#ifndef __RGB2HSV_H__
+#define __RGB2HSV_H__
+
+
 #include<stdint.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -13,7 +16,7 @@ typedef struct RGBcolor {
 typedef struct HSVcolor {
 	float H;
 	float S;
-	float V;
+	float V;//luminosity
 }HSVcolor;
 
 
@@ -56,3 +59,5 @@ static HSVcolor rgb2hsv(RGBcolor rgbColor) {
 
 	return hsvColor;
 }
+
+#endif // !__RGB2HSV_H__

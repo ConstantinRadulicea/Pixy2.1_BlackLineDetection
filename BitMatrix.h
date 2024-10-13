@@ -1,9 +1,16 @@
-#pragma once
+#ifndef __BITMATRIX_H__
+#define __BITMATRIX_H__
+
+
 
 #include <vector>
 #include <stdint.h>
+#include <queue>
+#include <unordered_map>
 
-
+class BitMatrix;
+// return true if the bit is accepted, otherwise returns false
+typedef bool (*BitMatrixFillFilter)(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context);
 
 #define BITARRAY_DATATYPE unsigned int
 #define BITARRAY_DATATYPE_MAX_VALUE UINT_MAX
@@ -88,6 +95,10 @@ public:
 		this->settedBits++;
 	}
 
+	void setBitXY(size_t x, size_t y) {
+		this->setBit(y, x);
+	}
+
 	void unsetBit(size_t row, size_t col) {
 		if (!(this->getBit(row, col))) {	// bit already unsetted
 			return;
@@ -95,6 +106,10 @@ public:
 		size_t offset = (row * this->nColumns) + col;
 		this->data[offset / BITARRAY_DATATYPE_BITS] = this->data[offset / BITARRAY_DATATYPE_BITS] & ~(1 << (offset % BITARRAY_DATATYPE_BITS));
 		this->settedBits--;
+	}
+
+	void unsetBitXY(size_t x, size_t y) {
+		this->unsetBit(y, x);
 	}
 
 	BITARRAY_DATATYPE getBlockValue(size_t index) {
@@ -236,9 +251,151 @@ public:
 		}
 	}
 
+	bool isInsideBoundaries(size_t row, size_t col) {
+		if (row < 0 || row >= this->getRows() || col < 0 || col >= this->getColumns()) {
+			return false;
+		}
+		return true;
+	}
+
+	BitMatrix floodFill(size_t row, size_t col, BitMatrixFillFilter filter_function, void* _Context) {
+		BitMatrix filledZone(this->getRows(), this->getColumns());
+		this->floodFill(row, col, filter_function, _Context, &filledZone);
+		return filledZone;
+	}
+
+
+	// returns 0 on success
+	bool floodFill(size_t row, size_t col, BitMatrixFillFilter filter_function, void* _Context, BitMatrix *filledZone) {
+		std::queue<std::pair<int16_t, int16_t>> queue;
+		int16_t posRow;
+		int16_t posCol;
+
+		filledZone->clear();
+
+		if (!isInsideBoundaries(row, col) || !filter_function(row, col, this, _Context)) {
+			return 1;
+		}
+		filledZone->setBitValue(row, col, true);
+
+		// Append the position of starting
+		// pixel of the component
+		std::pair<int16_t, int16_t> p(row, col);
+		queue.push(p);
+
+		// Color the pixel with the new color
+		//screen[x][y] = newC;
+
+		// While the queue is not empty i.e. the
+		// whole component having prevC color
+		// is not colored with newC color
+		while (queue.size() > 0) {
+			// Dequeue the front node
+			std::pair<int16_t, int16_t> currPixel = queue.front();
+			queue.pop();
+
+			posRow = currPixel.first;
+			posCol = currPixel.second;
+
+			// Check if the adjacent
+			// pixels are valid
+
+			if (isInsideBoundaries((int16_t)(posRow + 1), posCol) && !filledZone->getBit((int16_t)(posRow + 1), posCol) && filter_function((int16_t)(posRow + 1), posCol, this, _Context))
+			{
+				p.first = (int16_t)(posRow + 1);
+				p.second = posCol;
+				queue.push(p);
+				filledZone->setBitValue((int16_t)((int16_t)(posRow + 1)), posCol, true);
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow - 1), posCol) && !filledZone->getBit((int16_t)(posRow - 1), posCol) && filter_function((int16_t)(posRow - 1), posCol, this, _Context))
+			{
+				p.first = (int16_t)(posRow - 1);
+				p.second = posCol;
+				queue.push(p);
+				filledZone->setBitValue((int16_t)(posRow - 1), posCol, true);
+			}
+
+			if (isInsideBoundaries(posRow, (int16_t)(posCol + 1)) && !filledZone->getBit(posRow, (int16_t)(posCol + 1)) && filter_function(posRow, (int16_t)(posCol + 1), this, _Context))
+			{
+				//screen[posRow][(int16_t)(posCol + 1)] = newC;
+				p.first = posRow;
+				p.second = (int16_t)(posCol + 1);
+				queue.push(p);
+				filledZone->setBitValue(posRow, (int16_t)(posCol + 1), true);
+			}
+
+			if (isInsideBoundaries(posRow, (int16_t)(posCol - 1)) && !filledZone->getBit(posRow, (int16_t)(posCol - 1)) && filter_function(posRow, (int16_t)(posCol - 1), this, _Context))
+			{
+				p.first = posRow;
+				p.second = (int16_t)(posCol - 1);
+				queue.push(p);
+				filledZone->setBitValue(posRow, (int16_t)(posCol - 1), true);
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol + 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow + 1);
+				p.second = (int16_t)(posCol + 1);
+				queue.push(p);
+				filledZone->setBitValue((int16_t)(posRow + 1), (int16_t)(posCol + 1), true);
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol - 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow + 1);
+				p.second = (int16_t)(posCol - 1);
+				queue.push(p);
+				filledZone->setBitValue((int16_t)(posRow + 1), (int16_t)(posCol - 1), true);
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol - 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow - 1);
+				p.second = (int16_t)(posCol - 1);
+				queue.push(p);
+				filledZone->setBitValue((int16_t)(posRow - 1), (int16_t)(posCol - 1), true);
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol + 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow - 1);
+				p.second = (int16_t)(posCol + 1);
+				queue.push(p);
+				filledZone->setBitValue((int16_t)(posRow - 1), (int16_t)(posCol + 1), true);
+			}
+		}
+	}
+
+	// returns 0 on success
+	bool floodFillOnes(size_t row, size_t col, BitMatrix* filledZone) {
+		return floodFill(row, col, BitMatrix::floodFillFilterFunctionOnes, NULL, filledZone);
+	}
+
+	// returns 0 on success
+	bool floodFillZeroes(size_t row, size_t col, BitMatrix* filledZone) {
+		return floodFill(row, col, BitMatrix::floodFillFilterFunctionZeroes, NULL, filledZone);
+	}
+
+	
+	BitMatrix floodFillOnes(size_t row, size_t col) {
+		BitMatrix filledZone(this->getRows(), this->getColumns());
+		this->floodFillOnes(row, col, &filledZone);
+		return filledZone;
+	}
+
+	
+	BitMatrix floodFillZeroes(size_t row, size_t col) {
+		BitMatrix filledZone(this->getRows(), this->getColumns());
+		this->floodFillZeroes(row, col, &filledZone);
+		return filledZone;
+	}
+
+
 	~BitMatrix() {
 		data.~vector();
 	}
+
 
 private:
 	std::vector<BITARRAY_DATATYPE> data;
@@ -264,9 +421,16 @@ private:
 		  1, 2, 2, 3, 2, 3, 3, 4
 		};
 
-
 		return NIBBLE_LOOKUP[byte & 0x0F] + NIBBLE_LOOKUP[byte >> 4];
+	}
+
+	static bool floodFillFilterFunctionOnes(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context) {
+		return bit_matrix->getBit(row, col);
+	}
+
+	static bool floodFillFilterFunctionZeroes(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context) {
+		return !(bit_matrix->getBit(row, col));
 	}
 };
 
-
+#endif // !__BITMATRIX_H__

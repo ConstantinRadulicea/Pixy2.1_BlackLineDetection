@@ -1,4 +1,7 @@
-#pragma once
+#ifndef __OBJECTEDGES_H__
+#define __OBJECTEDGES_H__
+
+
 
 #include<list>
 #include <unordered_map>
@@ -100,4 +103,4 @@ private:
 	std::list<PixelCoordinates> edgePixels;
 };
 
-
+#endif // !__OBJECTEDGES_H__
