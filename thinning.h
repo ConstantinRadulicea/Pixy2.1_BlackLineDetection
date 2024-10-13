@@ -11,152 +11,162 @@
  * 
  */
 
-#include <unordered_map>
-#include"Pixy2BlackLineDetectionService.h"
+//#include <unordered_map>
+//#include"Pixy2BlackLineDetectionService.h"
 //#include "BlackObjectEdgeDetection.h"
-#include"ObjectEdges.h"
+//#include"ObjectEdges.h"
 #include "BitMatrix.h"
 
 using namespace std;
 
 
-
-
-typedef struct ObjectEdgeInfo
-{
-    size_t minX;
-    size_t minY;
-    size_t maxX;
-    size_t maxY;
-};
-
-static bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
-    PixelCoordinates coord;
-    coord.x = x;
-    coord.y = y;
-
-    auto foundCoord = map.find(coord);
-
-    if (foundCoord != map.end()) {
-        return foundCoord->second;
-    }
-    else
+typedef struct PixelCoordinates {
+    int16_t x;
+    int16_t y;
+    bool operator==(const PixelCoordinates& other) const
     {
-        return false;
+        return (x == other.x
+            && y == other.y);
     }
-}
-
-static ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
-    ObjectEdgeInfo info;
-    memset(&info, 0, sizeof(ObjectEdgeInfo));
-
-    for (auto kv : map) {
-        info.maxX = MAX(info.maxX, kv.first.x);
-        info.maxY = MAX(info.maxY, kv.first.y);
-        info.minX = MIN(info.minX, kv.first.x);
-        info.minY = MIN(info.minY, kv.first.y);
-    }
-    return info;
-}
-
-static size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
-    size_t count = 0;
-
-    for (auto kv : map) {
-        if (kv.second == true) {
-            count++;
-        }
-    }
-    return count;
-}
+}PixelCoordinates;
 
 
-/*
- 1 - 1 = 0
- 1 - 0 = 1
- 0 - 1 = 1
- 0 - 0 = 0
- dst = saturate( | src1 - src2 | )
-*/
-static void absdiff(
-    std::unordered_map<PixelCoordinates, bool>& src1,                      // First input array or matrix
-    std::unordered_map<PixelCoordinates, bool>& src2,                     // Second input array or matrix
-    std::unordered_map<PixelCoordinates, bool>& dst                    // Result array or matrix
-) {
-    PixelCoordinates coordSrc1;
-    bool valueDst;
-
-    dst.clear();
-
-    for (auto coordSrc1 : src1) {
-        valueDst = coordSrc1.second;
-        auto coordSrc2_found = src2.find(coordSrc1.first);
-
-        if (coordSrc2_found != src2.end()) {
-            if (coordSrc1.second != coordSrc2_found->second)
-            {
-                valueDst = true;
-            }
-            else if (coordSrc1.second == 1)		// it should add the 2 values but we work with bool so we cant add
-            {
-                valueDst = false;
-            }
-            else
-            {
-                valueDst = false;
-            }
-        }
-        if (valueDst)
-        {
-            dst[coordSrc1.first] = valueDst;
-        }
-    }
-
-    for (auto coordSrc2 : src2) {
-        auto src1_not_found = src1.find(coordSrc2.first);
-
-        if (src1_not_found == src1.end()) {
-            dst[coordSrc2.first] = coordSrc2.second;
-        }
-    }
-
-}
-
-static void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
-    for (auto it = map.begin(); it != map.end();)
-    {
-        if (it->second == false)
-        {
-            it = map.erase(it);
-        }
-        else {
-            ++it;
-        }
-    }
-}
-
-/*
-1 & ~(1) = 1 & 0 = 0;
-1 & ~(0) = 1 & 1 = 1;
-0 & ~(1) = 0 & 0 = 0;
-0 & ~(0) = 0 & 1 = 0;
-*/
-static void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<PixelCoordinates, bool>& B) {
-
-    for (auto coordA : A) {
-        auto coordB_found = B.find(coordA.first);
-
-        if (coordB_found != B.end()) {		// if found A in B
-            A[coordA.first] &= !(coordB_found->second);
-        }
-        else
-        {
-            A[coordA.first] &= !(false);
-        }
-    }
-
-    removeZeros(A);
-}
+//
+//typedef struct ObjectEdgeInfo
+//{
+//    size_t minX;
+//    size_t minY;
+//    size_t maxX;
+//    size_t maxY;
+//};
+//
+//static bool getCoord(std::unordered_map<PixelCoordinates, bool>& map, int x, int y) {
+//    PixelCoordinates coord;
+//    coord.x = x;
+//    coord.y = y;
+//
+//    auto foundCoord = map.find(coord);
+//
+//    if (foundCoord != map.end()) {
+//        return foundCoord->second;
+//    }
+//    else
+//    {
+//        return false;
+//    }
+//}
+//
+//static ObjectEdgeInfo getObjectEdgeInfo(std::unordered_map<PixelCoordinates, bool>& map) {
+//    ObjectEdgeInfo info;
+//    memset(&info, 0, sizeof(ObjectEdgeInfo));
+//
+//    for (auto kv : map) {
+//        info.maxX = MAX(info.maxX, kv.first.x);
+//        info.maxY = MAX(info.maxY, kv.first.y);
+//        info.minX = MIN(info.minX, kv.first.x);
+//        info.minY = MIN(info.minY, kv.first.y);
+//    }
+//    return info;
+//}
+//
+//static size_t countNonZero(std::unordered_map<PixelCoordinates, bool>& map) {
+//    size_t count = 0;
+//
+//    for (auto kv : map) {
+//        if (kv.second == true) {
+//            count++;
+//        }
+//    }
+//    return count;
+//}
+//
+//
+///*
+// 1 - 1 = 0
+// 1 - 0 = 1
+// 0 - 1 = 1
+// 0 - 0 = 0
+// dst = saturate( | src1 - src2 | )
+//*/
+//static void absdiff(
+//    std::unordered_map<PixelCoordinates, bool>& src1,                      // First input array or matrix
+//    std::unordered_map<PixelCoordinates, bool>& src2,                     // Second input array or matrix
+//    std::unordered_map<PixelCoordinates, bool>& dst                    // Result array or matrix
+//) {
+//    PixelCoordinates coordSrc1;
+//    bool valueDst;
+//
+//    dst.clear();
+//
+//    for (auto coordSrc1 : src1) {
+//        valueDst = coordSrc1.second;
+//        auto coordSrc2_found = src2.find(coordSrc1.first);
+//
+//        if (coordSrc2_found != src2.end()) {
+//            if (coordSrc1.second != coordSrc2_found->second)
+//            {
+//                valueDst = true;
+//            }
+//            else if (coordSrc1.second == 1)		// it should add the 2 values but we work with bool so we cant add
+//            {
+//                valueDst = false;
+//            }
+//            else
+//            {
+//                valueDst = false;
+//            }
+//        }
+//        if (valueDst)
+//        {
+//            dst[coordSrc1.first] = valueDst;
+//        }
+//    }
+//
+//    for (auto coordSrc2 : src2) {
+//        auto src1_not_found = src1.find(coordSrc2.first);
+//
+//        if (src1_not_found == src1.end()) {
+//            dst[coordSrc2.first] = coordSrc2.second;
+//        }
+//    }
+//
+//}
+//
+//static void removeZeros(std::unordered_map<PixelCoordinates, bool>& map) {
+//    for (auto it = map.begin(); it != map.end();)
+//    {
+//        if (it->second == false)
+//        {
+//            it = map.erase(it);
+//        }
+//        else {
+//            ++it;
+//        }
+//    }
+//}
+//
+///*
+//1 & ~(1) = 1 & 0 = 0;
+//1 & ~(0) = 1 & 1 = 1;
+//0 & ~(1) = 0 & 0 = 0;
+//0 & ~(0) = 0 & 1 = 0;
+//*/
+//static void AandNotB(std::unordered_map<PixelCoordinates, bool>& A, std::unordered_map<PixelCoordinates, bool>& B) {
+//
+//    for (auto coordA : A) {
+//        auto coordB_found = B.find(coordA.first);
+//
+//        if (coordB_found != B.end()) {		// if found A in B
+//            A[coordA.first] &= !(coordB_found->second);
+//        }
+//        else
+//        {
+//            A[coordA.first] &= !(false);
+//        }
+//    }
+//
+//    removeZeros(A);
+//}
 
 
 

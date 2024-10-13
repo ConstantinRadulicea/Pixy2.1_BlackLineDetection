@@ -69,14 +69,14 @@ void TestBitMatrix() {
     cv::Mat image;
     bitmatrix_img = imgToBitMatrix(IMG_PATH, 0.25);
     image = bitMatrixToMat(bitmatrix_img);
-    cv::imshow("Matrix as Image", image);
+    cv::imshow("image", image);
 
     temp_bitmatrix = bitmatrix_img.floodFillOnes(0, 0);
-    cv::imshow("Matrix as Image", bitMatrixToMat(temp_bitmatrix));
+    cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
 
     temp_bitmatrix = bitmatrix_img.floodFillOnes(0, 0);
     thinning(temp_bitmatrix, temp_skeleton_bitmatrix);
-    cv::imshow("Matrix as Image", bitMatrixToMat(temp_skeleton_bitmatrix));
+    cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
     
     cv::waitKey(0);  // Wait for a key press before closing the window
 }
