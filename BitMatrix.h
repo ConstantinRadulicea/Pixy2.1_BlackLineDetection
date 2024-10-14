@@ -628,14 +628,16 @@ public:
 
 		// To store the points of the longest path, run BFS again and record the path
 		std::queue<std::pair<Point2D, std::vector<Point2D>>> q;
+		std::pair<Point2D, std::vector<Point2D>> current;
+		Point2D p;
 		//std::vector<Point2D> longest_path;
 
 		q.push({ longestPathResult.point, {longestPathResult.point} });
 		visited.setBit(longestPathResult.point.y, longestPathResult.point.x);
 
 		while (!q.empty()) {
-			auto current = q.front();
-			Point2D p = current.first;
+			current = q.front();
+			p = current.first;
 			std::vector<Point2D> path = current.second;
 			q.pop();
 
