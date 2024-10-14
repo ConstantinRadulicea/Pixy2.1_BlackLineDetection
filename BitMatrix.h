@@ -403,6 +403,10 @@ private:
 	size_t nColumns;
 	size_t settedBits;
 
+	// Direction vectors for 8-connected neighbors
+	int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+	int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+
 	size_t countSettedBits(BITARRAY_DATATYPE byte)
 	{
 		size_t settedBits = 0;
@@ -431,6 +435,54 @@ private:
 	static bool floodFillFilterFunctionZeroes(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context) {
 		return !(bit_matrix->getBit(row, col));
 	}
+
+	// Utility function to check if a point is valid
+	bool isValid(int col, int row, BitMatrix* visited) {
+		return (col >= 0 && col < this->getColumns() && row >= 0 && row < this->getRows() &&
+			this->getBit(row, col) == true && visited->getBit(row, col) == false);
+	}
+
+
+
+	// BFS to find the farthest point from a given start point
+	std::pair<cv::Point, int> bfs(const cv::Point& start, const cv::Mat& skeleton) {
+		cv::Mat visited = cv::Mat::zeros(skeleton.size(), CV_8UC1);  // Mark visited points
+		std::queue<std::pair<cv::Point, int>> q;
+		q.push({ start, 0 });
+		visited.at<uchar>(start.y, start.x) = 1;
+
+		cv::Point farthest = start;
+		int maxDist = 0;
+
+		while (!q.empty()) {
+			auto current = q.front();
+			cv::Point p = current.first;
+			int dist = current.second;
+			q.pop();
+
+			// Update the farthest point found
+			if (dist > maxDist) {
+				maxDist = dist;
+				farthest = p;
+			}
+
+			// Explore 8-connected neighbors
+			for (int i = 0; i < 8; ++i) {
+				int newX = p.x + dx[i];
+				int newY = p.y + dy[i];
+
+				if (isValid(newX, newY, skeleton, visited)) {
+					visited.at<uchar>(newY, newX) = 1;
+					q.push({ cv::Point(newX, newY), dist + 1 });
+				}
+			}
+		}
+
+		return { farthest, maxDist };
+	}
+
+
+
 };
 
 #endif // !__BITMATRIX_H__

@@ -208,7 +208,6 @@ void TestBitMatrix() {
     
     skeleton = bitMatrixToMat(temp_skeleton_bitmatrix);
 
-
     // Find the longest path in the skeleton
     std::vector<cv::Point> longestPath = findLongestPath(skeleton);
 
@@ -221,7 +220,7 @@ void TestBitMatrix() {
 
 
     std::vector<cv::Point> approxCurve;
-    double epsilon = 5.0*2;  // Tolerance value for approximation
+    double epsilon = 1.0*1;  // Tolerance value for approximation
     cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
 
 
