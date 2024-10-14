@@ -48,19 +48,19 @@ public:
 		this->clear();
 	}
 
-	size_t getRows() {
+	inline size_t getRows() {
 		return this->nRows;
 	}
 
-	size_t getColumns() {
+	inline size_t getColumns() {
 		return this->nColumns;
 	}
 
-	size_t totBlocks() {
+	inline size_t totBlocks() {
 		return data.size();
 	}
 
-	size_t bitSize() {
+	inline size_t bitSize() {
 		return this->nRows * this->nColumns;
 	}
 
@@ -224,6 +224,18 @@ public:
 			valueSrc2 = src2.getBlockValue(i);
 			newValue = valueSrc1 ^ valueSrc2;
 			dst.setBlockValue(i, newValue);
+		}
+	}
+
+	inline static void absdiff(BitMatrix* src1, BitMatrix* src2, BitMatrix* dst) {
+		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
+
+		for (size_t i = 0; i < src1->totBlocks(); i++)
+		{
+			valueSrc1 = src1->getBlockValue(i);
+			valueSrc2 = src2->getBlockValue(i);
+			newValue = valueSrc1 ^ valueSrc2;
+			dst->setBlockValue(i, newValue);
 		}
 	}
 

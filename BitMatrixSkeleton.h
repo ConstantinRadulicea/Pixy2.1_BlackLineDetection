@@ -36,7 +36,7 @@ typedef struct PixelCoordinates {
  * 		src  The source image, binary with range = [0,1]
  * 		dst  The destination image
  */
-void BitMatrixSkeleton(BitMatrix& src, BitMatrix& dst);
+void BitMatrixSkeleton(BitMatrix* src, BitMatrix* dst);
 
 
 #endif // !__BITMATRIXSKELETON_H__

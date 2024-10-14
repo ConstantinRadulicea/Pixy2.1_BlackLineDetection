@@ -110,7 +110,7 @@ void TestBitMatrix() {
     temp_bitmatrix = bitmatrix_img.floodFillOnes(temp_bitmatrixpos.row, temp_bitmatrixpos.column);
     cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
 
-    BitMatrixSkeleton(temp_bitmatrix, temp_skeleton_bitmatrix);
+    BitMatrixSkeleton(&temp_bitmatrix, &temp_skeleton_bitmatrix);
     cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
 
 
@@ -187,7 +187,7 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         if (body.countNonZero() < 50) {
             continue;
         }
-        BitMatrixSkeleton(body, body_skeleton);
+        BitMatrixSkeleton(&body, &body_skeleton);
         body_skeleton.findLongestPath(&longestPath);
 
         std::vector<Point2D> approxCurve;
