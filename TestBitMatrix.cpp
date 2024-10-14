@@ -215,7 +215,7 @@ void TestBitMatrix() {
 
     */
 
-    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath(temp_skeleton_bitmatrix);
+    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath(&temp_skeleton_bitmatrix);
     std::vector<cv::Point>longestPath;
     for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
         longestPath.push_back(cv::Point(longestPath_Point2D[i].x, longestPath_Point2D[i].y));
@@ -229,7 +229,7 @@ void TestBitMatrix() {
     cv::imshow("Longhest path", pathImage);
 
     std::vector<cv::Point> approxCurve;
-    double epsilon = 1.0*1;  // Tolerance value for approximation
+    double epsilon = 1;  // Tolerance value for approximation
     cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
 
 
