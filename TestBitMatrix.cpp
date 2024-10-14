@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "approxPolyDP.h"
 
 
 #define IMG_PATH "img1.png"
@@ -216,6 +217,7 @@ void TestBitMatrix() {
     */
 
     std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath(&temp_skeleton_bitmatrix);
+
     std::vector<cv::Point>longestPath;
     for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
         longestPath.push_back(cv::Point(longestPath_Point2D[i].x, longestPath_Point2D[i].y));
@@ -229,8 +231,17 @@ void TestBitMatrix() {
     cv::imshow("Longhest path", pathImage);
 
     std::vector<cv::Point> approxCurve;
+    //double epsilon = 1;  // Tolerance value for approximation
+    //cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
+    
+    
+    std::vector<Point2D> approxCurve_Point2D;
     double epsilon = 1;  // Tolerance value for approximation
-    cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
+    approxCurve_Point2D = approxPolyDP(longestPath_Point2D, epsilon);
+
+    for (size_t i = 0; i < approxCurve_Point2D.size(); i++) {
+        approxCurve.push_back(cv::Point(approxCurve_Point2D[i].x, approxCurve_Point2D[i].y));
+    }
 
 
     cv::Mat result = cv::Mat::zeros(skeleton.size(), CV_8UC3);  // Create a blank canvas

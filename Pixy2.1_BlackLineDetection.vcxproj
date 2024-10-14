@@ -132,12 +132,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="geometry2D.cpp" />
     <ClCompile Include="TestBitMatrix.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="approxPolyDP.h" />
     <ClInclude Include="BitImage.h" />
     <ClInclude Include="BitMatrix.h" />
     <ClInclude Include="bits.h" />
+    <ClInclude Include="geometry2D.h" />
     <ClInclude Include="img1.h" />
     <ClInclude Include="img2.h" />
     <ClInclude Include="img3.h" />

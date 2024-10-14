@@ -7,12 +7,8 @@
 #include <stdint.h>
 #include <queue>
 #include <unordered_map>
+#include "geometry2D.h"
 
-
-typedef struct Point2D {
-	float x;
-	float y;
-}Point2D;
 
 typedef struct Point2D_Distance {
 	Point2D point;
@@ -406,6 +402,7 @@ public:
 
 
 	// Find the longest path in the skeleton
+	// uses 1 additional BitMatrix
 	static std::vector<Point2D> findLongestPath(BitMatrix* skeleton) {
 		// Direction vectors for 8-connected neighbors
 		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
@@ -467,6 +464,7 @@ public:
 
 
 	// BFS to find the farthest point from a given start point
+	// uses 1 additional BitMatrix
 	static Point2D_Distance bfs(Point2D* start, BitMatrix* skeleton) {
 		// Direction vectors for 8-connected neighbors
 		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
