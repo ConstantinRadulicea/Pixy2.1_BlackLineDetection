@@ -7,20 +7,32 @@
 #include <vector>
 #include "approxPolyDP.h"
 
-
+//#define IMG_PATH "img2.png"
 #define IMG_PATH "img/20241002_194857.jpg"
 
 
-BitMatrix imgToBitMatrix(const char img_path[], float black_treshold) {
+BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     BitMatrix bitmatrix_img;
     // Read the image from file
-    cv::Mat image = cv::imread(img_path);
+    std::string fp = std::string(_img_path);
+    //std::cout << "File path: " << fp << std::endl;
+    cv::Mat image = cv::imread(fp);
+
 
     // Check if the image was loaded
     if (image.empty()) {
         std::cerr << "Error: Could not open or find the image!" << std::endl;
         return bitmatrix_img;
     }
+
+
+    cv::Mat dst;
+    cv::Size newSize(320, 200);
+
+    // Resize the image
+    cv::resize(image, dst, newSize);
+    image = dst;
+
 
     bitmatrix_img.init(image.rows, image.cols);
     
@@ -85,12 +97,11 @@ std::vector<cv::Point> bitMatrixToArray(BitMatrix& bit_matrix) {
 }
 
 
-
-
 void TestBitMatrix() {
     BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
     cv::Mat image, skeleton;
-    bitmatrix_img = imgToBitMatrix(IMG_PATH, 0.25);
+    const char file_path[] = IMG_PATH;
+    bitmatrix_img = imgToBitMatrix(file_path, 0.25);
     image = bitMatrixToMat(bitmatrix_img);
     cv::imshow("image", image);
 
@@ -155,7 +166,6 @@ void TestBitMatrix() {
 }
 
 
-
 std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximation_epsilon) {
     std::vector<std::vector<Point2D>> vectors;
     BitMatrixPosition pixelPosition;
@@ -171,12 +181,13 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
             break;
         }
         image->floodFillOnes(pixelPosition.row, pixelPosition.column, &body);
-        BitMatrixSkeleton(body, body_skeleton);
         BitMatrix::AandNotB(image, &body);
-        if (body.countNonZero() < 100)
-        {
+        //std::cout << "Bits: " << image->countNonZero() << " Body: " << body.countNonZero() << std::endl;
+
+        if (body.countNonZero() < 50) {
             continue;
         }
+        BitMatrixSkeleton(body, body_skeleton);
         body_skeleton.findLongestPath(&longestPath);
 
         std::vector<Point2D> approxCurve;
@@ -190,11 +201,23 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
 
 void TestVectors() {
     std::vector<std::vector<Point2D>> vectors;
-    BitMatrix bitmatrix_img = imgToBitMatrix(IMG_PATH, 0.25);
+    char file_path[] = IMG_PATH;
+    BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.25);
     cv::Mat image = bitMatrixToMat(bitmatrix_img);
-    cv::imshow("image", image);
+    std::cout << "Black pixels: " << bitmatrix_img.countNonZero() << std::endl;
+    
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
 
-    vectors = gggg(&bitmatrix_img, 1.0f);
+    vectors = gggg(&bitmatrix_img, 2.0f);
+
+    // End time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate the duration
+    std::chrono::duration<double> duration = end - start;
+    // Output the result in seconds
+    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+
 
     std::vector<std::vector<cv::Point>> approxCurve;
     for (size_t i = 0; i < vectors.size(); i++) {
@@ -218,6 +241,17 @@ void TestVectors() {
 
 
     // Display the result
+    // Create a window
+    
+    // Resize the window to a specific size (adjust width and height as needed)
+    int windowWidth = 800;  // Adjust this value to fit your screen
+    int windowHeight = 600; // Adjust this value to fit your screen
+    cv::namedWindow("image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("image", windowWidth, windowHeight);
+    cv::imshow("image", image);
+
+    cv::namedWindow("Simplified Skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("Simplified Skeleton", windowWidth, windowHeight);
     cv::imshow("Simplified Skeleton", result);
     cv::waitKey(0);  // Wait for a key press before closing the window
 }

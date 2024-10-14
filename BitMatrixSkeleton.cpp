@@ -25,19 +25,15 @@
  * 		im    Binary image with range = [0,1]
  * 		iter  0=even, 1=odd
  */
-void BitMatrixSkeletonIteration(BitMatrix& img, int iter)
+void BitMatrixSkeletonIteration(BitMatrix& img, BitMatrix& marker, int iter, int nRows, int rowOffset, int nCols, int colOffset)
 {
-    int nRows = img.maxY() + 1;
-    int nCols = img.maxX() + 1;
-    int rowOffset = img.minY();
-    int colOffset = img.minX();
-
-    if (!(nRows - rowOffset >= 1 && nCols - colOffset >= 1)) {
+    if (img.countNonZero() <= 0) {
         return;
     }
 
     //cv::Mat marker = cv::Mat::zeros(img.size(), CV_8UC1);
-    BitMatrix marker(img.getRows(), img.getColumns());
+    //BitMatrix marker(img.getRows(), img.getColumns());
+    //marker.setToZeros();
 
     int x, y;
     PixelCoordinates pAbove;
@@ -124,17 +120,28 @@ void BitMatrixSkeletonIteration(BitMatrix& img, int iter)
 
 void BitMatrixSkeleton(BitMatrix& src, BitMatrix& dst)
 {
+    if (src.countNonZero() <= 0) {
+        return;
+    }
     dst = src;
-    //dst /= 255;         // convert to binary image
 
-    //cv::Mat prev = cv::Mat::zeros(dst.size(), CV_8UC1);
+    int nRows = src.maxY();
+    int nCols = src.maxX();
+    int rowOffset = src.minY();
+    int colOffset = src.minX();
+
+
+    nRows += 1;
+    nCols += 1;
+
+    
     BitMatrix prev(src.getRows(), src.getColumns());
-    //cv::Mat diff;
     BitMatrix diff(src.getRows(), src.getColumns());
+    BitMatrix marker(src.getRows(), src.getColumns());
 
     do {
-        BitMatrixSkeletonIteration(dst, 0);
-        BitMatrixSkeletonIteration(dst, 1);
+        BitMatrixSkeletonIteration(dst, marker, 0, nRows, rowOffset, nCols, colOffset);
+        BitMatrixSkeletonIteration(dst, marker, 1, nRows, rowOffset, nCols, colOffset);
         //cv::absdiff(dst, prev, diff);
         //absdiff(dst, prev, diff);
         BitMatrix::absdiff(dst, prev, diff);

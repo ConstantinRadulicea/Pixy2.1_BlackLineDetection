@@ -8,6 +8,7 @@
 #include <queue>
 #include <unordered_map>
 #include "geometry2D.h"
+#include "bits.h"
 
 
 typedef struct Point2D_Distance {
@@ -89,12 +90,12 @@ public:
 		this->data.shrink_to_fit();
 	}
 
-	bool getBit(size_t row, size_t col) {
-		size_t offset = (row * this->nColumns) + col;
+	inline bool getBit(register size_t row, register size_t col) {
+		register size_t offset = (row * this->nColumns) + col;
 		return 1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
 	}
 	
-	void setBitValue(size_t row, size_t col, bool value) {
+	inline void setBitValue(size_t row, size_t col, bool value) {
 		size_t offset = (row * this->nColumns) + col;
 		if (value) {
 			this->setBit(row, col);
@@ -104,27 +105,28 @@ public:
 		}
 	}
 
-	void setBitValueXY(size_t x, size_t y, bool value) {
+	inline void setBitValueXY(size_t x, size_t y, bool value) {
 		this->setBitValue(y, x, value);
 	}
-	bool getBitXY(size_t x, size_t y) {
+	inline bool getBitXY(size_t x, size_t y) {
 		return this->getBit(y, x);
 	}
 
-	void setBit(size_t row, size_t col) {
+	inline void setBit(register size_t row, register size_t col) {
 		if (this->getBit(row, col)) {	// bit already setted
 			return;
 		}
 		size_t offset = (row * this->nColumns) + col;
-		this->data[offset / BITARRAY_DATATYPE_BITS] = this->data[offset / BITARRAY_DATATYPE_BITS] | (1 << (offset % BITARRAY_DATATYPE_BITS));
+		size_t index = offset / BITARRAY_DATATYPE_BITS;
+		this->data[index] = this->data[index] | (1 << (offset % BITARRAY_DATATYPE_BITS));
 		this->settedBits++;
 	}
 
-	void setBitXY(size_t x, size_t y) {
+	inline void setBitXY(size_t x, size_t y) {
 		this->setBit(y, x);
 	}
 
-	void unsetBit(size_t row, size_t col) {
+	inline void unsetBit(size_t row, size_t col) {
 		if (!(this->getBit(row, col))) {	// bit already unsetted
 			return;
 		}
@@ -133,11 +135,11 @@ public:
 		this->settedBits--;
 	}
 
-	void unsetBitXY(size_t x, size_t y) {
+	inline void unsetBitXY(size_t x, size_t y) {
 		this->unsetBit(y, x);
 	}
 
-	BITARRAY_DATATYPE getBlockValue(size_t index) {
+	inline BITARRAY_DATATYPE getBlockValue(size_t index) {
 		if (index == (this->totBlocks()-1))
 		{
 			return this->data[index] & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
@@ -147,7 +149,7 @@ public:
 		}
 	}
 
-	void setBlockValue(size_t index, BITARRAY_DATATYPE value) {
+	inline void setBlockValue(size_t index, BITARRAY_DATATYPE value) {
 		BITARRAY_DATATYPE oldValue;
 		oldValue = this->getBlockValue(index);
 
@@ -213,7 +215,7 @@ public:
 		return this->settedBits;
 	}
 
-	static void absdiff(BitMatrix& src1, BitMatrix& src2, BitMatrix& dst) {
+	inline static void absdiff(BitMatrix& src1, BitMatrix& src2, BitMatrix& dst) {
 		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
 
 		for (size_t i = 0; i < src1.totBlocks(); i++)
@@ -225,33 +227,36 @@ public:
 		}
 	}
 
-	static void AandNotB(BitMatrix& A, BitMatrix& B)
-	{
-		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
-
-		for (size_t i = 0; i < A.totBlocks(); i++)
-		{
-			valueSrc1 = A.getBlockValue(i);
-			valueSrc2 = B.getBlockValue(i);
-			newValue = valueSrc1 & (~valueSrc2);
-			A.setBlockValue(i, newValue);
-		}
+	inline static void AandNotB(BitMatrix& dst_A, BitMatrix& B) {
+		AandNotB(&dst_A, &B);
 	}
 
-	static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
+	inline static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
 	{
 		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
 
 		for (size_t i = 0; i < dst_A->totBlocks(); i++)
 		{
-			valueSrc1 = dst_A->getBlockValue(i);
+			
 			valueSrc2 = B->getBlockValue(i);
+			if (valueSrc2 == 0) {
+				continue;
+			}
+			valueSrc1 = dst_A->getBlockValue(i);
+			if (valueSrc1 == 0) {
+				continue;
+			}
+			/*else if (valueSrc2 == BITARRAY_DATATYPE_MAX_VALUE) {
+				dst_A->setBlockValue(i, (BITARRAY_DATATYPE)0);
+				continue;
+			}*/
+			
 			newValue = valueSrc1 & (~valueSrc2);
 			dst_A->setBlockValue(i, newValue);
 		}
 	}
 
-	void logicAnd(BitMatrix& B) {
+	inline void logicAnd(BitMatrix& B) {
 		BITARRAY_DATATYPE valueSrc, valueB, newValue;
 
 		for (size_t i = 0; i < this->totBlocks(); i++)
@@ -263,7 +268,7 @@ public:
 		}
 	}
 
-	void logicOr(BitMatrix& B) {
+	inline void logicOr(BitMatrix& B) {
 		BITARRAY_DATATYPE valueSrc, valueB, newValue;
 
 		for (size_t i = 0; i < this->totBlocks(); i++)
@@ -275,30 +280,32 @@ public:
 		}
 	}
 
-	void setToZeros() {
-		for (size_t i = 0; i < this->totBlocks(); i++)
-		{
-			this->setBlockValue(i, (BITARRAY_DATATYPE)0);
-		}
+	inline void setToZeros() {
+		memset(this->data.data(), 0, this->data.size() * sizeof(BITARRAY_DATATYPE));
+		//for (size_t i = 0; i < this->totBlocks(); i++)
+		//{
+		//	this->setBlockValue(i, (BITARRAY_DATATYPE)0);
+		//}
 		this->settedBits = 0;
 	}
 
-	void setToOnes() {
-		for (size_t i = 0; i < this->totBlocks(); i++)
-		{
-			this->setBlockValue(i, (BITARRAY_DATATYPE)1);
-		}
+	inline void setToOnes() {
+		memset(this->data.data(), 255, this->data.size() * sizeof(BITARRAY_DATATYPE));
+		//for (size_t i = 0; i < this->totBlocks(); i++)
+		//{
+		//	this->setBlockValue(i, (BITARRAY_DATATYPE)1);
+		//}
 		this->settedBits = this->data.size() * sizeof(BITARRAY_DATATYPE) * 8;
 	}
 
-	bool isInsideBoundaries(size_t row, size_t col) {
+	inline bool isInsideBoundaries(size_t row, size_t col) {
 		if (row < 0 || row >= this->getRows() || col < 0 || col >= this->getColumns()) {
 			return false;
 		}
 		return true;
 	}
 
-	BitMatrix floodFill(size_t row, size_t col, BitMatrixFillFilter filter_function, void* _Context) {
+	inline BitMatrix floodFill(size_t row, size_t col, BitMatrixFillFilter filter_function, void* _Context) {
 		BitMatrix filledZone(this->getRows(), this->getColumns());
 		this->floodFill(row, col, filter_function, _Context, &filledZone);
 		return filledZone;
@@ -316,7 +323,7 @@ public:
 		if (!isInsideBoundaries(row, col) || !filter_function(row, col, this, _Context)) {
 			return 1;
 		}
-		filledZone->setBitValue(row, col, true);
+		filledZone->setBit(row, col);
 
 		// Append the position of starting
 		// pixel of the component
@@ -345,7 +352,7 @@ public:
 				p.first = (int16_t)(posRow + 1);
 				p.second = posCol;
 				queue.push(p);
-				filledZone->setBitValue((int16_t)((int16_t)(posRow + 1)), posCol, true);
+				filledZone->setBit((int16_t)((int16_t)(posRow + 1)), posCol);
 			}
 
 			if (isInsideBoundaries((int16_t)(posRow - 1), posCol) && !filledZone->getBit((int16_t)(posRow - 1), posCol) && filter_function((int16_t)(posRow - 1), posCol, this, _Context))
@@ -353,7 +360,7 @@ public:
 				p.first = (int16_t)(posRow - 1);
 				p.second = posCol;
 				queue.push(p);
-				filledZone->setBitValue((int16_t)(posRow - 1), posCol, true);
+				filledZone->setBit((int16_t)(posRow - 1), posCol);
 			}
 
 			if (isInsideBoundaries(posRow, (int16_t)(posCol + 1)) && !filledZone->getBit(posRow, (int16_t)(posCol + 1)) && filter_function(posRow, (int16_t)(posCol + 1), this, _Context))
@@ -362,7 +369,7 @@ public:
 				p.first = posRow;
 				p.second = (int16_t)(posCol + 1);
 				queue.push(p);
-				filledZone->setBitValue(posRow, (int16_t)(posCol + 1), true);
+				filledZone->setBit(posRow, (int16_t)(posCol + 1));
 			}
 
 			if (isInsideBoundaries(posRow, (int16_t)(posCol - 1)) && !filledZone->getBit(posRow, (int16_t)(posCol - 1)) && filter_function(posRow, (int16_t)(posCol - 1), this, _Context))
@@ -370,7 +377,7 @@ public:
 				p.first = posRow;
 				p.second = (int16_t)(posCol - 1);
 				queue.push(p);
-				filledZone->setBitValue(posRow, (int16_t)(posCol - 1), true);
+				filledZone->setBit(posRow, (int16_t)(posCol - 1));
 			}
 
 			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol + 1), this, _Context))
@@ -378,7 +385,7 @@ public:
 				p.first = (int16_t)(posRow + 1);
 				p.second = (int16_t)(posCol + 1);
 				queue.push(p);
-				filledZone->setBitValue((int16_t)(posRow + 1), (int16_t)(posCol + 1), true);
+				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
 			}
 
 			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol - 1), this, _Context))
@@ -386,7 +393,7 @@ public:
 				p.first = (int16_t)(posRow + 1);
 				p.second = (int16_t)(posCol - 1);
 				queue.push(p);
-				filledZone->setBitValue((int16_t)(posRow + 1), (int16_t)(posCol - 1), true);
+				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
 			}
 
 			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol - 1), this, _Context))
@@ -394,7 +401,7 @@ public:
 				p.first = (int16_t)(posRow - 1);
 				p.second = (int16_t)(posCol - 1);
 				queue.push(p);
-				filledZone->setBitValue((int16_t)(posRow - 1), (int16_t)(posCol - 1), true);
+				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
 			}
 
 			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol + 1), this, _Context))
@@ -402,43 +409,43 @@ public:
 				p.first = (int16_t)(posRow - 1);
 				p.second = (int16_t)(posCol + 1);
 				queue.push(p);
-				filledZone->setBitValue((int16_t)(posRow - 1), (int16_t)(posCol + 1), true);
+				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
 			}
 		}
 	}
 
 	// returns 0 on success
-	bool floodFillOnes(size_t row, size_t col, BitMatrix* filledZone) {
+	inline bool floodFillOnes(size_t row, size_t col, BitMatrix* filledZone) {
 		return floodFill(row, col, BitMatrix::floodFillFilterFunctionOnes, NULL, filledZone);
 	}
 
 	// returns 0 on success
-	bool floodFillZeroes(size_t row, size_t col, BitMatrix* filledZone) {
+	inline bool floodFillZeroes(size_t row, size_t col, BitMatrix* filledZone) {
 		return floodFill(row, col, BitMatrix::floodFillFilterFunctionZeroes, NULL, filledZone);
 	}
 
 	
-	BitMatrix floodFillOnes(size_t row, size_t col) {
+	inline BitMatrix floodFillOnes(size_t row, size_t col) {
 		BitMatrix filledZone(this->getRows(), this->getColumns());
 		this->floodFillOnes(row, col, &filledZone);
 		return filledZone;
 	}
 
 	
-	BitMatrix floodFillZeroes(size_t row, size_t col) {
+	inline BitMatrix floodFillZeroes(size_t row, size_t col) {
 		BitMatrix filledZone(this->getRows(), this->getColumns());
 		this->floodFillZeroes(row, col, &filledZone);
 		return filledZone;
 	}
 
 
-	std::vector<Point2D> findLongestPath() {
+	inline std::vector<Point2D> findLongestPath() {
 		std::vector<Point2D> path;
 		findLongestPath(this, &path);
 		return path;
 	}
 
-	void findLongestPath(std::vector<Point2D>* longest_path) {
+	inline void findLongestPath(std::vector<Point2D>* longest_path) {
 		BitMatrix::findLongestPath(this, longest_path);
 	}
 
@@ -446,30 +453,45 @@ public:
 	// uses 1 additional BitMatrix
 	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D>* longest_path) {
 		// Direction vectors for 8-connected neighbors
-		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-		int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 		// Start BFS from any skeleton point
 		Point2D start;
-		bool foundStart = false;
+		BitMatrixPosition pos;
+		Point2D_Distance farthestFromStart;
+		Point2D_Distance longestPathResult;
 		longest_path->clear();
-
-		// Find any pixel in the skeleton to start the BFS
-		for (int y = 0; y < skeleton->getRows() && !foundStart; y++) {
-			for (int x = 0; x < skeleton->getColumns() && !foundStart; x++) {
-				if (skeleton->getBit(y, x) == true) {
-					start = Point2D{ (float)x, (float)y };
-					foundStart = true;
-				}
-			}
+		if (skeleton->countNonZero() <= 0) {
+			return;
 		}
 
-		// First BFS to find the farthest point from 'start'
-		Point2D_Distance farthestFromStart = BitMatrix::bfs(&start, skeleton);
+		// Find any pixel in the skeleton to start the BFS
+		//for (int y = 0; y < skeleton->getRows() && !foundStart; y++) {
+		//	for (int x = 0; x < skeleton->getColumns() && !foundStart; x++) {
+		//		if (skeleton->getBit(y, x) == true) {
+		//			start = Point2D{ (float)x, (float)y };
+		//			foundStart = true;
+		//		}
+		//	}
+		//}
 
-		// Second BFS from the farthest point found
-		Point2D_Distance longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton);
+		pos = skeleton->getFirstSetPixel();
+		if (pos.valid == false) {
+			return;
+		}
+
+		start.x = pos.column;
+		start.y = pos.row;
 
 		BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
+
+		// First BFS to find the farthest point from 'start'
+		farthestFromStart = BitMatrix::bfs(&start, skeleton, &visited);
+		visited.setToZeros();
+		// Second BFS from the farthest point found
+		longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton, &visited);
+		visited.setToZeros();
+		
 
 		// To store the points of the longest path, run BFS again and record the path
 		std::queue<std::pair<Point2D, std::vector<Point2D>>> q;
@@ -494,9 +516,12 @@ public:
 
 				if (isValid(newX, newY, skeleton, &visited)) {
 					visited.setBit(newY, newX);
-					std::vector<Point2D> newPath = path;
-					newPath.push_back(Point2D{ (float)newX, (float)newY });
-					q.push({ Point2D{(float)newX, (float)newY}, newPath });
+					//std::vector<Point2D> newPath = path;
+					//newPath.push_back(Point2D{ (float)newX, (float)newY });
+					//q.push({ Point2D{(float)newX, (float)newY}, newPath });
+
+					path.push_back(Point2D{ (float)newX, (float)newY });
+					q.push({ Point2D{(float)newX, (float)newY}, path });
 				}
 			}
 		}
@@ -507,16 +532,16 @@ public:
 
 	// BFS to find the farthest point from a given start point
 	// uses 1 additional BitMatrix
-	static Point2D_Distance bfs(Point2D* start, BitMatrix* skeleton) {
+	static Point2D_Distance bfs(Point2D* start, BitMatrix* skeleton, BitMatrix *visited) {
 		// Direction vectors for 8-connected neighbors
-		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-		int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 
-		BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
+		//BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
 		std::queue<Point2D_Distance> q;
 
 		q.push(Point2D_Distance{ *start, 0 });
-		visited.setBit(start->y, start->x);
+		visited->setBit(start->y, start->x);
 
 		Point2D farthest = *start;
 		int maxDist = 0;
@@ -538,8 +563,8 @@ public:
 				int newX = p.x + dx[i];
 				int newY = p.y + dy[i];
 
-				if (isValid(newX, newY, skeleton, &visited)) {
-					visited.setBit(newY, newX);
+				if (isValid(newX, newY, skeleton, visited)) {
+					visited->setBit(newY, newX);
 					q.push(Point2D_Distance{ Point2D{(float)newX, (float)newY}, (float)dist + (float)1.0 });
 				}
 			}
@@ -549,7 +574,7 @@ public:
 	}
 
 
-	BitMatrixPosition getFirstSetPixel() {
+	inline BitMatrixPosition getFirstSetPixel2() {
 		for (size_t row = 0; row < this->getRows(); row++) {
 			for (size_t col = 0; col < this->getColumns(); col++)
 			{
@@ -558,6 +583,25 @@ public:
 					return BitMatrixPosition{ row, col, true };
 				}
 			}
+		}
+		return BitMatrixPosition{ 0, 0, false };
+	}
+
+	BitMatrixPosition getFirstSetPixel() {
+		BitMatrixPosition pos;
+		size_t bit_index;
+		size_t i = getFirstSetPixel_last_index;
+		for (; i < this->data.size(); i++) {
+			if (this->data[i] != 0)
+			{
+				bit_index = indexOfFirstSettedBit(this->data[i]);
+				pos = this->indexToPosition(i, bit_index);
+				pos.valid = true;
+				return pos;
+			}
+		}
+		if (getFirstSetPixel_last_index >= this->data.size()) {
+			getFirstSetPixel_last_index = 0;
 		}
 		return BitMatrixPosition{ 0, 0, false };
 	}
@@ -586,8 +630,38 @@ private:
 	size_t nRows;
 	size_t nColumns;
 	size_t settedBits;
+	size_t getFirstSetPixel_last_index = 0;
 
+	BitMatrixPosition indexToPosition(size_t index, size_t bit_index) {
+		size_t row, col;
+		bool valid = false;
+		row = ((index * BITARRAY_DATATYPE_BITS) + bit_index) / this->getColumns();
+		col = ((index * BITARRAY_DATATYPE_BITS) + bit_index) % this->getColumns();
+		if (row >= this->getRows()) {
+			valid = false;
+		}
+		else {
+			valid = true;
+		}
 
+		if (col >= this->getColumns()) {
+			valid = false;
+		}
+		else {
+			valid = true;
+		}
+		return BitMatrixPosition{ row , col, valid };
+	}
+
+	size_t indexOfFirstSettedBit(BITARRAY_DATATYPE byte) {
+		for (size_t i = 0; i < BITARRAY_DATATYPE_BITS; i++)
+		{
+			if (GetFlag(&byte, i) == true) {
+				return i;
+			}
+		}
+		return BITARRAY_DATATYPE_BITS;
+	}
 
 	size_t countSettedBits(BITARRAY_DATATYPE byte)
 	{
