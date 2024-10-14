@@ -8,7 +8,7 @@
 #include "approxPolyDP.h"
 
 
-#define IMG_PATH "img1.png"
+#define IMG_PATH "img/20241002_194857.jpg"
 
 
 BitMatrix imgToBitMatrix(const char img_path[], float black_treshold) {
@@ -173,6 +173,10 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         image->floodFillOnes(pixelPosition.row, pixelPosition.column, &body);
         BitMatrixSkeleton(body, body_skeleton);
         BitMatrix::AandNotB(image, &body);
+        if (body.countNonZero() < 100)
+        {
+            continue;
+        }
         body_skeleton.findLongestPath(&longestPath);
 
         std::vector<Point2D> approxCurve;
@@ -187,9 +191,10 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
 void TestVectors() {
     std::vector<std::vector<Point2D>> vectors;
     BitMatrix bitmatrix_img = imgToBitMatrix(IMG_PATH, 0.25);
+    cv::Mat image = bitMatrixToMat(bitmatrix_img);
+    cv::imshow("image", image);
+
     vectors = gggg(&bitmatrix_img, 1.0f);
-
-
 
     std::vector<std::vector<cv::Point>> approxCurve;
     for (size_t i = 0; i < vectors.size(); i++) {
