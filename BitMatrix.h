@@ -8,6 +8,19 @@
 #include <queue>
 #include <unordered_map>
 
+
+typedef struct Point2D {
+	float x;
+	float y;
+}Point2D;
+
+typedef struct Point2D_Distance {
+	Point2D point;
+	float distance;
+}Point2D_Distance;
+
+
+
 class BitMatrix;
 // return true if the bit is accepted, otherwise returns false
 typedef bool (*BitMatrixFillFilter)(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context);
@@ -392,6 +405,70 @@ public:
 	}
 
 
+	// Find the longest path in the skeleton
+	std::vector<Point2D> findLongestPath(BitMatrix& skeleton) {
+		// Direction vectors for 8-connected neighbors
+		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		// Start BFS from any skeleton point
+		Point2D start;
+		bool foundStart = false;
+
+		// Find any pixel in the skeleton to start the BFS
+		for (int y = 0; y < skeleton.getRows() && !foundStart; y++) {
+			for (int x = 0; x < skeleton.getColumns() && !foundStart; x++) {
+				if (skeleton.getBit(y, x) == true) {
+					start = Point2D{ (float)x, (float)y };
+					foundStart = true;
+				}
+			}
+		}
+
+		// First BFS to find the farthest point from 'start'
+		Point2D_Distance farthestFromStart = BitMatrix::bfs(start, skeleton);
+
+		// Second BFS from the farthest point found
+		Point2D_Distance longestPathResult = BitMatrix::bfs(farthestFromStart.point, skeleton);
+
+		// To store the points of the longest path, run BFS again and record the path
+		std::queue<std::pair<Point2D, std::vector<Point2D>>> q;
+
+
+		BitMatrix visited(skeleton.getRows(), skeleton.getColumns());
+
+		q.push({ longestPathResult.point, {longestPathResult.point} });
+		visited.setBit(longestPathResult.point.y, longestPathResult.point.x);
+
+		std::vector<Point2D> longestPath;
+
+		while (!q.empty()) {
+			auto current = q.front();
+			Point2D p = current.first;
+			std::vector<Point2D> path = current.second;
+			q.pop();
+
+			if (path.size() > longestPath.size()) {
+				longestPath = path;
+			}
+
+			for (int i = 0; i < 8; ++i) {
+				int newX = p.x + dx[i];
+				int newY = p.y + dy[i];
+
+				if (isValid(newX, newY, &skeleton, &visited)) {
+					visited.setBit(newY, newX);
+					std::vector<Point2D> newPath = path;
+					newPath.push_back(Point2D{ (float)newX, (float)newY });
+					q.push({ Point2D{(float)newX, (float)newY}, newPath });
+				}
+			}
+		}
+
+		return longestPath;
+	}
+
+
+
 	~BitMatrix() {
 		data.~vector();
 	}
@@ -403,9 +480,7 @@ private:
 	size_t nColumns;
 	size_t settedBits;
 
-	// Direction vectors for 8-connected neighbors
-	int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-	int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+
 
 	size_t countSettedBits(BITARRAY_DATATYPE byte)
 	{
@@ -437,27 +512,32 @@ private:
 	}
 
 	// Utility function to check if a point is valid
-	bool isValid(int col, int row, BitMatrix* visited) {
-		return (col >= 0 && col < this->getColumns() && row >= 0 && row < this->getRows() &&
-			this->getBit(row, col) == true && visited->getBit(row, col) == false);
+	static bool isValid(int col, int row, BitMatrix* main, BitMatrix* visited) {
+		return (col >= 0 && col < main->getColumns() && row >= 0 && row < main->getRows() &&
+			main->getBit(row, col) == true && visited->getBit(row, col) == false);
 	}
 
-
+	
 
 	// BFS to find the farthest point from a given start point
-	std::pair<cv::Point, int> bfs(const cv::Point& start, const cv::Mat& skeleton) {
-		cv::Mat visited = cv::Mat::zeros(skeleton.size(), CV_8UC1);  // Mark visited points
-		std::queue<std::pair<cv::Point, int>> q;
-		q.push({ start, 0 });
-		visited.at<uchar>(start.y, start.x) = 1;
+	static Point2D_Distance bfs(Point2D& start, BitMatrix& skeleton) {
+		// Direction vectors for 8-connected neighbors
+		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 
-		cv::Point farthest = start;
+		BitMatrix visited(skeleton.getRows(), skeleton.getColumns());
+		std::queue<Point2D_Distance> q;
+
+		q.push(Point2D_Distance{start, 0 });
+		visited.setBit(start.y, start.x);
+
+		Point2D farthest = start;
 		int maxDist = 0;
 
 		while (!q.empty()) {
 			auto current = q.front();
-			cv::Point p = current.first;
-			int dist = current.second;
+			Point2D p = current.point;
+			int dist = current.distance;
 			q.pop();
 
 			// Update the farthest point found
@@ -471,14 +551,14 @@ private:
 				int newX = p.x + dx[i];
 				int newY = p.y + dy[i];
 
-				if (isValid(newX, newY, skeleton, visited)) {
-					visited.at<uchar>(newY, newX) = 1;
-					q.push({ cv::Point(newX, newY), dist + 1 });
+				if (isValid(newX, newY, &skeleton, &visited)) {
+					visited.setBit(newY, newX);
+					q.push(Point2D_Distance{ Point2D{(float)newX, (float)newY}, (float)dist + (float)1.0 });
 				}
 			}
 		}
 
-		return { farthest, maxDist };
+		return { farthest, (float)maxDist };
 	}
 
 

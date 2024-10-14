@@ -208,8 +208,18 @@ void TestBitMatrix() {
     
     skeleton = bitMatrixToMat(temp_skeleton_bitmatrix);
 
+    /*
     // Find the longest path in the skeleton
     std::vector<cv::Point> longestPath = findLongestPath(skeleton);
+
+
+    */
+
+    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath(temp_skeleton_bitmatrix);
+    std::vector<cv::Point>longestPath;
+    for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
+        longestPath.push_back(cv::Point(longestPath_Point2D[i].x, longestPath_Point2D[i].y));
+    }
 
     // Visualize the longest path
     cv::Mat pathImage = cv::Mat::zeros(skeleton.size(), CV_8UC3);
@@ -217,7 +227,6 @@ void TestBitMatrix() {
         cv::line(pathImage, longestPath[i], longestPath[i + 1], cv::Scalar(0, 255, 0), 1);
     }
     cv::imshow("Longhest path", pathImage);
-
 
     std::vector<cv::Point> approxCurve;
     double epsilon = 1.0*1;  // Tolerance value for approximation
