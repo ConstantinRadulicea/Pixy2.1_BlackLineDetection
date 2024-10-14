@@ -1,6 +1,6 @@
 #include "BitMatrix.h"
 #include "rgb2hsv.h"
-#include "thinning.h"
+#include "BitMatrixSkeleton.h"
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <string>
@@ -86,110 +86,6 @@ std::vector<cv::Point> bitMatrixToArray(BitMatrix& bit_matrix) {
 
 
 
-// Direction vectors for 8-connected neighbors
-int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
-
-// Utility function to check if a point is valid
-bool isValid(int x, int y, const cv::Mat& skeleton, const cv::Mat& visited) {
-    return (x >= 0 && x < skeleton.cols && y >= 0 && y < skeleton.rows &&
-        skeleton.at<uchar>(y, x) == 255 && visited.at<uchar>(y, x) == 0);
-}
-
-// BFS to find the farthest point from a given start point
-std::pair<cv::Point, int> bfs(const cv::Point& start, const cv::Mat& skeleton) {
-    cv::Mat visited = cv::Mat::zeros(skeleton.size(), CV_8UC1);  // Mark visited points
-    std::queue<std::pair<cv::Point, int>> q;
-    q.push({ start, 0 });
-    visited.at<uchar>(start.y, start.x) = 1;
-
-    cv::Point farthest = start;
-    int maxDist = 0;
-
-    while (!q.empty()) {
-        auto current = q.front();
-        cv::Point p = current.first;
-        int dist = current.second;
-        q.pop();
-
-        // Update the farthest point found
-        if (dist > maxDist) {
-            maxDist = dist;
-            farthest = p;
-        }
-
-        // Explore 8-connected neighbors
-        for (int i = 0; i < 8; ++i) {
-            int newX = p.x + dx[i];
-            int newY = p.y + dy[i];
-
-            if (isValid(newX, newY, skeleton, visited)) {
-                visited.at<uchar>(newY, newX) = 1;
-                q.push({ cv::Point(newX, newY), dist + 1 });
-            }
-        }
-    }
-
-    return { farthest, maxDist };
-}
-
-// Find the longest path in the skeleton
-std::vector<cv::Point> findLongestPath(const cv::Mat& skeleton) {
-    // Start BFS from any skeleton point
-    cv::Point start;
-    bool foundStart = false;
-
-    // Find any pixel in the skeleton to start the BFS
-    for (int y = 0; y < skeleton.rows && !foundStart; y++) {
-        for (int x = 0; x < skeleton.cols && !foundStart; x++) {
-            if (skeleton.at<uchar>(y, x) == 255) {
-                start = cv::Point(x, y);
-                foundStart = true;
-            }
-        }
-    }
-
-    // First BFS to find the farthest point from 'start'
-    auto farthestFromStart = bfs(start, skeleton);
-
-    // Second BFS from the farthest point found
-    auto longestPathResult = bfs(farthestFromStart.first, skeleton);
-
-    // To store the points of the longest path, run BFS again and record the path
-    std::queue<std::pair<cv::Point, std::vector<cv::Point>>> q;
-    cv::Mat visited = cv::Mat::zeros(skeleton.size(), CV_8UC1);
-    q.push({ longestPathResult.first, {longestPathResult.first} });
-    visited.at<uchar>(longestPathResult.first.y, longestPathResult.first.x) = 1;
-
-    std::vector<cv::Point> longestPath;
-
-    while (!q.empty()) {
-        auto current = q.front();
-        cv::Point p = current.first;
-        std::vector<cv::Point> path = current.second;
-        q.pop();
-
-        if (path.size() > longestPath.size()) {
-            longestPath = path;
-        }
-
-        for (int i = 0; i < 8; ++i) {
-            int newX = p.x + dx[i];
-            int newY = p.y + dy[i];
-
-            if (isValid(newX, newY, skeleton, visited)) {
-                visited.at<uchar>(newY, newX) = 1;
-                std::vector<cv::Point> newPath = path;
-                newPath.push_back(cv::Point(newX, newY));
-                q.push({ cv::Point(newX, newY), newPath });
-            }
-        }
-    }
-
-    return longestPath;
-}
-
-
 
 void TestBitMatrix() {
     BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
@@ -203,7 +99,7 @@ void TestBitMatrix() {
     temp_bitmatrix = bitmatrix_img.floodFillOnes(temp_bitmatrixpos.row, temp_bitmatrixpos.column);
     cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
 
-    thinning(temp_bitmatrix, temp_skeleton_bitmatrix);
+    BitMatrixSkeleton(temp_bitmatrix, temp_skeleton_bitmatrix);
     cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
 
 
@@ -217,7 +113,7 @@ void TestBitMatrix() {
 
     */
 
-    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath(&temp_skeleton_bitmatrix);
+    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath();
 
     std::vector<cv::Point>longestPath;
     for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
@@ -258,6 +154,70 @@ void TestBitMatrix() {
     cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
+
+
+std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximation_epsilon) {
+    std::vector<std::vector<Point2D>> vectors;
+    BitMatrixPosition pixelPosition;
+    BitMatrix body(image->getRows(), image->getColumns());
+    BitMatrix body_skeleton(image->getRows(), image->getColumns());
+    std::vector<Point2D> longestPath;
+
+
+    for (;;)
+    {
+        pixelPosition = image->getFirstSetPixel();
+        if (!(pixelPosition.valid)) {
+            break;
+        }
+        image->floodFillOnes(pixelPosition.row, pixelPosition.column, &body);
+        BitMatrixSkeleton(body, body_skeleton);
+        BitMatrix::AandNotB(image, &body);
+        body_skeleton.findLongestPath(&longestPath);
+
+        std::vector<Point2D> approxCurve;
+        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
+        vectors.push_back(approxCurve);
+    }
+    
+    return vectors;
+}
+
+
+void TestVectors() {
+    std::vector<std::vector<Point2D>> vectors;
+    BitMatrix bitmatrix_img = imgToBitMatrix(IMG_PATH, 0.25);
+    vectors = gggg(&bitmatrix_img, 1.0f);
+
+
+
+    std::vector<std::vector<cv::Point>> approxCurve;
+    for (size_t i = 0; i < vectors.size(); i++) {
+        std::vector<cv::Point> temp;
+        approxCurve.push_back(temp);
+        for (size_t j = 0; j < vectors[i].size(); j++) {
+            approxCurve[i].push_back(cv::Point(vectors[i][j].x, vectors[i][j].y));
+        }
+    }
+
+
+    cv::Mat result = cv::Mat::zeros(bitmatrix_img.getRows(), bitmatrix_img.getColumns(), CV_8UC3);  // Create a blank canvas
+
+    for (size_t i = 0; i < approxCurve.size(); i++)
+    {
+        // Draw the simplified skeleton using the approximate curve
+        for (size_t j = 0; j < approxCurve[i].size() - 1; ++j) {
+            cv::line(result, approxCurve[i][j], approxCurve[i][j + 1], cv::Scalar(0, 255, 0), 1);
+        }
+    }
+
+
+    // Display the result
+    cv::imshow("Simplified Skeleton", result);
+    cv::waitKey(0);  // Wait for a key press before closing the window
+}
+
 void main() {
-	TestBitMatrix();
+    TestVectors();
+	//TestBitMatrix();
 }

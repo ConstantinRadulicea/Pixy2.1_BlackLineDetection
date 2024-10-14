@@ -132,6 +132,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="approxPolyDP.cpp" />
+    <ClCompile Include="BitMatrixSkeleton.cpp" />
     <ClCompile Include="geometry2D.cpp" />
     <ClCompile Include="TestBitMatrix.cpp" />
   </ItemGroup>
@@ -147,7 +149,7 @@
     <ClInclude Include="img4.h" />
     <ClInclude Include="img5.h" />
     <ClInclude Include="rgb2hsv.h" />
-    <ClInclude Include="thinning.h" />
+    <ClInclude Include="BitMatrixSkeleton.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="edges.csv" />

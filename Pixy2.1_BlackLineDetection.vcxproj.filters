@@ -21,6 +21,12 @@
     <ClCompile Include="geometry2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="approxPolyDP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BitMatrixSkeleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rgb2hsv.h">
@@ -29,7 +35,7 @@
     <ClInclude Include="img1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thinning.h">
+    <ClInclude Include="BitMatrixSkeleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BitMatrix.h">

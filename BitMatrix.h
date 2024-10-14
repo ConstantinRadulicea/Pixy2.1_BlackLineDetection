@@ -79,6 +79,16 @@ public:
 		this->settedBits = 0;
 	}
 
+	void free() {
+		this->nColumns = 0;
+		this->nRows = 0;
+		this->settedBits = 0;
+
+		this->data.resize(0);
+		this->data.reserve(0);
+		this->data.shrink_to_fit();
+	}
+
 	bool getBit(size_t row, size_t col) {
 		size_t offset = (row * this->nColumns) + col;
 		return 1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
@@ -228,6 +238,19 @@ public:
 		}
 	}
 
+	static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
+	{
+		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
+
+		for (size_t i = 0; i < dst_A->totBlocks(); i++)
+		{
+			valueSrc1 = dst_A->getBlockValue(i);
+			valueSrc2 = B->getBlockValue(i);
+			newValue = valueSrc1 & (~valueSrc2);
+			dst_A->setBlockValue(i, newValue);
+		}
+	}
+
 	void logicAnd(BitMatrix& B) {
 		BITARRAY_DATATYPE valueSrc, valueB, newValue;
 
@@ -257,6 +280,7 @@ public:
 		{
 			this->setBlockValue(i, (BITARRAY_DATATYPE)0);
 		}
+		this->settedBits = 0;
 	}
 
 	void setToOnes() {
@@ -264,6 +288,7 @@ public:
 		{
 			this->setBlockValue(i, (BITARRAY_DATATYPE)1);
 		}
+		this->settedBits = this->data.size() * sizeof(BITARRAY_DATATYPE) * 8;
 	}
 
 	bool isInsideBoundaries(size_t row, size_t col) {
@@ -407,15 +432,26 @@ public:
 	}
 
 
+	std::vector<Point2D> findLongestPath() {
+		std::vector<Point2D> path;
+		findLongestPath(this, &path);
+		return path;
+	}
+
+	void findLongestPath(std::vector<Point2D>* longest_path) {
+		BitMatrix::findLongestPath(this, longest_path);
+	}
+
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
-	static std::vector<Point2D> findLongestPath(BitMatrix* skeleton) {
+	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D>* longest_path) {
 		// Direction vectors for 8-connected neighbors
 		int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 		// Start BFS from any skeleton point
 		Point2D start;
 		bool foundStart = false;
+		longest_path->clear();
 
 		// Find any pixel in the skeleton to start the BFS
 		for (int y = 0; y < skeleton->getRows() && !foundStart; y++) {
@@ -437,7 +473,7 @@ public:
 
 		// To store the points of the longest path, run BFS again and record the path
 		std::queue<std::pair<Point2D, std::vector<Point2D>>> q;
-		std::vector<Point2D> longestPath;
+		//std::vector<Point2D> longest_path;
 
 		q.push({ longestPathResult.point, {longestPathResult.point} });
 		visited.setBit(longestPathResult.point.y, longestPathResult.point.x);
@@ -448,8 +484,8 @@ public:
 			std::vector<Point2D> path = current.second;
 			q.pop();
 
-			if (path.size() > longestPath.size()) {
-				longestPath = path;
+			if (path.size() > longest_path->size()) {
+				*longest_path = path;
 			}
 
 			for (int i = 0; i < 8; ++i) {
@@ -465,7 +501,7 @@ public:
 			}
 		}
 
-		return longestPath;
+		//return longestPath;
 	}
 
 
@@ -587,11 +623,6 @@ private:
 		return (col >= 0 && col < main->getColumns() && row >= 0 && row < main->getRows() &&
 			main->getBit(row, col) == true && visited->getBit(row, col) == false);
 	}
-
-	
-
-
-
 };
 
 #endif // !__BITMATRIX_H__
