@@ -15,6 +15,12 @@ typedef struct Point2D_Distance {
 	float distance;
 }Point2D_Distance;
 
+typedef struct BitMatrixPosition {
+	size_t row;
+	size_t column;
+	bool valid;
+}BitMatrixPosition;
+
 
 
 class BitMatrix;
@@ -507,6 +513,31 @@ public:
 	}
 
 
+	BitMatrixPosition getFirstSetPixel() {
+		for (size_t row = 0; row < this->getRows(); row++) {
+			for (size_t col = 0; col < this->getColumns(); col++)
+			{
+				if (this->getBit(row, col) == true)
+				{
+					return BitMatrixPosition{ row, col, true };
+				}
+			}
+		}
+		return BitMatrixPosition{ 0, 0, false };
+	}
+
+	BitMatrixPosition getFirstUnsetPixel() {
+		for (size_t row = 0; row < this->getRows(); row++) {
+			for (size_t col = 0; col < this->getColumns(); col++)
+			{
+				if (this->getBit(row, col) == false)
+				{
+					return BitMatrixPosition{ row, col, true };
+				}
+			}
+		}
+		return BitMatrixPosition{ 0, 0, false };
+	}
 
 
 	~BitMatrix() {

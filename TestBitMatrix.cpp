@@ -198,10 +198,11 @@ void TestBitMatrix() {
     image = bitMatrixToMat(bitmatrix_img);
     cv::imshow("image", image);
 
-    temp_bitmatrix = bitmatrix_img.floodFillOnes(0, 0);
+    BitMatrixPosition temp_bitmatrixpos = bitmatrix_img.getFirstSetPixel();
+
+    temp_bitmatrix = bitmatrix_img.floodFillOnes(temp_bitmatrixpos.row, temp_bitmatrixpos.column);
     cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
 
-    temp_bitmatrix = bitmatrix_img.floodFillOnes(0, 0);
     thinning(temp_bitmatrix, temp_skeleton_bitmatrix);
     cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
 
