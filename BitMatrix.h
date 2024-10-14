@@ -153,6 +153,10 @@ public:
 		BITARRAY_DATATYPE oldValue;
 		oldValue = this->getBlockValue(index);
 
+		if (oldValue == value) {
+			return;
+		}
+
 		value &= (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
 
 		this->settedBits += ((int)(this->countSettedBits(value)) - (int)(this->countSettedBits(oldValue)));
@@ -325,7 +329,7 @@ public:
 
 
 	// returns 0 on success
-	bool floodFill(size_t row, size_t col, BitMatrixFillFilter filter_function, void* _Context, BitMatrix *filledZone) {
+	bool floodFill(size_t row, size_t col, BitMatrixFillFilter filter_function, void* _Context, BitMatrix* filledZone) {
 		std::queue<std::pair<int16_t, int16_t>> queue;
 		int16_t posRow;
 		int16_t posCol;
@@ -340,6 +344,7 @@ public:
 		// Append the position of starting
 		// pixel of the component
 		std::pair<int16_t, int16_t> p(row, col);
+		std::pair<int16_t, int16_t> currPixel;
 		queue.push(p);
 
 		// Color the pixel with the new color
@@ -350,7 +355,7 @@ public:
 		// is not colored with newC color
 		while (queue.size() > 0) {
 			// Dequeue the front node
-			std::pair<int16_t, int16_t> currPixel = queue.front();
+			currPixel = queue.front();
 			queue.pop();
 
 			posRow = currPixel.first;
@@ -425,6 +430,122 @@ public:
 			}
 		}
 	}
+
+
+	// returns 0 on success
+	bool floodFillOnesDelete(size_t row, size_t col, BitMatrix* filledZone) {
+		std::queue<std::pair<int16_t, int16_t>> queue;
+		int16_t posRow;
+		int16_t posCol;
+		BitMatrixFillFilter filter_function = BitMatrix::floodFillFilterFunctionOnes;
+		void* _Context = NULL;
+
+		filledZone->clear();
+
+		if (!isInsideBoundaries(row, col) || !filter_function(row, col, this, _Context)) {
+			return 1;
+		}
+		filledZone->setBit(row, col);
+		this->unsetBit(row, col);
+
+		// Append the position of starting
+		// pixel of the component
+		std::pair<int16_t, int16_t> p(row, col);
+		std::pair<int16_t, int16_t> currPixel;
+		queue.push(p);
+
+		// Color the pixel with the new color
+		//screen[x][y] = newC;
+
+		// While the queue is not empty i.e. the
+		// whole component having prevC color
+		// is not colored with newC color
+		while (queue.size() > 0) {
+			// Dequeue the front node
+			currPixel = queue.front();
+			queue.pop();
+
+			posRow = currPixel.first;
+			posCol = currPixel.second;
+
+			// Check if the adjacent
+			// pixels are valid
+
+			if (isInsideBoundaries((int16_t)(posRow + 1), posCol) && !filledZone->getBit((int16_t)(posRow + 1), posCol) && filter_function((int16_t)(posRow + 1), posCol, this, _Context))
+			{
+				p.first = (int16_t)(posRow + 1);
+				p.second = posCol;
+				queue.push(p);
+				filledZone->setBit((int16_t)((int16_t)(posRow + 1)), posCol);
+				this->unsetBit((int16_t)((int16_t)(posRow + 1)), posCol);
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow - 1), posCol) && !filledZone->getBit((int16_t)(posRow - 1), posCol) && filter_function((int16_t)(posRow - 1), posCol, this, _Context))
+			{
+				p.first = (int16_t)(posRow - 1);
+				p.second = posCol;
+				queue.push(p);
+				filledZone->setBit((int16_t)(posRow - 1), posCol);
+				this->unsetBit((int16_t)(posRow - 1), posCol);
+			}
+
+			if (isInsideBoundaries(posRow, (int16_t)(posCol + 1)) && !filledZone->getBit(posRow, (int16_t)(posCol + 1)) && filter_function(posRow, (int16_t)(posCol + 1), this, _Context))
+			{
+				//screen[posRow][(int16_t)(posCol + 1)] = newC;
+				p.first = posRow;
+				p.second = (int16_t)(posCol + 1);
+				queue.push(p);
+				filledZone->setBit(posRow, (int16_t)(posCol + 1));
+				this->unsetBit(posRow, (int16_t)(posCol + 1));
+			}
+
+			if (isInsideBoundaries(posRow, (int16_t)(posCol - 1)) && !filledZone->getBit(posRow, (int16_t)(posCol - 1)) && filter_function(posRow, (int16_t)(posCol - 1), this, _Context))
+			{
+				p.first = posRow;
+				p.second = (int16_t)(posCol - 1);
+				queue.push(p);
+				filledZone->setBit(posRow, (int16_t)(posCol - 1));
+				this->unsetBit(posRow, (int16_t)(posCol - 1));
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol + 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow + 1);
+				p.second = (int16_t)(posCol + 1);
+				queue.push(p);
+				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
+				this->unsetBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol - 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow + 1);
+				p.second = (int16_t)(posCol - 1);
+				queue.push(p);
+				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
+				this->unsetBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol - 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow - 1);
+				p.second = (int16_t)(posCol - 1);
+				queue.push(p);
+				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
+				this->unsetBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
+			}
+
+			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol + 1), this, _Context))
+			{
+				p.first = (int16_t)(posRow - 1);
+				p.second = (int16_t)(posCol + 1);
+				queue.push(p);
+				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
+				this->unsetBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
+			}
+		}
+	}
+
 
 	// returns 0 on success
 	inline bool floodFillOnes(size_t row, size_t col, BitMatrix* filledZone) {

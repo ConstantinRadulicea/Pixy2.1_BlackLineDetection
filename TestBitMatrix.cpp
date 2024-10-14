@@ -180,8 +180,8 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         if (!(pixelPosition.valid)) {
             break;
         }
-        image->floodFillOnes(pixelPosition.row, pixelPosition.column, &body);
-        BitMatrix::AandNotB(image, &body);
+        image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
+        //BitMatrix::AandNotB(image, &body);
         //std::cout << "Bits: " << image->countNonZero() << " Body: " << body.countNonZero() << std::endl;
 
         if (body.countNonZero() < 50) {
