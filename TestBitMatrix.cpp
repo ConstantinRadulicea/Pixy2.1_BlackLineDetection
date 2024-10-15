@@ -25,7 +25,7 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     //std::cout << "File path: " << fp << std::endl;
     cv::Mat image = cv::imread(fp);
 
-
+     
     // Check if the image was loaded
     if (image.empty()) {
         std::cerr << "Error: Could not open or find the image!" << std::endl;
