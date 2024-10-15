@@ -179,6 +179,7 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
     std::vector<Point2D> longestPath;
+    std::vector<Point2D> approxCurve;
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
@@ -196,9 +197,10 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         BitMatrixSkeleton(&body);
         body.findLongestPath(&longestPath);
 
-        std::vector<Point2D> approxCurve;
+        
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
         vectors.push_back(approxCurve);
+        approxCurve.clear();
     }
 
     // End time
