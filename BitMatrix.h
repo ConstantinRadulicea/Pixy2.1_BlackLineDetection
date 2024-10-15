@@ -147,10 +147,10 @@ public:
 	inline BITARRAY_DATATYPE getBlockValue(size_t index) {
 		if (index == (this->totBlocks()-1))
 		{
-			return this->data[index] & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
+			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
 		}
 		else {
-			return this->data[index];
+			return this->data.at(index);
 		}
 	}
 
@@ -642,11 +642,11 @@ public:
 		while (!q.empty()) {
 			current = q.front();
 			p = current.start;
-			std::vector<Point2D> path = current.path;
+			std::vector<Point2D> *path = &(current.path);
 			q.pop();
 
-			if (path.size() > longest_path->size()) {
-				*longest_path = path;
+			if (path->size() > longest_path->size()) {
+				*longest_path = *path;
 			}
 
 			for (int i = 0; i < 8; ++i) {
@@ -663,7 +663,7 @@ public:
 					struct _local_path temp_local_path;
 					temp_local_path.start.x = (float)newX;
 					temp_local_path.start.y = (float)newY;
-					temp_local_path.path = path;
+					temp_local_path.path = *path;
 					temp_local_path.path.push_back(temp_local_path.start);
 					q.push(temp_local_path);
 				}

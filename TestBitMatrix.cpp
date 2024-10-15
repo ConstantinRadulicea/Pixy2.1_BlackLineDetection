@@ -249,16 +249,16 @@ void TestVectors() {
     // Create a window
     
     // Resize the window to a specific size (adjust width and height as needed)
-    int windowWidth = 800;  // Adjust this value to fit your screen
-    int windowHeight = 600; // Adjust this value to fit your screen
-    cv::namedWindow("image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("image", windowWidth, windowHeight);
-    cv::imshow("image", image);
+    //int windowWidth = 800;  // Adjust this value to fit your screen
+    //int windowHeight = 600; // Adjust this value to fit your screen
+    //cv::namedWindow("image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    //cv::resizeWindow("image", windowWidth, windowHeight);
+    //cv::imshow("image", image);
 
-    cv::namedWindow("Simplified Skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("Simplified Skeleton", windowWidth, windowHeight);
-    cv::imshow("Simplified Skeleton", result);
-    cv::waitKey(0);  // Wait for a key press before closing the window
+    //cv::namedWindow("Simplified Skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    //cv::resizeWindow("Simplified Skeleton", windowWidth, windowHeight);
+    //cv::imshow("Simplified Skeleton", result);
+    //cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
 void main() {
