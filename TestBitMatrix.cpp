@@ -8,7 +8,14 @@
 #include "approxPolyDP.h"
 
 //#define IMG_PATH "img2.png"
-#define IMG_PATH "img/20241002_194857.jpg"
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+//#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
+//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+//#define IMG_PATH "img/20241002_194947.jpg" // curve 2
+//#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
 
 BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
@@ -184,7 +191,7 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         //BitMatrix::AandNotB(image, &body);
         //std::cout << "Bits: " << image->countNonZero() << " Body: " << body.countNonZero() << std::endl;
 
-        if (body.countNonZero() < 50) {
+        if (body.countNonZero() < 8) {
             continue;
         }
         BitMatrixSkeleton(&body, &body_skeleton);
@@ -202,14 +209,14 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
 void TestVectors() {
     std::vector<std::vector<Point2D>> vectors;
     char file_path[] = IMG_PATH;
-    BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.25);
+    BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
     cv::Mat image = bitMatrixToMat(bitmatrix_img);
     std::cout << "Black pixels: " << bitmatrix_img.countNonZero() << std::endl;
     
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
 
-    vectors = gggg(&bitmatrix_img, 2.0f);
+    vectors = gggg(&bitmatrix_img, 3.0f);
 
     // End time
     auto end = std::chrono::high_resolution_clock::now();
