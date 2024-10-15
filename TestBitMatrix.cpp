@@ -188,8 +188,6 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
             break;
         }
         image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
-        //BitMatrix::AandNotB(image, &body);
-        //std::cout << "Bits: " << image->countNonZero() << " Body: " << body.countNonZero() << std::endl;
 
         if (body.countNonZero() < 8) {
             continue;
