@@ -134,7 +134,7 @@ void BitMatrixSkeleton(BitMatrix* src, BitMatrix* dst)
     nRows += 1;
     nCols += 1;
 
-    
+
     BitMatrix prev(src->getRows(), src->getColumns());
     BitMatrix diff(src->getRows(), src->getColumns());
     BitMatrix marker(src->getRows(), src->getColumns());
@@ -148,6 +148,41 @@ void BitMatrixSkeleton(BitMatrix* src, BitMatrix* dst)
         //writeMatlabEdges("edges.csv", mapToVector(dst));
         //dst.copyTo(prev);
         prev = *dst;
+    }// while (cv::countNonZero(diff) > 0);
+    //while (countNonZero(diff) > 0);
+    while (diff.countNonZero() > 0);
+}
+
+
+void BitMatrixSkeleton(BitMatrix* matrix)
+{
+    if (matrix->countNonZero() <= 0) {
+        return;
+    }
+
+    int nRows = matrix->maxY();
+    int nCols = matrix->maxX();
+    int rowOffset = matrix->minY();
+    int colOffset = matrix->minX();
+
+
+    nRows += 1;
+    nCols += 1;
+
+
+    BitMatrix prev(matrix->getRows(), matrix->getColumns());
+    BitMatrix diff(matrix->getRows(), matrix->getColumns());
+    BitMatrix marker(matrix->getRows(), matrix->getColumns());
+
+    do {
+        BitMatrixSkeletonIteration(matrix, &marker, 0, nRows, rowOffset, nCols, colOffset);
+        BitMatrixSkeletonIteration(matrix, &marker, 1, nRows, rowOffset, nCols, colOffset);
+        //cv::absdiff(dst, prev, diff);
+        //absdiff(dst, prev, diff);
+        BitMatrix::absdiff(matrix, &prev, &diff);
+        //writeMatlabEdges("edges.csv", mapToVector(dst));
+        //dst.copyTo(prev);
+        prev = *matrix;
     }// while (cv::countNonZero(diff) > 0);
     //while (countNonZero(diff) > 0);
     while (diff.countNonZero() > 0);

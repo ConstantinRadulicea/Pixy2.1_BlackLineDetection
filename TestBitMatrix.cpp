@@ -180,7 +180,8 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
     std::vector<Point2D> longestPath;
 
-
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
     for (;;)
     {
         pixelPosition = image->getFirstSetPixel();
@@ -192,14 +193,65 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         if (body.countNonZero() < 50) {
             continue;
         }
-        BitMatrixSkeleton(&body, &body_skeleton);
-        body_skeleton.findLongestPath(&longestPath);
+        BitMatrixSkeleton(&body);
+        body.findLongestPath(&longestPath);
 
         std::vector<Point2D> approxCurve;
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
         vectors.push_back(approxCurve);
     }
-    
+
+    // End time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate the duration
+    std::chrono::duration<double> duration = end - start;
+    // Output the result in seconds
+    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+
+    return vectors;
+}
+
+
+std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {
+    std::vector<std::vector<Point2D>> vectors;
+    BitMatrixPosition pixelPosition;
+    BitMatrix body(image->getRows(), image->getColumns());
+    BitMatrix body_skeleton(image->getRows(), image->getColumns());
+    std::vector<Point2D> longestPath;
+    body_skeleton = *image;
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
+    BitMatrixSkeleton(&body_skeleton);
+    for (;;)
+    {
+        pixelPosition = body_skeleton.getFirstSetPixel();
+        if (!(pixelPosition.valid)) {
+            break;
+        }
+        body_skeleton.floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
+        //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
+
+
+        if (body.countNonZero() < 30) {
+            continue;
+        }
+        body.findLongestPath(&longestPath);
+
+        std::vector<Point2D> approxCurve;
+        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
+        if (approxCurve.size() > 1) {
+            vectors.push_back(approxCurve);
+        }
+        
+    }
+
+    // End time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate the duration
+    std::chrono::duration<double> duration = end - start;
+    // Output the result in seconds
+    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+
     return vectors;
 }
 
@@ -211,17 +263,11 @@ void TestVectors() {
     cv::Mat image = bitMatrixToMat(bitmatrix_img);
     std::cout << "Black pixels: " << bitmatrix_img.countNonZero() << std::endl;
     
-    // Start time
-    auto start = std::chrono::high_resolution_clock::now();
+
 
     vectors = gggg(&bitmatrix_img, 3.0f);
 
-    // End time
-    auto end = std::chrono::high_resolution_clock::now();
-    // Calculate the duration
-    std::chrono::duration<double> duration = end - start;
-    // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+
 
 
     std::vector<std::vector<cv::Point>> approxCurve;

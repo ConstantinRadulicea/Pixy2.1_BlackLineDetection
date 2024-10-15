@@ -308,6 +308,7 @@ public:
 		//	this->setBlockValue(i, (BITARRAY_DATATYPE)0);
 		//}
 		this->settedBits = 0;
+		this->getFirstSetPixel_last_index = 0;
 	}
 
 	inline void setToOnes() {
@@ -634,6 +635,7 @@ public:
 		std::queue<_local_path> q;
 		_local_path current;
 		Point2D p;
+		struct _local_path temp_local_path;
 		//std::vector<Point2D> longest_path;
 
 		q.push({ longestPathResult.point, {longestPathResult.point} });
@@ -659,8 +661,6 @@ public:
 					//newPath.push_back(Point2D{ (float)newX, (float)newY });
 					//q.push({ Point2D{(float)newX, (float)newY}, newPath });
 
-					
-					struct _local_path temp_local_path;
 					temp_local_path.start.x = (float)newX;
 					temp_local_path.start.y = (float)newY;
 					temp_local_path.path = *path;
