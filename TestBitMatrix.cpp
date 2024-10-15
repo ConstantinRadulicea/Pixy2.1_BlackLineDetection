@@ -6,12 +6,12 @@
 #include <string>
 #include <vector>
 #include "approxPolyDP.h"
+#include "cvector.h"
 
 //#define IMG_PATH "img2.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
-#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
@@ -102,83 +102,89 @@ std::vector<cv::Point> bitMatrixToArray(BitMatrix& bit_matrix) {
     }
     return arr;
 }
+//
+//
+//void TestBitMatrix() {
+//    BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
+//    cv::Mat image, skeleton;
+//    const char file_path[] = IMG_PATH;
+//    bitmatrix_img = imgToBitMatrix(file_path, 0.25);
+//    image = bitMatrixToMat(bitmatrix_img);
+//    cv::imshow("image", image);
+//
+//    BitMatrixPosition temp_bitmatrixpos = bitmatrix_img.getFirstSetPixel();
+//
+//    temp_bitmatrix = bitmatrix_img.floodFillOnes(temp_bitmatrixpos.row, temp_bitmatrixpos.column);
+//    cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
+//
+//    BitMatrixSkeleton(&temp_bitmatrix, &temp_skeleton_bitmatrix);
+//    cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
+//
+//
+//    
+//    skeleton = bitMatrixToMat(temp_skeleton_bitmatrix);
+//
+//    /*
+//    // Find the longest path in the skeleton
+//    std::vector<cv::Point> longestPath = findLongestPath(skeleton);
+//
+//
+//    */
+//
+//    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath();
+//
+//    std::vector<cv::Point>longestPath;
+//    for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
+//        longestPath.push_back(cv::Point(longestPath_Point2D[i].x, longestPath_Point2D[i].y));
+//    }
+//
+//    // Visualize the longest path
+//    cv::Mat pathImage = cv::Mat::zeros(skeleton.size(), CV_8UC3);
+//    for (size_t i = 0; i < longestPath.size() - 1; ++i) {
+//        cv::line(pathImage, longestPath[i], longestPath[i + 1], cv::Scalar(0, 255, 0), 1);
+//    }
+//    cv::imshow("Longhest path", pathImage);
+//
+//    std::vector<cv::Point> approxCurve;
+//    //double epsilon = 1;  // Tolerance value for approximation
+//    //cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
+//    
+//    
+//    std::vector<Point2D> approxCurve_Point2D;
+//    double epsilon = 1;  // Tolerance value for approximation
+//    approxCurve_Point2D = approxPolyDP(longestPath_Point2D, epsilon);
+//
+//    for (size_t i = 0; i < approxCurve_Point2D.size(); i++) {
+//        approxCurve.push_back(cv::Point(approxCurve_Point2D[i].x, approxCurve_Point2D[i].y));
+//    }
+//
+//
+//    cv::Mat result = cv::Mat::zeros(skeleton.size(), CV_8UC3);  // Create a blank canvas
+//
+//    // Draw the simplified skeleton using the approximate curve
+//    for (size_t i = 0; i < approxCurve.size() - 1; ++i) {
+//        cv::line(result, approxCurve[i], approxCurve[i + 1], cv::Scalar(0, 255, 0), 1);
+//    }
+//
+//    // Display the result
+//    cv::imshow("Simplified Skeleton", result);
+//    
+//    cv::waitKey(0);  // Wait for a key press before closing the window
+//}
 
+// std::vector<std::vector<Point2D>>
+cvector gggg(BitMatrix* image, float vector_approximation_epsilon) {
+    //std::vector<std::vector<Point2D>> vectors;
+    cvector vectors;
+    CVECTOR_DEFAULT(vectors);
+    cvector_init(&vectors, 0, sizeof(cvector));
 
-void TestBitMatrix() {
-    BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
-    cv::Mat image, skeleton;
-    const char file_path[] = IMG_PATH;
-    bitmatrix_img = imgToBitMatrix(file_path, 0.25);
-    image = bitMatrixToMat(bitmatrix_img);
-    cv::imshow("image", image);
-
-    BitMatrixPosition temp_bitmatrixpos = bitmatrix_img.getFirstSetPixel();
-
-    temp_bitmatrix = bitmatrix_img.floodFillOnes(temp_bitmatrixpos.row, temp_bitmatrixpos.column);
-    cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
-
-    BitMatrixSkeleton(&temp_bitmatrix, &temp_skeleton_bitmatrix);
-    cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
-
-
-    
-    skeleton = bitMatrixToMat(temp_skeleton_bitmatrix);
-
-    /*
-    // Find the longest path in the skeleton
-    std::vector<cv::Point> longestPath = findLongestPath(skeleton);
-
-
-    */
-
-    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath();
-
-    std::vector<cv::Point>longestPath;
-    for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
-        longestPath.push_back(cv::Point(longestPath_Point2D[i].x, longestPath_Point2D[i].y));
-    }
-
-    // Visualize the longest path
-    cv::Mat pathImage = cv::Mat::zeros(skeleton.size(), CV_8UC3);
-    for (size_t i = 0; i < longestPath.size() - 1; ++i) {
-        cv::line(pathImage, longestPath[i], longestPath[i + 1], cv::Scalar(0, 255, 0), 1);
-    }
-    cv::imshow("Longhest path", pathImage);
-
-    std::vector<cv::Point> approxCurve;
-    //double epsilon = 1;  // Tolerance value for approximation
-    //cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
-    
-    
-    std::vector<Point2D> approxCurve_Point2D;
-    double epsilon = 1;  // Tolerance value for approximation
-    approxCurve_Point2D = approxPolyDP(longestPath_Point2D, epsilon);
-
-    for (size_t i = 0; i < approxCurve_Point2D.size(); i++) {
-        approxCurve.push_back(cv::Point(approxCurve_Point2D[i].x, approxCurve_Point2D[i].y));
-    }
-
-
-    cv::Mat result = cv::Mat::zeros(skeleton.size(), CV_8UC3);  // Create a blank canvas
-
-    // Draw the simplified skeleton using the approximate curve
-    for (size_t i = 0; i < approxCurve.size() - 1; ++i) {
-        cv::line(result, approxCurve[i], approxCurve[i + 1], cv::Scalar(0, 255, 0), 1);
-    }
-
-    // Display the result
-    cv::imshow("Simplified Skeleton", result);
-    
-    cv::waitKey(0);  // Wait for a key press before closing the window
-}
-
-
-std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D>> vectors;
     BitMatrixPosition pixelPosition;
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
-    std::vector<Point2D> longestPath;
+    cvector longestPath;
+    CVECTOR_DEFAULT(longestPath);
+    cvector_init(&longestPath, 0, sizeof(Point2D));
 
 
     for (;;)
@@ -191,23 +197,32 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         //BitMatrix::AandNotB(image, &body);
         //std::cout << "Bits: " << image->countNonZero() << " Body: " << body.countNonZero() << std::endl;
 
-        if (body.countNonZero() < 8) {
+        if (body.countNonZero() < 50) {
             continue;
         }
         BitMatrixSkeleton(&body, &body_skeleton);
         body_skeleton.findLongestPath(&longestPath);
 
-        std::vector<Point2D> approxCurve;
-        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        vectors.push_back(approxCurve);
+        cvector approxCurve;
+        CVECTOR_DEFAULT(approxCurve);
+        cvector_init(&approxCurve, 0, sizeof(Point2D));
+        ramerDouglasPeucker_cvector(&longestPath, vector_approximation_epsilon, &approxCurve);
+
+        cvector_push_back(&vectors, &approxCurve);
+        //vectors.push_back(approxCurve);
     }
+    cvector_free(&longestPath);
     
     return vectors;
 }
 
 
 void TestVectors() {
-    std::vector<std::vector<Point2D>> vectors;
+    //std::vector<std::vector<Point2D>> vectors;
+    cvector vectors;
+    cvector* temp_cvector_ptr;
+    CVECTOR_DEFAULT(vectors);
+
     char file_path[] = IMG_PATH;
     BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
     cv::Mat image = bitMatrixToMat(bitmatrix_img);
@@ -225,13 +240,16 @@ void TestVectors() {
     // Output the result in seconds
     std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
 
-
+    Point2D temp_point2d;
     std::vector<std::vector<cv::Point>> approxCurve;
-    for (size_t i = 0; i < vectors.size(); i++) {
+    for (size_t i = 0; i < cvector_size(&vectors); i++) {
         std::vector<cv::Point> temp;
         approxCurve.push_back(temp);
-        for (size_t j = 0; j < vectors[i].size(); j++) {
-            approxCurve[i].push_back(cv::Point(vectors[i][j].x, vectors[i][j].y));
+        temp_cvector_ptr = (cvector*)cvector_at(&vectors, i);
+        for (size_t j = 0; j < cvector_size(temp_cvector_ptr); j++) {
+            temp_point2d = *((Point2D*)cvector_at((cvector*)cvector_at(&vectors, i), j));
+            //approxCurve[i].push_back(cv::Point(vectors[i][j].x, vectors[i][j].y));
+            approxCurve[i].push_back(cv::Point(temp_point2d.x, temp_point2d.y));
         }
     }
 

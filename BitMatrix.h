@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "geometry2D.h"
 #include "bits.h"
-
+#include "cvector.h"
 
 typedef struct Point2D_Distance {
 	Point2D point;
@@ -21,6 +21,12 @@ typedef struct BitMatrixPosition {
 	size_t column;
 	bool valid;
 }BitMatrixPosition;
+
+
+typedef struct Point2D_int16_t {
+	int16_t x;
+	int16_t y;
+}Point2D_int16_t;
 
 
 
@@ -434,7 +440,7 @@ public:
 
 	// returns 0 on success
 	bool floodFillOnesDelete(size_t row, size_t col, BitMatrix* filledZone) {
-		std::queue<std::pair<int16_t, int16_t>> queue;
+		std::queue<Point2D_int16_t> queue;
 		int16_t posRow;
 		int16_t posCol;
 		BitMatrixFillFilter filter_function = BitMatrix::floodFillFilterFunctionOnes;
@@ -450,8 +456,8 @@ public:
 
 		// Append the position of starting
 		// pixel of the component
-		std::pair<int16_t, int16_t> p(row, col);
-		std::pair<int16_t, int16_t> currPixel;
+		Point2D_int16_t p = Point2D_int16_t{ (int16_t)row, (int16_t)col };
+		Point2D_int16_t currPixel;
 		queue.push(p);
 
 		// Color the pixel with the new color
@@ -461,20 +467,23 @@ public:
 		// whole component having prevC color
 		// is not colored with newC color
 		while (queue.size() > 0) {
+			//if (queue.size() > 50) {
+			//	int awdw = 3;
+			//}
 			// Dequeue the front node
 			currPixel = queue.front();
 			queue.pop();
 
-			posRow = currPixel.first;
-			posCol = currPixel.second;
+			posRow = currPixel.x;
+			posCol = currPixel.y;
 
 			// Check if the adjacent
 			// pixels are valid
 
 			if (isInsideBoundaries((int16_t)(posRow + 1), posCol) && !filledZone->getBit((int16_t)(posRow + 1), posCol) && filter_function((int16_t)(posRow + 1), posCol, this, _Context))
 			{
-				p.first = (int16_t)(posRow + 1);
-				p.second = posCol;
+				p.x = (int16_t)(posRow + 1);
+				p.y = posCol;
 				queue.push(p);
 				filledZone->setBit((int16_t)((int16_t)(posRow + 1)), posCol);
 				this->unsetBit((int16_t)((int16_t)(posRow + 1)), posCol);
@@ -482,8 +491,8 @@ public:
 
 			if (isInsideBoundaries((int16_t)(posRow - 1), posCol) && !filledZone->getBit((int16_t)(posRow - 1), posCol) && filter_function((int16_t)(posRow - 1), posCol, this, _Context))
 			{
-				p.first = (int16_t)(posRow - 1);
-				p.second = posCol;
+				p.x = (int16_t)(posRow - 1);
+				p.y = posCol;
 				queue.push(p);
 				filledZone->setBit((int16_t)(posRow - 1), posCol);
 				this->unsetBit((int16_t)(posRow - 1), posCol);
@@ -492,8 +501,8 @@ public:
 			if (isInsideBoundaries(posRow, (int16_t)(posCol + 1)) && !filledZone->getBit(posRow, (int16_t)(posCol + 1)) && filter_function(posRow, (int16_t)(posCol + 1), this, _Context))
 			{
 				//screen[posRow][(int16_t)(posCol + 1)] = newC;
-				p.first = posRow;
-				p.second = (int16_t)(posCol + 1);
+				p.x = posRow;
+				p.y = (int16_t)(posCol + 1);
 				queue.push(p);
 				filledZone->setBit(posRow, (int16_t)(posCol + 1));
 				this->unsetBit(posRow, (int16_t)(posCol + 1));
@@ -501,8 +510,8 @@ public:
 
 			if (isInsideBoundaries(posRow, (int16_t)(posCol - 1)) && !filledZone->getBit(posRow, (int16_t)(posCol - 1)) && filter_function(posRow, (int16_t)(posCol - 1), this, _Context))
 			{
-				p.first = posRow;
-				p.second = (int16_t)(posCol - 1);
+				p.x = posRow;
+				p.y = (int16_t)(posCol - 1);
 				queue.push(p);
 				filledZone->setBit(posRow, (int16_t)(posCol - 1));
 				this->unsetBit(posRow, (int16_t)(posCol - 1));
@@ -510,8 +519,8 @@ public:
 
 			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol + 1), this, _Context))
 			{
-				p.first = (int16_t)(posRow + 1);
-				p.second = (int16_t)(posCol + 1);
+				p.x = (int16_t)(posRow + 1);
+				p.y = (int16_t)(posCol + 1);
 				queue.push(p);
 				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
 				this->unsetBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
@@ -519,8 +528,8 @@ public:
 
 			if (isInsideBoundaries((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow + 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow + 1), (int16_t)(posCol - 1), this, _Context))
 			{
-				p.first = (int16_t)(posRow + 1);
-				p.second = (int16_t)(posCol - 1);
+				p.x = (int16_t)(posRow + 1);
+				p.y = (int16_t)(posCol - 1);
 				queue.push(p);
 				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
 				this->unsetBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
@@ -528,8 +537,8 @@ public:
 
 			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol - 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol - 1), this, _Context))
 			{
-				p.first = (int16_t)(posRow - 1);
-				p.second = (int16_t)(posCol - 1);
+				p.x = (int16_t)(posRow - 1);
+				p.y = (int16_t)(posCol - 1);
 				queue.push(p);
 				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
 				this->unsetBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
@@ -537,8 +546,8 @@ public:
 
 			if (isInsideBoundaries((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && !filledZone->getBit((int16_t)(posRow - 1), (int16_t)(posCol + 1)) && filter_function((int16_t)(posRow - 1), (int16_t)(posCol + 1), this, _Context))
 			{
-				p.first = (int16_t)(posRow - 1);
-				p.second = (int16_t)(posCol + 1);
+				p.x = (int16_t)(posRow - 1);
+				p.y = (int16_t)(posCol + 1);
 				queue.push(p);
 				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
 				this->unsetBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
@@ -572,41 +581,45 @@ public:
 	}
 
 
-	inline std::vector<Point2D> findLongestPath() {
-		std::vector<Point2D> path;
+	inline cvector findLongestPath() {
+		cvector path;
+		CVECTOR_DEFAULT(path);
+		cvector_init(&path, 0, sizeof(Point2D));
 		findLongestPath(this, &path);
 		return path;
 	}
 
-	inline void findLongestPath(std::vector<Point2D>* longest_path) {
+	// std::vector<Point2D>* longest_path
+	inline void findLongestPath(cvector* longest_path) {
 		BitMatrix::findLongestPath(this, longest_path);
 	}
 
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
-	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D>* longest_path) {
+	static void findLongestPath(BitMatrix* skeleton, cvector* longest_path) {
 		// Direction vectors for 8-connected neighbors
 		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 		// Start BFS from any skeleton point
 		Point2D start;
+		Point2D temp_point2d;
 		BitMatrixPosition pos;
 		Point2D_Distance farthestFromStart;
 		Point2D_Distance longestPathResult;
-		longest_path->clear();
+
+
+		struct _local_path {
+			Point2D start;
+			cvector path;
+		};
+
+		_local_path temp_local_path;
+
+		cvector_clear(longest_path);
+
 		if (skeleton->countNonZero() <= 0) {
 			return;
 		}
-
-		// Find any pixel in the skeleton to start the BFS
-		//for (int y = 0; y < skeleton->getRows() && !foundStart; y++) {
-		//	for (int x = 0; x < skeleton->getColumns() && !foundStart; x++) {
-		//		if (skeleton->getBit(y, x) == true) {
-		//			start = Point2D{ (float)x, (float)y };
-		//			foundStart = true;
-		//		}
-		//	}
-		//}
 
 		pos = skeleton->getFirstSetPixel();
 		if (pos.valid == false) {
@@ -627,22 +640,29 @@ public:
 		
 
 		// To store the points of the longest path, run BFS again and record the path
-		std::queue<std::pair<Point2D, std::vector<Point2D>>> q;
-		std::pair<Point2D, std::vector<Point2D>> current;
+		std::queue<struct _local_path> q;
+		struct _local_path current;
 		Point2D p;
 		//std::vector<Point2D> longest_path;
 
-		q.push({ longestPathResult.point, {longestPathResult.point} });
+		temp_local_path.start = longestPathResult.point;
+		CVECTOR_DEFAULT(temp_local_path.path);
+		cvector_init(&(temp_local_path.path), 1, sizeof(Point2D));
+
+
+		cvector_push_back(&(temp_local_path.path), &(longestPathResult.point));
+		//q.push(struct _local_path{ longestPathResult.point, {longestPathResult.point} });
+		q.push(temp_local_path);
 		visited.setBit(longestPathResult.point.y, longestPathResult.point.x);
 
 		while (!q.empty()) {
 			current = q.front();
-			p = current.first;
-			std::vector<Point2D> path = current.second;
+			p = current.start;
+			cvector* path = &(current.path);
 			q.pop();
-
-			if (path.size() > longest_path->size()) {
-				*longest_path = path;
+			
+			if (cvector_size(path) > cvector_size(longest_path)) {
+				cvector_clone(longest_path, path);
 			}
 
 			for (int i = 0; i < 8; ++i) {
@@ -655,10 +675,23 @@ public:
 					//newPath.push_back(Point2D{ (float)newX, (float)newY });
 					//q.push({ Point2D{(float)newX, (float)newY}, newPath });
 
-					path.push_back(Point2D{ (float)newX, (float)newY });
-					q.push({ Point2D{(float)newX, (float)newY}, path });
+					temp_local_path.start.x = (float)newX;
+					temp_local_path.start.y = (float)newY;
+
+					CVECTOR_DEFAULT(temp_local_path.path);
+					cvector_clone(&(temp_local_path.path), path);
+					cvector_push_back(&(temp_local_path.path), &(temp_local_path.start));
+					q.push(temp_local_path);
+
+					// path.push_back(Point2D{ (float)newX, (float)newY });
+					//q.push({ Point2D{(float)newX, (float)newY}, path });
+					//if (q.size() > 2) {
+					//	int awdw = 3;
+					//}
 				}
+				
 			}
+			cvector_free(path);
 		}
 
 		//return longestPath;
