@@ -199,7 +199,7 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
 
         
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        if (approxCurve.size() >= 2) {
+        if (approxCurve.size() > 1) {
             vectors.push_back(approxCurve);
         }
         
@@ -223,6 +223,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
     std::vector<Point2D> longestPath;
+    std::vector<Point2D> approxCurve;
     body_skeleton = *image;
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
@@ -242,11 +243,12 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         }
         body.findLongestPath(&longestPath);
 
-        std::vector<Point2D> approxCurve;
+        
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
         if (approxCurve.size() > 1) {
             vectors.push_back(approxCurve);
         }
+        approxCurve.clear();
         
     }
 
@@ -270,7 +272,7 @@ void TestVectors() {
     
 
 
-    vectors = gggg(&bitmatrix_img, 3.0f);
+    vectors = gggg2(&bitmatrix_img, 3.0f);
 
 
 
@@ -300,16 +302,16 @@ void TestVectors() {
     // Create a window
     
     // Resize the window to a specific size (adjust width and height as needed)
-    int windowWidth = 800;  // Adjust this value to fit your screen
-    int windowHeight = 600; // Adjust this value to fit your screen
-    cv::namedWindow("image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("image", windowWidth, windowHeight);
-    cv::imshow("image", image);
-
-    cv::namedWindow("Simplified Skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("Simplified Skeleton", windowWidth, windowHeight);
-    cv::imshow("Simplified Skeleton", result);
-    cv::waitKey(0);  // Wait for a key press before closing the window
+//    int windowWidth = 800;  // Adjust this value to fit your screen
+//    int windowHeight = 600; // Adjust this value to fit your screen
+//    cv::namedWindow("image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+//    cv::resizeWindow("image", windowWidth, windowHeight);
+//    cv::imshow("image", image);
+//
+//    cv::namedWindow("Simplified Skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+//    cv::resizeWindow("Simplified Skeleton", windowWidth, windowHeight);
+//    cv::imshow("Simplified Skeleton", result);
+//    cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
 void main() {
