@@ -7,14 +7,13 @@
 #include <vector>
 #include "approxPolyDP.h"
 
-//#define IMG_PATH "img2.png"
+//#define IMG_PATH "img1.png"
 //#define IMG_PATH "img/black.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
@@ -192,7 +191,7 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
         }
         image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
 
-        if (body.countNonZero() < 50) {
+        if (body.countNonZero() < 8) {
             continue;
         }
         BitMatrixSkeleton(&body);
@@ -240,7 +239,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
 
 
-        if (body.countNonZero() < 1) {
+        if (body.countNonZero() < 8) {
             continue;
         }
         body.findLongestPath(&longestPath);
@@ -269,12 +268,14 @@ void TestVectors() {
     std::vector<std::vector<Point2D>> vectors;
     char file_path[] = IMG_PATH;
     BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
+    BitMatrix temp_bitmatrix_1 = bitmatrix_img;
     cv::Mat image = bitMatrixToMat(bitmatrix_img);
     std::cout << "Black pixels: " << bitmatrix_img.countNonZero() << std::endl;
     
 
-
-    vectors = gggg2(&bitmatrix_img, 3.0f);
+    //vectors = gggg(&bitmatrix_img, 3.0f);
+    vectors = gggg2(&temp_bitmatrix_1, 3.0f);
+    
 
 
 
