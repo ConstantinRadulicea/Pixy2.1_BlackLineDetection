@@ -199,57 +199,216 @@ inline int getWhiteBlackTransitions(struct mat_9x9* window) {
         (window->P5 == false && window->P6 == true) +
         (window->P6 == false && window->P7 == true) +
         (window->P7 == false && window->P8 == true) +
-        (window->P8 == false && window->P9 == true);
+        (window->P8 == false && window->P9 == true) +
+        (window->P9 == false && window->P2 == true);
 }
 
 
+
+
+int iteration1_edge_top_left(BitMatrix* img, BitMatrix* marker, int iter) {
+    struct mat_9x9 window;
+    size_t bits_deleted;
+    size_t row, col;
+    int bit_sum;
+
+    bits_deleted = 0;
+
+    row = 0;
+    col = 0;
+    window.P2 = false;
+    window.P3 = false;
+    window.P7 = false;
+    window.P8 = false;
+    window.P9 = false;
+    for (col; col < 1; col++) {
+        window.P1 = img->getBit(row, col);
+        if (window.P1 == false) {
+            continue;
+        }
+
+        window.P4 = img->getBit(row, col + 1);
+
+        if (iter == 0) {
+            window.P6 = img->getBit(row + 1, col);
+            if (window.P2 && window.P4 && window.P6) {
+                continue;
+            }
+
+            if (window.P4 && window.P6 && window.P8) {
+                continue;
+            }
+        }
+        else if (iter == 1) {
+            
+            if (window.P2 && window.P4 && window.P8) {
+                continue;
+            }
+
+            window.P6 = img->getBit(row + 1, col);
+            if (window.P2 && window.P6 && window.P8) {
+                continue;
+            }
+        }
+
+        window.P5 = img->getBit(row + 1, col + 1);
+
+        bit_sum =
+            (int)window.P2 +
+            (int)window.P3 +
+            (int)window.P4 +
+            (int)window.P5 +
+            (int)window.P6 +
+            (int)window.P7 +
+            (int)window.P8 +
+            (int)window.P9;
+
+        if (!((2 <= bit_sum) && (bit_sum <= 6))) {
+            continue;
+
+        }
+        if (getWhiteBlackTransitions(&window) == 1) {
+            marker->setBit(row, col);
+            bits_deleted++;
+        }
+    }
+    return bits_deleted;
+}
+
+
+int iteration1_edges(BitMatrix* img, BitMatrix* marker, int iter) {
+    struct mat_9x9 window;
+    size_t bits_deleted;
+    size_t row;
+    int bit_sum;
+
+    bits_deleted = 0;
+
+    row = 0;
+    window.P2 = false;
+    window.P3 = false;
+    window.P4 = img->getBit(row, 2);
+    window.P9 = false;
+    for (size_t col = 1; col < img->getColumns() - 2; col++) {
+        window.P1 = img->getBit(row, col);
+        if (window.P1 == false) {
+            col++;
+            if (window.P4 == true)
+            {
+                window.P1 = window.P4;
+            }
+            else {
+                continue;
+            }
+        }
+        
+        window.P4 = img->getBit(row, col + 1);
+
+        if (iter == 0) {
+            window.P6 = img->getBit(row + 1, col);
+            if (window.P2 && window.P4 && window.P6) {
+                continue;
+            }
+
+            window.P8 = img->getBit(row, col - 1);
+            if (window.P4 && window.P6 && window.P8) {
+                continue;
+            }
+        }
+        else if (iter == 1) {
+            window.P8 = img->getBit(row, col - 1);
+            if (window.P2 && window.P4 && window.P8) {
+                continue;
+            }
+
+            window.P6 = img->getBit(row + 1, col);
+            if (window.P2 && window.P6 && window.P8) {
+                continue;
+            }
+        }
+
+        
+        window.P5 = img->getBit(row + 1, col + 1);
+        window.P7 = img->getBit(row + 1, col - 1);
+
+        bit_sum =
+            (int)window.P2 +
+            (int)window.P3 +
+            (int)window.P4 +
+            (int)window.P5 +
+            (int)window.P6 +
+            (int)window.P7 +
+            (int)window.P8 +
+            (int)window.P9;
+
+        if (!((2 <= bit_sum) && (bit_sum <= 6))) {
+            continue;
+
+        }
+        if (getWhiteBlackTransitions(&window) == 1) {
+            marker->setBit(row, col);
+            bits_deleted++;
+        }
+    }
+    return bits_deleted;
+}
 
 /*
 P9  P2  P3
 P8  P1  P4
 P7  P6  P5
 */
-void iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
+int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
     struct mat_9x9 window;
-
+    size_t bits_deleted;
     int bit_sum;
-
-    for (size_t row = 1; row < img->getRows()-2; row++)
-    {
+    bits_deleted = 0;
+    bits_deleted += iteration1_edge_top_left(img, marker, iter);
+    //bits_deleted += iteration1_edges(img, marker, iter);
+    window.P4 = img->getBit(1, 2);
+    for (size_t row = 1; row < img->getRows()-2; row++) {
         for (size_t col = 1; col < img->getColumns() - 2; col++) {
             window.P1 = img->getBit(row, col);
             if (window.P1 == false) {
-                continue;
+                col++;
+                if (window.P4 == true)
+                {
+                    window.P1 = window.P4;
+                }else{
+                    continue;
+                }
             }
             window.P2 = img->getBit(row-1, col);
-            window.P3 = img->getBit(row-1, col+1);
             window.P4 = img->getBit(row, col+1);
-            window.P5 = img->getBit(row+1, col+1);
-            window.P6 = img->getBit(row+1, col);
-            window.P7 = img->getBit(row+1, col-1);
-            window.P8 = img->getBit(row, col-1);
-            window.P9 = img->getBit(row-1, col-1);
+            
 
-            if (iter == 0)
-            {
-                if (!(window.P2 && window.P4 && window.P6)) {
+            if (iter == 0) {
+                window.P6 = img->getBit(row + 1, col);
+                if ((window.P2 && window.P4 && window.P6)) {
                     continue;
                 }
 
-                if (!(window.P4 && window.P6 && window.P8)) {
+                window.P8 = img->getBit(row, col - 1);
+                if ((window.P4 && window.P6 && window.P8)) {
                     continue;
                 }
             }
-            else if (iter == 1)
-            {
-                if (!(window.P2 && window.P4 && window.P8)) {
+            else if (iter == 1) {
+                window.P8 = img->getBit(row, col - 1);
+                if ((window.P2 && window.P4 && window.P8)) {
                     continue;
                 }
 
-                if (!(window.P2 && window.P6 && window.P8)) {
+                window.P6 = img->getBit(row + 1, col);
+                if ((window.P2 && window.P6 && window.P8)) {
                     continue;
                 }
             }
+
+            window.P3 = img->getBit(row - 1, col + 1);
+            window.P5 = img->getBit(row + 1, col + 1);
+            window.P7 = img->getBit(row + 1, col - 1);
+            window.P9 = img->getBit(row - 1, col - 1);
 
 
 
@@ -269,34 +428,30 @@ void iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
             }
             if (getWhiteBlackTransitions(&window) == 1) {
                 marker->setBit(row, col);
+                bits_deleted++;
             }
         }
     }
     BitMatrix::AandNotB(img, marker);
+    return bits_deleted;
 }
 
 
+
+
+
 void BitMatrixSkeleton2(BitMatrix* matrix) {
+    size_t bits_deleted;
     if (matrix->countNonZero() <= 0) {
         return;
     }
-
-    BitMatrix prev(matrix->getRows(), matrix->getColumns());
-    BitMatrix diff(matrix->getRows(), matrix->getColumns());
     BitMatrix marker(matrix->getRows(), matrix->getColumns());
 
     do {
-        iteration1(matrix, &marker, 0);
-        iteration1(matrix, &marker, 1);
-        //cv::absdiff(dst, prev, diff);
-        //absdiff(dst, prev, diff);
-        BitMatrix::absdiff(matrix, &prev, &diff);
-        //writeMatlabEdges("edges.csv", mapToVector(dst));
-        //dst.copyTo(prev);
-        prev = *matrix;
-    }// while (cv::countNonZero(diff) > 0);
-    //while (countNonZero(diff) > 0);
-    while (diff.countNonZero() > 0);
+        bits_deleted = iteration1(matrix, &marker, 0);
+        bits_deleted += iteration1(matrix, &marker, 1);
+    }
+    while (bits_deleted > 0);
 }
 
 
