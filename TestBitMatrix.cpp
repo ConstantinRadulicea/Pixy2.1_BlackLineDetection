@@ -239,7 +239,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
 
 
-        if (body.countNonZero() < 5) {
+        if (body.countNonZero() < 1) {
             continue;
         }
         body.findLongestPath(&longestPath);

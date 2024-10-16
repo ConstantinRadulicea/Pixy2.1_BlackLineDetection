@@ -276,7 +276,7 @@ int iteration1_edge_top_left(BitMatrix* img, BitMatrix* marker, int iter) {
 }
 
 
-int iteration1_edges(BitMatrix* img, BitMatrix* marker, int iter) {
+int iteration1_edges_top(BitMatrix* img, BitMatrix* marker, int iter) {
     struct mat_9x9 window;
     size_t bits_deleted;
     size_t row;
@@ -363,21 +363,14 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
     size_t bits_deleted;
     int bit_sum;
     bits_deleted = 0;
-    bits_deleted += iteration1_edge_top_left(img, marker, iter);
-    //bits_deleted += iteration1_edges(img, marker, iter);
-    window.P4 = img->getBit(1, 2);
+
     for (size_t row = 1; row < img->getRows()-2; row++) {
         for (size_t col = 1; col < img->getColumns() - 2; col++) {
             window.P1 = img->getBit(row, col);
             if (window.P1 == false) {
-                col++;
-                if (window.P4 == true)
-                {
-                    window.P1 = window.P4;
-                }else{
-                    continue;
-                }
+                continue;
             }
+
             window.P2 = img->getBit(row-1, col);
             window.P4 = img->getBit(row, col+1);
             
@@ -428,11 +421,11 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
             }
             if (getWhiteBlackTransitions(&window) == 1) {
                 marker->setBit(row, col);
+                //int ggg = img->getBit(row, col);
                 bits_deleted++;
             }
         }
     }
-    BitMatrix::AandNotB(img, marker);
     return bits_deleted;
 }
 
@@ -447,11 +440,22 @@ void BitMatrixSkeleton2(BitMatrix* matrix) {
     }
     BitMatrix marker(matrix->getRows(), matrix->getColumns());
 
-    do {
+    bits_deleted = iteration1_edge_top_left(matrix, &marker, 0);
+    bits_deleted += iteration1_edges_top(matrix, &marker, 0);
+    bits_deleted += iteration1(matrix, &marker, 0);
+    BitMatrix::AandNotB(matrix, &marker);
+    bits_deleted += iteration1_edge_top_left(matrix, &marker, 1);
+    bits_deleted += iteration1_edges_top(matrix, &marker, 1);
+    bits_deleted = iteration1(matrix, &marker, 1);
+    BitMatrix::AandNotB(matrix, &marker);
+
+    while (bits_deleted > 0) {
         bits_deleted = iteration1(matrix, &marker, 0);
+        BitMatrix::AandNotB(matrix, &marker);
         bits_deleted += iteration1(matrix, &marker, 1);
+        BitMatrix::AandNotB(matrix, &marker);
     }
-    while (bits_deleted > 0);
+    
 }
 
 
