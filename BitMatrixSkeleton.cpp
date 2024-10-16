@@ -64,15 +64,6 @@ void BitMatrixSkeletonIteration(BitMatrix* img, BitMatrix* marker, int iter, int
         pDst.x = colOffset - 1;
         pDst.y = y;
 
-        // initialize col pointers
-
-        //no = &(pAbove[0]);
-        //ne = &(pAbove[1]);
-        //me = &(pCurr[0]);
-        //ea = &(pCurr[1]);
-        //so = &(pBelow[0]);
-        //se = &(pBelow[1]);
-
 
         (pAbove.y < rowOffset || pAbove.x < colOffset) ? no = 0 : no = (int)img->getBitXY(pAbove.x, pAbove.y);
         (pAbove.y < rowOffset) ? ne = 0 : ne = (int)img->getBitXY(pAbove.x + 1, pAbove.y);
@@ -187,6 +178,128 @@ void BitMatrixSkeleton(BitMatrix* matrix)
     //while (countNonZero(diff) > 0);
     while (diff.countNonZero() > 0);
 }
+
+
+
+/*
+P9  P2  P3
+P8  P1  P4
+P7  P6  P5
+*/
+struct mat_9x9 {
+    bool P1, P2, P3, P4, P5, P6, P7, P8, P9;
+};
+
+
+inline int getWhiteBlackTransitions(struct mat_9x9* window) {
+    return
+        (window->P2 == false && window->P3 == true) +
+        (window->P3 == false && window->P4 == true) +
+        (window->P4 == false && window->P5 == true) +
+        (window->P5 == false && window->P6 == true) +
+        (window->P6 == false && window->P7 == true) +
+        (window->P7 == false && window->P8 == true) +
+        (window->P8 == false && window->P9 == true);
+}
+
+
+
+/*
+P9  P2  P3
+P8  P1  P4
+P7  P6  P5
+*/
+void iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
+    struct mat_9x9 window;
+
+    int bit_sum;
+
+    for (size_t row = 1; row < img->getRows()-2; row++)
+    {
+        for (size_t col = 1; col < img->getColumns() - 2; col++) {
+            window.P1 = img->getBit(row, col);
+            if (window.P1 == false) {
+                continue;
+            }
+            window.P2 = img->getBit(row-1, col);
+            window.P3 = img->getBit(row-1, col+1);
+            window.P4 = img->getBit(row, col+1);
+            window.P5 = img->getBit(row+1, col+1);
+            window.P6 = img->getBit(row+1, col);
+            window.P7 = img->getBit(row+1, col-1);
+            window.P8 = img->getBit(row, col-1);
+            window.P9 = img->getBit(row-1, col-1);
+
+            if (iter == 0)
+            {
+                if (!(window.P2 && window.P4 && window.P6)) {
+                    continue;
+                }
+
+                if (!(window.P4 && window.P6 && window.P8)) {
+                    continue;
+                }
+            }
+            else if (iter == 1)
+            {
+                if (!(window.P2 && window.P4 && window.P8)) {
+                    continue;
+                }
+
+                if (!(window.P2 && window.P6 && window.P8)) {
+                    continue;
+                }
+            }
+
+
+
+            bit_sum =
+                (int)window.P2 +
+                (int)window.P3 +
+                (int)window.P4 +
+                (int)window.P5 +
+                (int)window.P6 +
+                (int)window.P7 +
+                (int)window.P8 +
+                (int)window.P9;
+
+            if (!((2 <= bit_sum) && (bit_sum <= 6))) {
+                continue;
+                
+            }
+            if (getWhiteBlackTransitions(&window) == 1) {
+                marker->setBit(row, col);
+            }
+        }
+    }
+    BitMatrix::AandNotB(img, marker);
+}
+
+
+void BitMatrixSkeleton2(BitMatrix* matrix) {
+    if (matrix->countNonZero() <= 0) {
+        return;
+    }
+
+    BitMatrix prev(matrix->getRows(), matrix->getColumns());
+    BitMatrix diff(matrix->getRows(), matrix->getColumns());
+    BitMatrix marker(matrix->getRows(), matrix->getColumns());
+
+    do {
+        iteration1(matrix, &marker, 0);
+        iteration1(matrix, &marker, 1);
+        //cv::absdiff(dst, prev, diff);
+        //absdiff(dst, prev, diff);
+        BitMatrix::absdiff(matrix, &prev, &diff);
+        //writeMatlabEdges("edges.csv", mapToVector(dst));
+        //dst.copyTo(prev);
+        prev = *matrix;
+    }// while (cv::countNonZero(diff) > 0);
+    //while (countNonZero(diff) > 0);
+    while (diff.countNonZero() > 0);
+}
+
+
 
 
 #endif // !__THINNING_H__
