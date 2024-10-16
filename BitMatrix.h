@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include "geometry2D.h"
 #include "bits.h"
+#include <bitset>
 
 
 typedef struct Point2D_Distance {
@@ -27,15 +28,14 @@ typedef struct Point2D_int16_t {
 	int16_t y;
 }Point2D_int16_t;
 
-
-
 class BitMatrix;
+
 // return true if the bit is accepted, otherwise returns false
 typedef bool (*BitMatrixFillFilter)(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context);
 
 #define BITARRAY_DATATYPE unsigned int
 #define BITARRAY_DATATYPE_MAX_VALUE UINT_MAX
-#define BITARRAY_DATATYPE_BITS	(sizeof(BITARRAY_DATATYPE) * 8)
+#define BITARRAY_DATATYPE_BITS (sizeof(BITARRAY_DATATYPE) * 8)
 
 
 class BitMatrix
@@ -72,13 +72,8 @@ public:
 	void clear() {
 		size_t arrSize = 0;
 		this->data.clear();
+		arrSize = (nRows * nColumns);
 
-		if (this->bitSize() % BITARRAY_DATATYPE_BITS) {
-			arrSize = ((nRows * nColumns) / BITARRAY_DATATYPE_BITS) + 1;
-		}
-		else {
-			arrSize = ((nRows * nColumns) / BITARRAY_DATATYPE_BITS);
-		}
 		data.reserve(arrSize);
 		data.resize(arrSize);
 		this->setToZeros();
@@ -97,7 +92,7 @@ public:
 
 	inline bool getBit(register size_t row, register size_t col) {
 		register size_t offset = (row * this->nColumns) + col;
-		return 1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
+		return this->data.at(offset);
 	}
 	
 	inline void setBitValue(size_t row, size_t col, bool value) {
@@ -122,8 +117,7 @@ public:
 			return;
 		}
 		size_t offset = (row * this->nColumns) + col;
-		size_t index = offset / BITARRAY_DATATYPE_BITS;
-		this->data[index] = this->data[index] | (1 << (offset % BITARRAY_DATATYPE_BITS));
+		this->data.at(offset) = true;
 		this->settedBits++;
 	}
 
@@ -136,7 +130,7 @@ public:
 			return;
 		}
 		size_t offset = (row * this->nColumns) + col;
-		this->data[offset / BITARRAY_DATATYPE_BITS] = this->data[offset / BITARRAY_DATATYPE_BITS] & ~(1 << (offset % BITARRAY_DATATYPE_BITS));
+		this->data.at(offset) = false;
 		this->settedBits--;
 	}
 
@@ -144,17 +138,11 @@ public:
 		this->unsetBit(y, x);
 	}
 
-	inline BITARRAY_DATATYPE getBlockValue(size_t index) {
-		if (index == (this->totBlocks()-1))
-		{
-			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
-		}
-		else {
-			return this->data.at(index);
-		}
+	inline bool getBlockValue(size_t index) {
+		return this->data[index];
 	}
 
-	inline void setBlockValue(size_t index, BITARRAY_DATATYPE value) {
+	inline void setBlockValue(size_t index, bool value) {
 		BITARRAY_DATATYPE oldValue;
 		oldValue = this->getBlockValue(index);
 
@@ -162,9 +150,7 @@ public:
 			return;
 		}
 
-		value &= (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
-
-		this->settedBits += ((int)(this->countSettedBits(value)) - (int)(this->countSettedBits(oldValue)));
+		this->settedBits += ((int)value - (int)oldValue);
 		this->data[index] = value;
 	}
 
@@ -237,14 +223,12 @@ public:
 	}
 
 	inline static void absdiff(BitMatrix* src1, BitMatrix* src2, BitMatrix* dst) {
-		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
-
-		for (size_t i = 0; i < src1->totBlocks(); i++)
+		bool old_value, new_value;
+		for (size_t i = 0; i < src1->data.size(); i++)
 		{
-			valueSrc1 = src1->getBlockValue(i);
-			valueSrc2 = src2->getBlockValue(i);
-			newValue = valueSrc1 ^ valueSrc2;
-			dst->setBlockValue(i, newValue);
+			new_value = src1->data[i] ^ src2->data[i];
+			dst->setBlockValue(i, new_value);
+
 		}
 	}
 
@@ -254,7 +238,7 @@ public:
 
 	inline static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
 	{
-		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
+		bool valueSrc1, valueSrc2, newValue;
 
 		for (size_t i = 0; i < dst_A->totBlocks(); i++)
 		{
@@ -278,7 +262,7 @@ public:
 	}
 
 	inline void logicAnd(BitMatrix& B) {
-		BITARRAY_DATATYPE valueSrc, valueB, newValue;
+		bool valueSrc, valueB, newValue;
 
 		for (size_t i = 0; i < this->totBlocks(); i++)
 		{
@@ -290,7 +274,7 @@ public:
 	}
 
 	inline void logicOr(BitMatrix& B) {
-		BITARRAY_DATATYPE valueSrc, valueB, newValue;
+		bool valueSrc, valueB, newValue;
 
 		for (size_t i = 0; i < this->totBlocks(); i++)
 		{
@@ -302,21 +286,13 @@ public:
 	}
 
 	inline void setToZeros() {
-		memset(this->data.data(), 0, this->data.size() * sizeof(BITARRAY_DATATYPE));
-		//for (size_t i = 0; i < this->totBlocks(); i++)
-		//{
-		//	this->setBlockValue(i, (BITARRAY_DATATYPE)0);
-		//}
+		std::fill(this->data.begin(), this->data.end(), false);
 		this->settedBits = 0;
 		this->getFirstSetPixel_last_index = 0;
 	}
 
 	inline void setToOnes() {
-		memset(this->data.data(), 255, this->data.size() * sizeof(BITARRAY_DATATYPE));
-		//for (size_t i = 0; i < this->totBlocks(); i++)
-		//{
-		//	this->setBlockValue(i, (BITARRAY_DATATYPE)1);
-		//}
+		std::fill(this->data.begin(), this->data.end(), true);
 		this->settedBits = this->data.size() * sizeof(BITARRAY_DATATYPE) * 8;
 	}
 
@@ -736,10 +712,10 @@ public:
 		size_t bit_index;
 		size_t i = getFirstSetPixel_last_index;
 		for (; i < this->data.size(); i++) {
-			if (this->data[i] != 0)
+			if (this->data[i] == true)
 			{
-				bit_index = indexOfFirstSettedBit(this->data[i]);
-				pos = this->indexToPosition(i, bit_index);
+				//bit_index = indexOfFirstSettedBit(this->data[i]);
+				pos = this->indexToPosition(i);
 				pos.valid = true;
 				return pos;
 			}
@@ -768,19 +744,20 @@ public:
 		data.~vector();
 	}
 
-
+	std::vector<bool> data;
 private:
-	std::vector<BITARRAY_DATATYPE> data;
+	
+	//std::bitset data;
 	size_t nRows;
 	size_t nColumns;
 	size_t settedBits;
 	size_t getFirstSetPixel_last_index = 0;
 
-	BitMatrixPosition indexToPosition(size_t index, size_t bit_index) {
+	BitMatrixPosition indexToPosition(size_t index) {
 		size_t row, col;
 		bool valid = false;
-		row = ((index * BITARRAY_DATATYPE_BITS) + bit_index) / this->getColumns();
-		col = ((index * BITARRAY_DATATYPE_BITS) + bit_index) % this->getColumns();
+		row = ((index)) / this->getColumns();
+		col = ((index)) % this->getColumns();
 		if (row >= this->getRows()) {
 			valid = false;
 		}
