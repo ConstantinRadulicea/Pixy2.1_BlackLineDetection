@@ -8,12 +8,12 @@
 #include "approxPolyDP.h"
 
 //#define IMG_PATH "img2.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
@@ -199,7 +199,10 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
 
         
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        vectors.push_back(approxCurve);
+        if (approxCurve.size() >= 2) {
+            vectors.push_back(approxCurve);
+        }
+        
         approxCurve.clear();
     }
 

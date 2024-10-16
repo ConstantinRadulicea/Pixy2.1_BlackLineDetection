@@ -33,8 +33,8 @@ class BitMatrix;
 // return true if the bit is accepted, otherwise returns false
 typedef bool (*BitMatrixFillFilter)(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context);
 
-#define BITARRAY_DATATYPE unsigned int
-#define BITARRAY_DATATYPE_MAX_VALUE UINT_MAX
+#define BITARRAY_DATATYPE unsigned int					//unsigned long long int //unsigned char //unsigned int
+#define BITARRAY_DATATYPE_MAX_VALUE	UINT_MAX					//ULLONG_MAX //UCHAR_MAX //UINT_MAX
 #define BITARRAY_DATATYPE_BITS	(sizeof(BITARRAY_DATATYPE) * 8)
 
 
@@ -118,12 +118,12 @@ public:
 	}
 
 	inline void setBit(register size_t row, register size_t col) {
-		if (this->getBit(row, col)) {	// bit already setted
+		if (this->getBit(row, col) == true) {	// bit already setted
 			return;
 		}
 		size_t offset = (row * this->nColumns) + col;
 		size_t index = offset / BITARRAY_DATATYPE_BITS;
-		this->data[index] = this->data[index] | (1 << (offset % BITARRAY_DATATYPE_BITS));
+		this->data[index] = (BITARRAY_DATATYPE)this->data[index] | (BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % (size_t)BITARRAY_DATATYPE_BITS));
 		this->settedBits++;
 	}
 
@@ -136,7 +136,7 @@ public:
 			return;
 		}
 		size_t offset = (row * this->nColumns) + col;
-		this->data[offset / BITARRAY_DATATYPE_BITS] = this->data[offset / BITARRAY_DATATYPE_BITS] & ~(1 << (offset % BITARRAY_DATATYPE_BITS));
+		this->data[offset / BITARRAY_DATATYPE_BITS] = (BITARRAY_DATATYPE)this->data[offset / BITARRAY_DATATYPE_BITS] & ~((BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % BITARRAY_DATATYPE_BITS)));
 		this->settedBits--;
 	}
 
@@ -147,7 +147,7 @@ public:
 	inline BITARRAY_DATATYPE getBlockValue(size_t index) {
 		if (index == (this->totBlocks()-1))
 		{
-			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
+			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % (size_t)BITARRAY_DATATYPE_BITS));
 		}
 		else {
 			return this->data.at(index);
