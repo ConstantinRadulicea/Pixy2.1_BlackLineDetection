@@ -735,6 +735,7 @@ public:
 		BitMatrixPosition pos;
 		size_t bit_index;
 		size_t i = getFirstSetPixel_last_index;
+		size_t start_index = getFirstSetPixel_last_index;
 		for (; i < this->data.size(); i++) {
 			if (this->data[i] != 0)
 			{
@@ -747,6 +748,17 @@ public:
 		if (getFirstSetPixel_last_index >= this->data.size()) {
 			getFirstSetPixel_last_index = 0;
 		}
+
+		for (; i < start_index; i++) {
+			if (this->data[i] != 0)
+			{
+				bit_index = indexOfFirstSettedBit(this->data[i]);
+				pos = this->indexToPosition(i, bit_index);
+				pos.valid = true;
+				return pos;
+			}
+		}
+		this->settedBits = 0;
 		return BitMatrixPosition{ 0, 0, false };
 	}
 
