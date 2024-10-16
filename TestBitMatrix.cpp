@@ -8,13 +8,13 @@
 #include "approxPolyDP.h"
 
 //#define IMG_PATH "img2.png"
-#define IMG_PATH "img/black.png"
+//#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 

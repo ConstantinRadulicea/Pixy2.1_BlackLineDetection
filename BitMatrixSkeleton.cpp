@@ -713,7 +713,7 @@ int iteration1_edges_left(BitMatrix* img, BitMatrix* marker, int iter) {
     bits_deleted = 0;
 
     row = 1;
-    col = 1;
+    col = 0;
 
     //window.P2 = false;
     //window.P3 = false;
@@ -954,7 +954,7 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
 
 
 void BitMatrixSkeleton2(BitMatrix* matrix) {
-    size_t bits_deleted;
+    size_t bits_deleted = 1;
     if (matrix->countNonZero() <= 0) {
         return;
     }
@@ -981,6 +981,7 @@ void BitMatrixSkeleton2(BitMatrix* matrix) {
     bits_deleted += iteration1_edges_right(matrix, &marker, 1);
     bits_deleted += iteration1(matrix, &marker, 1);
     BitMatrix::AandNotB(matrix, &marker);
+
 
     while (bits_deleted > 0) {
         bits_deleted = iteration1(matrix, &marker, 0);
