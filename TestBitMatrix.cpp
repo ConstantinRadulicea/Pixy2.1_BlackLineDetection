@@ -9,11 +9,11 @@
 
 //#define IMG_PATH "img1.png"
 //#define IMG_PATH "img/black.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
@@ -36,10 +36,11 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     cv::Mat dst;
     //cv::Size newSize(320, 200);
     int width = 64;
-    cv::Size newSize((int)(width * (float)(320.0/200.0)), width);
+    int height = (int)(width * (float)(320.0 / 200.0));
+    cv::Size newSize(height, width);
     // Resize the image
-    //cv::resize(image, dst, newSize, 0.0, 0.0, cv::INTER_AREA);
-    cv::resize(image, dst, newSize);
+    cv::resize(image, dst, newSize, 0.0, 0.0, cv::INTER_LANCZOS4);
+    //cv::resize(image, dst, newSize);
     image = dst;
 
 
@@ -242,7 +243,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
 
 
-        if (body.countNonZero() < 1) {
+        if (body.countNonZero() < 8) {
             continue;
         }
         body.findLongestPath(&longestPath);
@@ -269,6 +270,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
 
 void TestVectors() {
     std::vector<std::vector<Point2D>> vectors;
+    cv::Mat original_img = cv::imread(IMG_PATH);
     char file_path[] = IMG_PATH;
     BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
     BitMatrix temp_bitmatrix_1 = bitmatrix_img;
@@ -306,15 +308,19 @@ void TestVectors() {
     // Create a window
     
     // Resize the window to a specific size (adjust width and height as needed)
-    int windowWidth = 800;  // Adjust this value to fit your screen
-    int windowHeight = 600; // Adjust this value to fit your screen
-    cv::namedWindow("image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("image", windowWidth, windowHeight);
-    cv::imshow("image", image);
+    int windowWidth = 400;  // Adjust this value to fit your screen
+    int windowHeight = 320; // Adjust this value to fit your screen
+    cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("original image", windowWidth, windowHeight);
+    cv::imshow("original image", original_img);
 
-    cv::namedWindow("Simplified Skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("Simplified Skeleton", windowWidth, windowHeight);
-    cv::imshow("Simplified Skeleton", result);
+    cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("treshold", windowWidth, windowHeight);
+    cv::imshow("treshold", image);
+
+    cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("lines", windowWidth, windowHeight);
+    cv::imshow("lines", result);
     cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
