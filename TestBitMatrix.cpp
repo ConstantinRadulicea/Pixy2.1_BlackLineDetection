@@ -248,13 +248,59 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         }
         body.findLongestPath(&longestPath);
 
-        
+
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
         if (approxCurve.size() > 1) {
             vectors.push_back(approxCurve);
         }
         approxCurve.clear();
-        
+
+    }
+
+    // End time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate the duration
+    std::chrono::duration<double> duration = end - start;
+    // Output the result in seconds
+    std::cout << "Function execution time: " << duration.count() << " seconds" << " clock_cycles: " << clock() - clock_start << std::endl;
+
+    return vectors;
+}
+
+
+
+std::vector<std::vector<Point2D>> gggg3(BitMatrix* image, float vector_approximation_epsilon) {
+    std::vector<std::vector<Point2D>> vectors;
+    BitMatrixPosition pixelPosition;
+    BitMatrix visited(image->getRows(), image->getColumns());
+    BitMatrix body_skeleton(image->getRows(), image->getColumns());
+    std::vector<Point2D> longestPath;
+    std::vector<Point2D> approxCurve;
+    size_t temp_size_1;
+    body_skeleton = *image;
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
+    auto clock_start = clock();
+    //BitMatrixSkeleton(&body_skeleton);
+    //BitMatrixSkeleton2(&body_skeleton);
+    for (;;)
+    {
+        body_skeleton.findLongestPath(&longestPath, &visited);
+        BitMatrix::AandNotB(&body_skeleton, &visited);
+        temp_size_1 = longestPath.size();
+        if (temp_size_1 <= 0){
+            break;
+        }
+        else if (temp_size_1 < 4) {
+            continue;
+        }
+
+        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
+        if (approxCurve.size() > 1) {
+            vectors.push_back(approxCurve);
+        }
+        approxCurve.clear();
+
     }
 
     // End time
@@ -278,8 +324,12 @@ void TestVectors() {
     std::cout << "Black pixels: " << bitmatrix_img.countNonZero() << std::endl;
     
 
-    //vectors = gggg(&bitmatrix_img, 3.0f);
-    vectors = gggg2(&bitmatrix_img, 3.0f);
+    temp_bitmatrix_1 = bitmatrix_img;
+    vectors = gggg(&temp_bitmatrix_1, 3.0f);
+    temp_bitmatrix_1 = bitmatrix_img;
+    vectors = gggg2(&temp_bitmatrix_1, 3.0f);
+    temp_bitmatrix_1 = bitmatrix_img;
+    vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 
 
     std::vector<std::vector<cv::Point>> approxCurve;

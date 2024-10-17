@@ -580,17 +580,23 @@ public:
 
 	inline std::vector<Point2D> findLongestPath() {
 		std::vector<Point2D> path;
-		findLongestPath(this, &path);
+		BitMatrix visited(this->getRows(), this->getColumns());
+		findLongestPath(this, &path, &visited);
 		return path;
 	}
 
 	inline void findLongestPath(std::vector<Point2D>* longest_path) {
-		BitMatrix::findLongestPath(this, longest_path);
+		BitMatrix visited(this->getRows(), this->getColumns());
+		BitMatrix::findLongestPath(this, longest_path, &visited);
+	}
+
+	inline void findLongestPath(std::vector<Point2D>* longest_path, BitMatrix* visited) {
+		BitMatrix::findLongestPath(this, longest_path, visited);
 	}
 
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
-	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D>* longest_path) {
+	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D>* longest_path, BitMatrix* visited) {
 		// Direction vectors for 8-connected neighbors
 		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
@@ -621,14 +627,14 @@ public:
 		start.x = pos.column;
 		start.y = pos.row;
 
-		BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
-
+		//BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
+		visited->setToZeros();
 		// First BFS to find the farthest point from 'start'
-		farthestFromStart = BitMatrix::bfs(&start, skeleton, &visited);
-		visited.setToZeros();
+		farthestFromStart = BitMatrix::bfs(&start, skeleton, visited);
+		visited->setToZeros();
 		// Second BFS from the farthest point found
-		longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton, &visited);
-		visited.setToZeros();
+		longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton, visited);
+		visited->setToZeros();
 		
 
 		// To store the points of the longest path, run BFS again and record the path
@@ -639,7 +645,7 @@ public:
 		//std::vector<Point2D> longest_path;
 
 		q.push({ longestPathResult.point, {longestPathResult.point} });
-		visited.setBit(longestPathResult.point.y, longestPathResult.point.x);
+		visited->setBit(longestPathResult.point.y, longestPathResult.point.x);
 
 		while (!q.empty()) {
 			current = q.front();
@@ -655,8 +661,8 @@ public:
 				int newX = p.x + dx[i];
 				int newY = p.y + dy[i];
 
-				if (isValid(newX, newY, skeleton, &visited)) {
-					visited.setBit(newY, newX);
+				if (isValid(newX, newY, skeleton, visited)) {
+					visited->setBit(newY, newX);
 					//std::vector<Point2D> newPath = path;
 					//newPath.push_back(Point2D{ (float)newX, (float)newY });
 					//q.push({ Point2D{(float)newX, (float)newY}, newPath });
