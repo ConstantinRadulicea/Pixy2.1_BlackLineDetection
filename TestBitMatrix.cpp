@@ -35,6 +35,7 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
 
     cv::Mat dst;
     cv::Size newSize(320, 200);
+    //cv::Size newSize(4000, 3000);
 
     // Resize the image
     cv::resize(image, dst, newSize);
@@ -227,6 +228,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     body_skeleton = *image;
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
+    auto clock_start = clock();
     //BitMatrixSkeleton(&body_skeleton);
     BitMatrixSkeleton2(&body_skeleton);
     for (;;)
@@ -258,7 +260,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     // Calculate the duration
     std::chrono::duration<double> duration = end - start;
     // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+    std::cout << "Function execution time: " << duration.count() << " seconds" << " clock_cycles: " << clock() - clock_start << std::endl;
 
     return vectors;
 }
@@ -278,8 +280,6 @@ void TestVectors() {
     
 
 
-
-
     std::vector<std::vector<cv::Point>> approxCurve;
     for (size_t i = 0; i < vectors.size(); i++) {
         std::vector<cv::Point> temp;
@@ -291,12 +291,13 @@ void TestVectors() {
 
 
     cv::Mat result = cv::Mat::zeros(bitmatrix_img.getRows(), bitmatrix_img.getColumns(), CV_8UC3);  // Create a blank canvas
-
+    cv::RNG rng(time(0));
     for (size_t i = 0; i < approxCurve.size(); i++)
     {
+        cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
         // Draw the simplified skeleton using the approximate curve
         for (size_t j = 0; j < approxCurve[i].size() - 1; ++j) {
-            cv::line(result, approxCurve[i][j], approxCurve[i][j + 1], cv::Scalar(0, 255, 0), 1);
+            cv::line(result, approxCurve[i][j], approxCurve[i][j + 1], color, 1);
         }
     }
 
