@@ -9,11 +9,11 @@
 
 //#define IMG_PATH "img1.png"
 //#define IMG_PATH "img/black.png"
-#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
@@ -34,10 +34,11 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
 
 
     cv::Mat dst;
-    cv::Size newSize(320, 200);
-    //cv::Size newSize(4000, 3000);
-
+    //cv::Size newSize(320, 200);
+    int width = 64;
+    cv::Size newSize((int)(width * (float)(320.0/200.0)), width);
     // Resize the image
+    //cv::resize(image, dst, newSize, 0.0, 0.0, cv::INTER_AREA);
     cv::resize(image, dst, newSize);
     image = dst;
 
@@ -241,7 +242,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
 
 
-        if (body.countNonZero() < 8) {
+        if (body.countNonZero() < 1) {
             continue;
         }
         body.findLongestPath(&longestPath);
@@ -276,8 +277,7 @@ void TestVectors() {
     
 
     //vectors = gggg(&bitmatrix_img, 3.0f);
-    vectors = gggg2(&temp_bitmatrix_1, 3.0f);
-    
+    vectors = gggg2(&bitmatrix_img, 3.0f);
 
 
     std::vector<std::vector<cv::Point>> approxCurve;
