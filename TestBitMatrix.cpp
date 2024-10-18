@@ -9,13 +9,13 @@
 
 //#define IMG_PATH "img1.png"
 //#define IMG_PATH "img/black.png"
-#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
-//#define IMG_PATH "img/20241002_194842.jpg" // curve 3
+#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
 
 BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
@@ -35,7 +35,7 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
 
     cv::Mat dst;
     //cv::Size newSize(320, 200);
-    int width = 64;
+    int width = 200/2;
     int height = (int)(width * (float)(320.0 / 200.0));
     cv::Size newSize(height, width);
     // Resize the image
@@ -235,6 +235,9 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     BitMatrixSkeleton2(&body_skeleton);
     for (;;)
     {
+        if (body_skeleton.countNonZero() <= 0) {
+            break;
+        }
         pixelPosition = body_skeleton.getFirstSetPixel();
         if (!(pixelPosition.valid)) {
             break;
@@ -243,14 +246,14 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
         //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
 
 
-        if (body.countNonZero() < 4) {
+        if (body.countNonZero() < 2) {
             continue;
         }
         body.findLongestPath(&longestPath);
 
 
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        if (approxCurve.size() > 1) {
+        if (approxCurve.size() > 0) {
             vectors.push_back(approxCurve);
         }
         approxCurve.clear();
@@ -313,6 +316,19 @@ std::vector<std::vector<Point2D>> gggg3(BitMatrix* image, float vector_approxima
     return vectors;
 }
 
+cv::Mat TestFunction(BitMatrix bitmatrix_img) {
+    BitMatrixSkeleton(&bitmatrix_img);
+    cv::Mat res = bitMatrixToMat(bitmatrix_img);
+
+    int windowWidth = 400;  // Adjust this value to fit your screen
+    int windowHeight = 320; // Adjust this value to fit your screen
+
+    cv::namedWindow("test", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("test", windowWidth, windowHeight);
+    cv::imshow("test", res);
+    return res;
+}
+
 
 void TestVectors() {
     std::vector<std::vector<Point2D>> vectors;
@@ -328,8 +344,8 @@ void TestVectors() {
     vectors = gggg(&temp_bitmatrix_1, 3.0f);
     temp_bitmatrix_1 = bitmatrix_img;
     vectors = gggg2(&temp_bitmatrix_1, 3.0f);
-    temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg3(&temp_bitmatrix_1, 3.0f);
+    //temp_bitmatrix_1 = bitmatrix_img;
+    //vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 
 
     std::vector<std::vector<cv::Point>> approxCurve;
@@ -371,6 +387,8 @@ void TestVectors() {
     cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("lines", windowWidth, windowHeight);
     cv::imshow("lines", result);
+
+    TestFunction(bitmatrix_img);
     cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
