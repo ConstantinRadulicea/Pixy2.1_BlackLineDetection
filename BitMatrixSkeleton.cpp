@@ -198,14 +198,14 @@ P7  P6  P5
 */
 inline int getWhiteBlackTransitions(struct mat_9x9* window) {
     return
-        (window->P2 == false && window->P3 == true) +
-        (window->P3 == false && window->P4 == true) +
-        (window->P4 == false && window->P5 == true) +
-        (window->P5 == false && window->P6 == true) +
-        (window->P6 == false && window->P7 == true) +
-        (window->P7 == false && window->P8 == true) +
-        (window->P8 == false && window->P9 == true) +
-        (window->P9 == false && window->P2 == true);
+        (int)(window->P2 == false && window->P3 == true) +
+        (int)(window->P3 == false && window->P4 == true) +
+        (int)(window->P4 == false && window->P5 == true) +
+        (int)(window->P5 == false && window->P6 == true) +
+        (int)(window->P6 == false && window->P7 == true) +
+        (int)(window->P7 == false && window->P8 == true) +
+        (int)(window->P8 == false && window->P9 == true) +
+        (int)(window->P9 == false && window->P2 == true);
 }
 
 
@@ -882,11 +882,15 @@ P7  P6  P5
 int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
     struct mat_9x9 window;
     size_t bits_deleted;
+    size_t n_rows, n_cols;
     int bit_sum;
-    bits_deleted = 0;
 
-    for (size_t row = 1; row < img->getRows()-1; row++) {
-        for (size_t col = 1; col < img->getColumns() - 1; col++) {
+    bits_deleted = 0;
+    n_rows = img->getRows() - 1;
+    n_cols = img->getColumns() - 1;
+
+    for (size_t row = 1; row < n_rows; row++) {
+        for (size_t col = 1; col < n_cols; col++) {
             window.P1 = img->getBit(row, col);
             if (window.P1 == false) {
                 continue;

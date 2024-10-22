@@ -101,7 +101,6 @@ public:
 	}
 	
 	inline void setBitValue(size_t row, size_t col, bool value) {
-		size_t offset = (row * this->nColumns) + col;
 		if (value) {
 			this->setBit(row, col);
 		}
@@ -132,11 +131,15 @@ public:
 	}
 
 	inline void unsetBit(size_t row, size_t col) {
-		if (!(this->getBit(row, col))) {	// bit already unsetted
+		size_t offset;
+		BITARRAY_DATATYPE value;
+		if (this->getBit(row, col) == false) {	// bit already unsetted
 			return;
 		}
-		size_t offset = (row * this->nColumns) + col;
-		this->data[offset / BITARRAY_DATATYPE_BITS] = (BITARRAY_DATATYPE)this->data[offset / BITARRAY_DATATYPE_BITS] & ~((BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % BITARRAY_DATATYPE_BITS)));
+		offset = (row * this->nColumns) + col;
+		value = this->data[offset / BITARRAY_DATATYPE_BITS];
+		value = value & ~((BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % BITARRAY_DATATYPE_BITS)));
+		this->data[offset / BITARRAY_DATATYPE_BITS] = value;
 		this->settedBits--;
 	}
 
@@ -147,7 +150,7 @@ public:
 	inline BITARRAY_DATATYPE getBlockValue(size_t index) {
 		if (index == (this->totBlocks()-1))
 		{
-			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % (size_t)BITARRAY_DATATYPE_BITS));
+			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> ((size_t)BITARRAY_DATATYPE_BITS) - (this->bitSize() % (size_t)BITARRAY_DATATYPE_BITS));
 		}
 		else {
 			return this->data.at(index);
@@ -161,9 +164,10 @@ public:
 		if (oldValue == value) {
 			return;
 		}
-
-		value &= (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> (this->bitSize() % BITARRAY_DATATYPE_BITS));
-
+		if (index == (this->totBlocks() - 1)) {
+			value &= (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> ((size_t)BITARRAY_DATATYPE_BITS) - (this->bitSize() % (size_t)BITARRAY_DATATYPE_BITS));
+		}
+		
 		this->settedBits += ((int)(this->countSettedBits(value)) - (int)(this->countSettedBits(oldValue)));
 		this->data[index] = value;
 	}
@@ -258,7 +262,6 @@ public:
 
 		for (size_t i = 0; i < dst_A->totBlocks(); i++)
 		{
-			
 			valueSrc2 = B->getBlockValue(i);
 			if (valueSrc2 == 0) {
 				continue;

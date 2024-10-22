@@ -19,6 +19,10 @@ float perpendicularDistance(Point2D& point, Point2D& lineStart, Point2D& lineEnd
 // Recursive function implementing the Ramer–Douglas–Peucker algorithm
 void ramerDouglasPeucker(std::vector<Point2D>* points, float epsilon, std::vector<Point2D>* output) {
     if (points->size() < 2) {
+        if (points->size() == 1) {
+            output->push_back(points->at(0));
+            return;
+        }
         return; // Not enough points to simplify
     }
 

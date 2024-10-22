@@ -9,13 +9,13 @@
 
 //#define IMG_PATH "img1.png"
 //#define IMG_PATH "img/black.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
-#define IMG_PATH "img/20241002_194842.jpg" // curve 3
+//#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
 
 BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
@@ -71,9 +71,9 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     BitMatrix scaled;
     scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
     BitMatrix::downscale_3(&scaled, &bitmatrix_img);
-    
-
     return scaled;
+
+    //return bitmatrix_img;
 }
 
 cv::Mat bitMatrixToMat(BitMatrix &bit_matrix) {
@@ -231,6 +231,8 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     BitMatrixPosition pixelPosition;
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
+    BitMatrix temp(image->getRows(), image->getColumns());
+
     std::vector<Point2D> longestPath;
     std::vector<Point2D> approxCurve;
     body_skeleton = *image;
@@ -323,7 +325,7 @@ std::vector<std::vector<Point2D>> gggg3(BitMatrix* image, float vector_approxima
 }
 
 cv::Mat TestFunction(BitMatrix bitmatrix_img) {
-    BitMatrixSkeleton(&bitmatrix_img);
+    BitMatrixSkeleton2(&bitmatrix_img);
     cv::Mat res = bitMatrixToMat(bitmatrix_img);
 
     int windowWidth = 400;  // Adjust this value to fit your screen
@@ -347,7 +349,7 @@ void TestVectors() {
     
 
     temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg(&temp_bitmatrix_1, 3.0f);
+    //vectors = gggg(&temp_bitmatrix_1, 3.0f);
     temp_bitmatrix_1 = bitmatrix_img;
     vectors = gggg2(&temp_bitmatrix_1, 3.0f);
     //temp_bitmatrix_1 = bitmatrix_img;
