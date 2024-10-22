@@ -674,8 +674,8 @@ public:
 					//newPath.push_back(Point2D_int{ (float)newX, (float)newY });
 					//q.push({ Point2D_int{(float)newX, (float)newY}, newPath });
 
-					temp_local_path.start.x = (float)newX;
-					temp_local_path.start.y = (float)newY;
+					temp_local_path.start.x = newX;
+					temp_local_path.start.y = newY;
 					temp_local_path.path = *path;
 					temp_local_path.path.push_back(temp_local_path.start);
 					q.push(temp_local_path);

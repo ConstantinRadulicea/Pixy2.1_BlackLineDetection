@@ -69,10 +69,10 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
         }
     }
 
-    //BitMatrix scaled;
-    //scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
-    //BitMatrix::downscale_3(&scaled, &bitmatrix_img, 0.6f);
-    //return scaled;
+    BitMatrix scaled;
+    scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
+    BitMatrix::downscale_3(&scaled, &bitmatrix_img, 0.6f);
+    return scaled;
 
     return bitmatrix_img;
 }
