@@ -781,6 +781,40 @@ public:
 		return BitMatrixPosition{ 0, 0, false };
 	}
 
+	static void downscale_3(BitMatrix *_dst, BitMatrix* _src) {
+		BITARRAY_DATATYPE up_word, mid_word, down_word;
+		BITARRAY_DATATYPE right_up_word, right_mid_word, right_down_word;
+
+		size_t new_columns, new_rows;
+		size_t n_settedbits;
+
+		_dst->clear();
+		new_columns = _src->getColumns() / (size_t)3;
+		new_rows = _src->getRows() / (size_t)3;
+		
+		for (size_t row = 1; row < _src->getRows() - 1; row += 3)
+		{
+			for (size_t col = 1; col < _src->getColumns() - 1; col += 3)
+			{
+				n_settedbits = 0;
+				n_settedbits += (size_t)(_src->getBit(row - 1, col - 1) & true);
+				n_settedbits += (size_t)(_src->getBit(row - 1, col) & true);
+				n_settedbits += (size_t)(_src->getBit(row - 1, col + 1) & true);
+				n_settedbits += (size_t)(_src->getBit(row, col - 1) & true);
+				n_settedbits += (size_t)(_src->getBit(row, col) & true);
+				n_settedbits += (size_t)(_src->getBit(row, col + 1) & true);
+				n_settedbits += (size_t)(_src->getBit(row + 1, col - 1) & true);
+				n_settedbits += (size_t)(_src->getBit(row + 1, col) & true);
+				n_settedbits += (size_t)(_src->getBit(row + 1, col + 1) & true);
+
+				if (n_settedbits > 3) {
+					_dst->setBit(row/3, col/3);
+				}
+			}
+		}
+
+	}
+
 
 	~BitMatrix() {
 		data.~vector();

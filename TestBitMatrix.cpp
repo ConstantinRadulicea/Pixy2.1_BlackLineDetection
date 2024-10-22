@@ -35,7 +35,7 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
 
     cv::Mat dst;
     //cv::Size newSize(320, 200);
-    int width = 200/2;
+    int width = 200;
     int height = (int)(width * (float)(320.0 / 200.0));
     cv::Size newSize(height, width);
     // Resize the image
@@ -67,7 +67,13 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
             }
         }
     }
-    return bitmatrix_img;
+
+    BitMatrix scaled;
+    scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
+    BitMatrix::downscale_3(&scaled, &bitmatrix_img);
+    
+
+    return scaled;
 }
 
 cv::Mat bitMatrixToMat(BitMatrix &bit_matrix) {
@@ -387,6 +393,7 @@ void TestVectors() {
     cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("lines", windowWidth, windowHeight);
     cv::imshow("lines", result);
+
 
     TestFunction(bitmatrix_img);
     cv::waitKey(0);  // Wait for a key press before closing the window
