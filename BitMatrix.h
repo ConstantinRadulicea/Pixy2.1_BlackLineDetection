@@ -745,6 +745,9 @@ public:
 	}
 
 	BitMatrixPosition getFirstSetPixel() {
+		if (this->settedBits <= 0) {
+			return BitMatrixPosition{ 0, 0, false };
+		}
 		BitMatrixPosition pos;
 		size_t bit_index;
 		size_t i = getFirstSetPixel_last_index;

@@ -69,10 +69,10 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
         }
     }
 
-    BitMatrix scaled;
-    scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
-    BitMatrix::downscale_3(&scaled, &bitmatrix_img, 0.6f);
-    return scaled;
+    //BitMatrix scaled;
+    //scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
+    //BitMatrix::downscale_3(&scaled, &bitmatrix_img, 0.6f);
+    //return scaled;
 
     return bitmatrix_img;
 }
@@ -231,29 +231,19 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     std::vector<std::vector<Point2D>> vectors;
     BitMatrixPosition pixelPosition;
     BitMatrix body(image->getRows(), image->getColumns());
-    BitMatrix body_skeleton(image->getRows(), image->getColumns());
-    BitMatrix temp(image->getRows(), image->getColumns());
 
     std::vector<Point2D> longestPath;
     std::vector<Point2D> approxCurve;
-    body_skeleton = *image;
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
-    auto clock_start = clock();
-    //BitMatrixSkeleton(&body_skeleton);
-    BitMatrixSkeleton2(&body_skeleton);
+    BitMatrixSkeleton2(image);
     for (;;)
     {
-        if (body_skeleton.countNonZero() <= 0) {
-            break;
-        }
-        pixelPosition = body_skeleton.getFirstSetPixel();
+        pixelPosition = image->getFirstSetPixel();
         if (!(pixelPosition.valid)) {
             break;
         }
-        body_skeleton.floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
-        //std::cout << "body_skeleton: " << body_skeleton.countNonZero() << " body: " << body.countNonZero() << std::endl;
-
+        image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
 
         if (body.countNonZero() < 2) {
             continue;
@@ -274,7 +264,7 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
     // Calculate the duration
     std::chrono::duration<double> duration = end - start;
     // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << " clock_cycles: " << clock() - clock_start << std::endl;
+    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
 
     return vectors;
 }
@@ -350,11 +340,11 @@ void TestVectors() {
     
 
     temp_bitmatrix_1 = bitmatrix_img;
-    //vectors = gggg(&temp_bitmatrix_1, 3.0f);
+    vectors = gggg(&temp_bitmatrix_1, 3.0f);
     temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg2(&temp_bitmatrix_1, 2.0f);
-    //temp_bitmatrix_1 = bitmatrix_img;
-    //vectors = gggg3(&temp_bitmatrix_1, 3.0f);
+    vectors = gggg2(&temp_bitmatrix_1, 3.0f);
+    temp_bitmatrix_1 = bitmatrix_img;
+    vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 
 
     std::vector<std::vector<cv::Point>> approxCurve;
