@@ -958,7 +958,7 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
 
 // https://rosettacode.org/wiki/Zhang-Suen_thinning_algorithm#C
 void BitMatrixSkeleton2(BitMatrix* matrix) {
-    size_t bits_deleted = 1;
+    size_t bits_deleted = 0;
     if (matrix->countNonZero() <= 0) {
         return;
     }

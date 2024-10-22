@@ -32,6 +32,10 @@ typedef struct Point2D_int16_t {
 class BitMatrix;
 // return true if the bit is accepted, otherwise returns false
 typedef bool (*BitMatrixFillFilter)(size_t row, size_t col, BitMatrix* bit_matrix, void* _Context);
+//
+//#define BITARRAY_DATATYPE unsigned long long int					//unsigned long long int //unsigned char //unsigned int
+//#define BITARRAY_DATATYPE_MAX_VALUE	ULLONG_MAX					//ULLONG_MAX //UCHAR_MAX //UINT_MAX
+//#define BITARRAY_DATATYPE_BITS	(sizeof(BITARRAY_DATATYPE) * 8)
 
 #define BITARRAY_DATATYPE unsigned int					//unsigned long long int //unsigned char //unsigned int
 #define BITARRAY_DATATYPE_MAX_VALUE	UINT_MAX					//ULLONG_MAX //UCHAR_MAX //UINT_MAX
@@ -122,7 +126,7 @@ public:
 		}
 		size_t offset = (row * this->nColumns) + col;
 		size_t index = offset / BITARRAY_DATATYPE_BITS;
-		this->data[index] = (BITARRAY_DATATYPE)this->data[index] | (BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % (size_t)BITARRAY_DATATYPE_BITS));
+		this->data[index] = (BITARRAY_DATATYPE)(this->data[index]) | (BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % (size_t)BITARRAY_DATATYPE_BITS));
 		this->settedBits++;
 	}
 
@@ -256,7 +260,7 @@ public:
 		AandNotB(&dst_A, &B);
 	}
 
-	inline static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
+	static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
 	{
 		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
 
@@ -810,7 +814,7 @@ public:
 				n_settedbits += (size_t)(_src->getBit(row + 1, col) & true);
 				n_settedbits += (size_t)(_src->getBit(row + 1, col + 1) & true);
 
-				if (n_settedbits > 3) {
+				if (n_settedbits > 2) {
 					_dst->setBit(row/3, col/3);
 				}
 			}
