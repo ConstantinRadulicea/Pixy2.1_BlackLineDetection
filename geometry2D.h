@@ -65,6 +65,11 @@ typedef struct Point2D {
 	float y;
 }Point2D;
 
+typedef struct Point2D_int {
+	int x;
+	int y;
+}Point2D_int;
+
 typedef struct LineSegment {
 	Point2D A;
 	Point2D B;

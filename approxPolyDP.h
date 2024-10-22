@@ -5,10 +5,10 @@
 #include <vector>
 
 // Recursive function implementing the Ramer–Douglas–Peucker algorithm
-void ramerDouglasPeucker(std::vector<Point2D>* points, float epsilon, std::vector<Point2D>* output);
+void ramerDouglasPeucker(std::vector<Point2D_int>* points, float epsilon, std::vector<Point2D_int>* output);
 
 // Wrapper function to simplify a contour
-std::vector<Point2D> approxPolyDP(std::vector<Point2D>& contour, float epsilon);
+std::vector<Point2D_int> approxPolyDP(std::vector<Point2D_int>& contour, float epsilon);
 
 
 

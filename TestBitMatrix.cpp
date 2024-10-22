@@ -141,7 +141,7 @@ void TestBitMatrix() {
 
     */
 
-    std::vector<Point2D> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath();
+    std::vector<Point2D_int> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath();
 
     std::vector<cv::Point>longestPath;
     for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
@@ -160,7 +160,7 @@ void TestBitMatrix() {
     //cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
     
     
-    std::vector<Point2D> approxCurve_Point2D;
+    std::vector<Point2D_int> approxCurve_Point2D;
     double epsilon = 1;  // Tolerance value for approximation
     approxCurve_Point2D = approxPolyDP(longestPath_Point2D, epsilon);
 
@@ -183,13 +183,13 @@ void TestBitMatrix() {
 }
 
 
-std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D>> vectors;
+std::vector<std::vector<Point2D_int>> gggg(BitMatrix* image, float vector_approximation_epsilon) {
+    std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
-    std::vector<Point2D> longestPath;
-    std::vector<Point2D> approxCurve;
+    std::vector<Point2D_int> longestPath;
+    std::vector<Point2D_int> approxCurve;
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
@@ -227,13 +227,13 @@ std::vector<std::vector<Point2D>> gggg(BitMatrix* image, float vector_approximat
 }
 
 
-std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D>> vectors;
+std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {
+    std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
     BitMatrix body(image->getRows(), image->getColumns());
 
-    std::vector<Point2D> longestPath;
-    std::vector<Point2D> approxCurve;
+    std::vector<Point2D_int> longestPath;
+    std::vector<Point2D_int> approxCurve;
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
     BitMatrixSkeleton2(image);
@@ -271,13 +271,13 @@ std::vector<std::vector<Point2D>> gggg2(BitMatrix* image, float vector_approxima
 
 
 
-std::vector<std::vector<Point2D>> gggg3(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D>> vectors;
+std::vector<std::vector<Point2D_int>> gggg3(BitMatrix* image, float vector_approximation_epsilon) {
+    std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
     BitMatrix visited(image->getRows(), image->getColumns());
     BitMatrix body_skeleton(image->getRows(), image->getColumns());
-    std::vector<Point2D> longestPath;
-    std::vector<Point2D> approxCurve;
+    std::vector<Point2D_int> longestPath;
+    std::vector<Point2D_int> approxCurve;
     size_t temp_size_1;
     body_skeleton = *image;
     // Start time
@@ -330,7 +330,7 @@ cv::Mat TestFunction(BitMatrix bitmatrix_img) {
 
 
 void TestVectors() {
-    std::vector<std::vector<Point2D>> vectors;
+    std::vector<std::vector<Point2D_int>> vectors;
     cv::Mat original_img = cv::imread(IMG_PATH);
     char file_path[] = IMG_PATH;
     BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
@@ -373,23 +373,23 @@ void TestVectors() {
     // Create a window
     
     // Resize the window to a specific size (adjust width and height as needed)
-    //int windowWidth = 400;  // Adjust this value to fit your screen
-    //int windowHeight = 320; // Adjust this value to fit your screen
-    //cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("original image", windowWidth, windowHeight);
-    //cv::imshow("original image", original_img);
+    int windowWidth = 400;  // Adjust this value to fit your screen
+    int windowHeight = 320; // Adjust this value to fit your screen
+    cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("original image", windowWidth, windowHeight);
+    cv::imshow("original image", original_img);
 
-    //cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("treshold", windowWidth, windowHeight);
-    //cv::imshow("treshold", image);
+    cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("treshold", windowWidth, windowHeight);
+    cv::imshow("treshold", image);
 
-    //cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("lines", windowWidth, windowHeight);
-    //cv::imshow("lines", result);
+    cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("lines", windowWidth, windowHeight);
+    cv::imshow("lines", result);
 
 
-    //TestFunction(bitmatrix_img);
-    //cv::waitKey(0);  // Wait for a key press before closing the window
+    TestFunction(bitmatrix_img);
+    cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
 void main() {

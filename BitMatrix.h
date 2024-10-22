@@ -12,7 +12,7 @@
 
 
 typedef struct Point2D_Distance {
-	Point2D point;
+	Point2D_int point;
 	float distance;
 }Point2D_Distance;
 
@@ -585,37 +585,37 @@ public:
 	}
 
 
-	inline std::vector<Point2D> findLongestPath() {
-		std::vector<Point2D> path;
+	inline std::vector<Point2D_int> findLongestPath() {
+		std::vector<Point2D_int> path;
 		BitMatrix visited(this->getRows(), this->getColumns());
 		findLongestPath(this, &path, &visited);
 		return path;
 	}
 
-	inline void findLongestPath(std::vector<Point2D>* longest_path) {
+	inline void findLongestPath(std::vector<Point2D_int>* longest_path) {
 		BitMatrix visited(this->getRows(), this->getColumns());
 		BitMatrix::findLongestPath(this, longest_path, &visited);
 	}
 
-	inline void findLongestPath(std::vector<Point2D>* longest_path, BitMatrix* visited) {
+	inline void findLongestPath(std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
 		BitMatrix::findLongestPath(this, longest_path, visited);
 	}
 
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
-	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D>* longest_path, BitMatrix* visited) {
+	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
 		// Direction vectors for 8-connected neighbors
 		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 		// Start BFS from any skeleton point
-		Point2D start;
+		Point2D_int start;
 		BitMatrixPosition pos;
 		Point2D_Distance farthestFromStart;
 		Point2D_Distance longestPathResult;
 
 		struct _local_path {
-			Point2D start;
-			std::vector<Point2D> path;
+			Point2D_int start;
+			std::vector<Point2D_int> path;
 		};
 
 
@@ -647,9 +647,9 @@ public:
 		// To store the points of the longest path, run BFS again and record the path
 		std::queue<_local_path> q;
 		_local_path current;
-		Point2D p;
+		Point2D_int p;
 		struct _local_path temp_local_path;
-		//std::vector<Point2D> longest_path;
+		//std::vector<Point2D_int> longest_path;
 
 		q.push({ longestPathResult.point, {longestPathResult.point} });
 		visited->setBit(longestPathResult.point.y, longestPathResult.point.x);
@@ -657,7 +657,7 @@ public:
 		while (!q.empty()) {
 			current = q.front();
 			p = current.start;
-			std::vector<Point2D> *path = &(current.path);
+			std::vector<Point2D_int> *path = &(current.path);
 			q.pop();
 
 			if (path->size() > longest_path->size()) {
@@ -670,9 +670,9 @@ public:
 
 				if (isValid(newX, newY, skeleton, visited)) {
 					visited->setBit(newY, newX);
-					//std::vector<Point2D> newPath = path;
-					//newPath.push_back(Point2D{ (float)newX, (float)newY });
-					//q.push({ Point2D{(float)newX, (float)newY}, newPath });
+					//std::vector<Point2D_int> newPath = path;
+					//newPath.push_back(Point2D_int{ (float)newX, (float)newY });
+					//q.push({ Point2D_int{(float)newX, (float)newY}, newPath });
 
 					temp_local_path.start.x = (float)newX;
 					temp_local_path.start.y = (float)newY;
@@ -689,7 +689,7 @@ public:
 
 	// BFS to find the farthest point from a given start point
 	// uses 1 additional BitMatrix
-	static Point2D_Distance bfs(Point2D* start, BitMatrix* skeleton, BitMatrix *visited) {
+	static Point2D_Distance bfs(Point2D_int* start, BitMatrix* skeleton, BitMatrix *visited) {
 		// Direction vectors for 8-connected neighbors
 		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
@@ -700,12 +700,12 @@ public:
 		q.push(Point2D_Distance{ *start, 0 });
 		visited->setBit(start->y, start->x);
 
-		Point2D farthest = *start;
+		Point2D_int farthest = *start;
 		int maxDist = 0;
 
 		while (!q.empty()) {
 			auto current = q.front();
-			Point2D p = current.point;
+			Point2D_int p = current.point;
 			int dist = current.distance;
 			q.pop();
 
@@ -722,7 +722,7 @@ public:
 
 				if (isValid(newX, newY, skeleton, visited)) {
 					visited->setBit(newY, newX);
-					q.push(Point2D_Distance{ Point2D{(float)newX, (float)newY}, (float)dist + (float)1.0 });
+					q.push(Point2D_Distance{ Point2D_int{(int)newX, (int)newY}, dist + (float)1.0 });
 				}
 			}
 		}

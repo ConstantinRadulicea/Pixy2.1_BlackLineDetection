@@ -2,7 +2,7 @@
 
 
 // Helper function to compute the perpendicular distance of a point from a line
-float perpendicularDistance(Point2D& point, Point2D& lineStart, Point2D& lineEnd) {
+float perpendicularDistance(Point2D_int& point, Point2D_int& lineStart, Point2D_int& lineEnd) {
     float dx = lineEnd.x - lineStart.x;
     float dy = lineEnd.y - lineStart.y;
 
@@ -17,7 +17,7 @@ float perpendicularDistance(Point2D& point, Point2D& lineStart, Point2D& lineEnd
 }
 
 // Recursive function implementing the Ramer–Douglas–Peucker algorithm
-void ramerDouglasPeucker(std::vector<Point2D>* points, float epsilon, std::vector<Point2D>* output) {
+void ramerDouglasPeucker(std::vector<Point2D_int>* points, float epsilon, std::vector<Point2D_int>* output) {
     if (points->size() < 2) {
         if (points->size() == 1) {
             output->push_back(points->at(0));
@@ -40,10 +40,10 @@ void ramerDouglasPeucker(std::vector<Point2D>* points, float epsilon, std::vecto
 
     // If the max distance is greater than epsilon, recursively simplify the curve
     if (maxDistance > epsilon) {
-        std::vector<Point2D> leftSubList(points->begin(), points->begin() + index + 1);
-        std::vector<Point2D> rightSubList(points->begin() + index, points->end());
+        std::vector<Point2D_int> leftSubList(points->begin(), points->begin() + index + 1);
+        std::vector<Point2D_int> rightSubList(points->begin() + index, points->end());
 
-        std::vector<Point2D> leftResult, rightResult;
+        std::vector<Point2D_int> leftResult, rightResult;
         ramerDouglasPeucker(&leftSubList, epsilon, &leftResult);
         ramerDouglasPeucker(&rightSubList, epsilon, &rightResult);
 
@@ -59,8 +59,8 @@ void ramerDouglasPeucker(std::vector<Point2D>* points, float epsilon, std::vecto
 }
 
 // Wrapper function to simplify a contour
-std::vector<Point2D> approxPolyDP(std::vector<Point2D>& contour, float epsilon) {
-    std::vector<Point2D> simplifiedContour;
+std::vector<Point2D_int> approxPolyDP(std::vector<Point2D_int>& contour, float epsilon) {
+    std::vector<Point2D_int> simplifiedContour;
     ramerDouglasPeucker(&contour, epsilon, &simplifiedContour);
     return simplifiedContour;
 }
