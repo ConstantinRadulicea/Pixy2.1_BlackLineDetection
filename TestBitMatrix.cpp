@@ -9,10 +9,11 @@
 
 //#define IMG_PATH "img1.png"
 //#define IMG_PATH "img/black.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/test1.png"
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
-#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
+//#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
@@ -70,10 +71,10 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
 
     BitMatrix scaled;
     scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
-    BitMatrix::downscale_3(&scaled, &bitmatrix_img);
+    BitMatrix::downscale_3(&scaled, &bitmatrix_img, 0.6f);
     return scaled;
 
-    //return bitmatrix_img;
+    return bitmatrix_img;
 }
 
 cv::Mat bitMatrixToMat(BitMatrix &bit_matrix) {

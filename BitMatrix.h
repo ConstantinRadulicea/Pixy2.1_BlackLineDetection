@@ -788,7 +788,7 @@ public:
 		return BitMatrixPosition{ 0, 0, false };
 	}
 
-	static void downscale_3(BitMatrix *_dst, BitMatrix* _src) {
+	static void downscale_3(BitMatrix *_dst, BitMatrix* _src, float min_treshold) {
 		BITARRAY_DATATYPE up_word, mid_word, down_word;
 		BITARRAY_DATATYPE right_up_word, right_mid_word, right_down_word;
 
@@ -814,7 +814,7 @@ public:
 				n_settedbits += (size_t)(_src->getBit(row + 1, col) & true);
 				n_settedbits += (size_t)(_src->getBit(row + 1, col + 1) & true);
 
-				if (n_settedbits > 2) {
+				if (n_settedbits >= (size_t)(9.0f * min_treshold)) {
 					_dst->setBit(row/3, col/3);
 				}
 			}
