@@ -10,9 +10,9 @@
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
-#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
@@ -228,16 +228,17 @@ std::vector<std::vector<Point2D_int>> gggg(BitMatrix* image, float vector_approx
 }
 
 
-std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D_int>> vectors;
-    BitMatrixPosition pixelPosition;
+std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {    
     BitMatrix body(image->getRows(), image->getColumns());
-
+    BitMatrix temp(image->getRows(), image->getColumns());
     std::vector<Point2D_int> longestPath;
     std::vector<Point2D_int> approxCurve;
+    std::vector<std::vector<Point2D_int>> vectors;
+    BitMatrixPosition pixelPosition;
+
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
-    BitMatrixSkeletonZS(image);
+    BitMatrixSkeletonZS(image, &temp);
     for (;;)
     {
         pixelPosition = image->getFirstSetPixel();
@@ -249,8 +250,7 @@ std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_appro
         if (body.countNonZero() < 2) {
             continue;
         }
-        body.findLongestPath(&longestPath);
-
+        body.findLongestPath(&longestPath, &temp);
 
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
         if (approxCurve.size() > 0) {

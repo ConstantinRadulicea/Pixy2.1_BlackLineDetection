@@ -837,9 +837,9 @@ public:
 		new_columns = _src->getColumns() / (size_t)downscale_rate;
 		new_rows = _src->getRows() / (size_t)downscale_rate;
 
-		for (size_t row = 0; row < _src->getRows() - 1; row += downscale_rate)
+		for (size_t row = 0; row < _src->getRows() - downscale_rate; row += downscale_rate)
 		{
-			for (size_t col = 0; col < _src->getColumns() - 1; col += downscale_rate)
+			for (size_t col = 0; col < _src->getColumns() - downscale_rate; col += downscale_rate)
 			{
 				n_settedbits = 0;
 				for (size_t i = 0; i < downscale_rate; i++)

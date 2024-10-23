@@ -39,7 +39,7 @@ typedef struct PixelCoordinates {
 void BitMatrixSkeleton(BitMatrix* src, BitMatrix* dst);
 void BitMatrixSkeleton(BitMatrix* matrix);
 
-
+void BitMatrixSkeletonZS(BitMatrix* matrix, BitMatrix* marker);
 void BitMatrixSkeletonZS(BitMatrix* matrix);
 
 

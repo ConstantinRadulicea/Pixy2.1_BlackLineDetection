@@ -957,46 +957,49 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
 
 
 // https://rosettacode.org/wiki/Zhang-Suen_thinning_algorithm#C
-void BitMatrixSkeletonZS(BitMatrix* matrix) {
+void BitMatrixSkeletonZS(BitMatrix* matrix, BitMatrix *marker) {
     size_t bits_deleted = 0;
     if (matrix->countNonZero() <= 0) {
         return;
     }
-    BitMatrix marker(matrix->getRows(), matrix->getColumns());
+    marker->clear();
 
-    bits_deleted = iteration1_edge_top_left(matrix, &marker, 0);
-    bits_deleted += iteration1_edge_top_right(matrix, &marker, 0);
-    bits_deleted += iteration1_edge_bottom_left(matrix, &marker, 0);
-    bits_deleted += iteration1_edge_bottom_right(matrix, &marker, 0);
-    bits_deleted += iteration1_edges_top(matrix, &marker, 0);
-    bits_deleted += iteration1_edges_bottom(matrix, &marker, 0);
-    bits_deleted += iteration1_edges_left(matrix, &marker, 0);
-    bits_deleted += iteration1_edges_right(matrix, &marker, 0);
-    bits_deleted += iteration1(matrix, &marker, 0);
-    BitMatrix::AandNotB(matrix, &marker);
+    bits_deleted = iteration1_edge_top_left(matrix, marker, 0);
+    bits_deleted += iteration1_edge_top_right(matrix, marker, 0);
+    bits_deleted += iteration1_edge_bottom_left(matrix, marker, 0);
+    bits_deleted += iteration1_edge_bottom_right(matrix, marker, 0);
+    bits_deleted += iteration1_edges_top(matrix, marker, 0);
+    bits_deleted += iteration1_edges_bottom(matrix, marker, 0);
+    bits_deleted += iteration1_edges_left(matrix, marker, 0);
+    bits_deleted += iteration1_edges_right(matrix, marker, 0);
+    bits_deleted += iteration1(matrix, marker, 0);
+    BitMatrix::AandNotB(matrix, marker);
 
-    bits_deleted += iteration1_edge_top_left(matrix, &marker, 1);
-    bits_deleted += iteration1_edge_top_right(matrix, &marker, 1);
-    bits_deleted += iteration1_edge_bottom_left(matrix, &marker, 1);
-    bits_deleted += iteration1_edge_bottom_right(matrix, &marker, 1);
-    bits_deleted += iteration1_edges_top(matrix, &marker, 1);
-    bits_deleted += iteration1_edges_bottom(matrix, &marker, 1);
-    bits_deleted += iteration1_edges_left(matrix, &marker, 1);
-    bits_deleted += iteration1_edges_right(matrix, &marker, 1);
-    bits_deleted += iteration1(matrix, &marker, 1);
-    BitMatrix::AandNotB(matrix, &marker);
+    bits_deleted += iteration1_edge_top_left(matrix, marker, 1);
+    bits_deleted += iteration1_edge_top_right(matrix, marker, 1);
+    bits_deleted += iteration1_edge_bottom_left(matrix, marker, 1);
+    bits_deleted += iteration1_edge_bottom_right(matrix, marker, 1);
+    bits_deleted += iteration1_edges_top(matrix, marker, 1);
+    bits_deleted += iteration1_edges_bottom(matrix, marker, 1);
+    bits_deleted += iteration1_edges_left(matrix, marker, 1);
+    bits_deleted += iteration1_edges_right(matrix, marker, 1);
+    bits_deleted += iteration1(matrix, marker, 1);
+    BitMatrix::AandNotB(matrix, marker);
 
 
     while (bits_deleted > 0) {
-        bits_deleted = iteration1(matrix, &marker, 0);
-        BitMatrix::AandNotB(matrix, &marker);
-        bits_deleted += iteration1(matrix, &marker, 1);
-        BitMatrix::AandNotB(matrix, &marker);
+        bits_deleted = iteration1(matrix, marker, 0);
+        BitMatrix::AandNotB(matrix, marker);
+        bits_deleted += iteration1(matrix, marker, 1);
+        BitMatrix::AandNotB(matrix, marker);
     }
-    
 }
 
 
-
+// https://rosettacode.org/wiki/Zhang-Suen_thinning_algorithm#C
+void BitMatrixSkeletonZS(BitMatrix* matrix) {
+    BitMatrix marker(matrix->getRows(), matrix->getColumns());
+    BitMatrixSkeletonZS(matrix, &marker);
+}
 
 #endif // !__THINNING_H__
