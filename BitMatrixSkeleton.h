@@ -40,7 +40,7 @@ void BitMatrixSkeleton(BitMatrix* src, BitMatrix* dst);
 void BitMatrixSkeleton(BitMatrix* matrix);
 
 
-void BitMatrixSkeleton2(BitMatrix* matrix);
+void BitMatrixSkeletonZS(BitMatrix* matrix);
 
 
 #endif // !__BITMATRIXSKELETON_H__

@@ -7,7 +7,7 @@
 #include <vector>
 #include "approxPolyDP.h"
 
-//#define IMG_PATH "img1.png"
+//#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
 #define IMG_PATH "img/20241002_194857.jpg" // intersection 1
@@ -70,8 +70,9 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     }
 
     BitMatrix scaled;
-    scaled.init(bitmatrix_img.getRows() / 3, bitmatrix_img.getColumns() / 3);
-    BitMatrix::downscale_3(&scaled, &bitmatrix_img, 0.6f);
+    size_t downscale_rate = 4;
+    scaled.init(bitmatrix_img.getRows() / downscale_rate, bitmatrix_img.getColumns() / downscale_rate);
+    BitMatrix::downscale(&scaled, &bitmatrix_img, downscale_rate, 0.3f);
     return scaled;
 
     return bitmatrix_img;
@@ -236,7 +237,7 @@ std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_appro
     std::vector<Point2D_int> approxCurve;
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
-    BitMatrixSkeleton2(image);
+    BitMatrixSkeletonZS(image);
     for (;;)
     {
         pixelPosition = image->getFirstSetPixel();
@@ -284,7 +285,7 @@ std::vector<std::vector<Point2D_int>> gggg3(BitMatrix* image, float vector_appro
     auto start = std::chrono::high_resolution_clock::now();
     auto clock_start = clock();
     //BitMatrixSkeleton(&body_skeleton);
-    //BitMatrixSkeleton2(&body_skeleton);
+    //BitMatrixSkeletonZS(&body_skeleton);
     for (;;)
     {
         body_skeleton.findLongestPath(&longestPath, &visited);
@@ -316,7 +317,7 @@ std::vector<std::vector<Point2D_int>> gggg3(BitMatrix* image, float vector_appro
 }
 
 cv::Mat TestFunction(BitMatrix bitmatrix_img) {
-    BitMatrixSkeleton2(&bitmatrix_img);
+    BitMatrixSkeletonZS(&bitmatrix_img);
     cv::Mat res = bitMatrixToMat(bitmatrix_img);
 
     int windowWidth = 400;  // Adjust this value to fit your screen

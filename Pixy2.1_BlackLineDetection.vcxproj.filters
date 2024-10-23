@@ -27,6 +27,9 @@
     <ClCompile Include="BitMatrixSkeleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BitMatrixThinningK3M.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rgb2hsv.h">

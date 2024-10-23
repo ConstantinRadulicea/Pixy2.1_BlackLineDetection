@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClCompile Include="approxPolyDP.cpp" />
     <ClCompile Include="BitMatrixSkeleton.cpp" />
+    <ClCompile Include="BitMatrixThinningK3M.cpp" />
     <ClCompile Include="geometry2D.cpp" />
     <ClCompile Include="TestBitMatrix.cpp" />
   </ItemGroup>

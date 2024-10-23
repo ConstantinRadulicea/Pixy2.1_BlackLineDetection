@@ -791,7 +791,7 @@ public:
 		return BitMatrixPosition{ 0, 0, false };
 	}
 
-	static void downscale_3(BitMatrix *_dst, BitMatrix* _src, float min_treshold) {
+	static void downscale_3(BitMatrix* _dst, BitMatrix* _src, float min_treshold) {
 		BITARRAY_DATATYPE up_word, mid_word, down_word;
 		BITARRAY_DATATYPE right_up_word, right_mid_word, right_down_word;
 
@@ -801,7 +801,7 @@ public:
 		_dst->clear();
 		new_columns = _src->getColumns() / (size_t)3;
 		new_rows = _src->getRows() / (size_t)3;
-		
+
 		for (size_t row = 1; row < _src->getRows() - 1; row += 3)
 		{
 			for (size_t col = 1; col < _src->getColumns() - 1; col += 3)
@@ -818,7 +818,39 @@ public:
 				n_settedbits += (size_t)(_src->getBit(row + 1, col + 1) & true);
 
 				if (n_settedbits >= (size_t)(9.0f * min_treshold)) {
-					_dst->setBit(row/3, col/3);
+					_dst->setBit(row / 3, col / 3);
+				}
+			}
+		}
+
+	}
+
+
+	static void downscale(BitMatrix* _dst, BitMatrix* _src, size_t downscale_rate, float min_treshold) {
+		BITARRAY_DATATYPE up_word, mid_word, down_word;
+		BITARRAY_DATATYPE right_up_word, right_mid_word, right_down_word;
+
+		size_t new_columns, new_rows;
+		size_t n_settedbits;
+		//size_t downscale_rate = 2;
+		_dst->clear();
+		new_columns = _src->getColumns() / (size_t)downscale_rate;
+		new_rows = _src->getRows() / (size_t)downscale_rate;
+
+		for (size_t row = 0; row < _src->getRows() - 1; row += downscale_rate)
+		{
+			for (size_t col = 0; col < _src->getColumns() - 1; col += downscale_rate)
+			{
+				n_settedbits = 0;
+				for (size_t i = 0; i < downscale_rate; i++)
+				{
+					for (size_t j = 0; j < downscale_rate; j++)
+					{
+						n_settedbits += (size_t)(_src->getBit(row+i, col+j) & true);
+					}
+				}
+				if (n_settedbits >= (size_t)((downscale_rate * downscale_rate) * min_treshold)) {
+					_dst->setBit(row / downscale_rate, col / downscale_rate);
 				}
 			}
 		}
