@@ -7,13 +7,16 @@
 #include <vector>
 #include "approxPolyDP.h"
 
+#define DOWNSCALE_FACTOR 4
+#define DOWNSCALE_COLOR_TRESHOLD 0.3f
+
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
-//#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
+//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
@@ -70,9 +73,9 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     }
 
     BitMatrix scaled;
-    size_t downscale_rate = 4;
+    size_t downscale_rate = DOWNSCALE_FACTOR;
     scaled.init(bitmatrix_img.getRows() / downscale_rate, bitmatrix_img.getColumns() / downscale_rate);
-    BitMatrix::downscale(&scaled, &bitmatrix_img, downscale_rate, 0.3f);
+    BitMatrix::downscale(&scaled, &bitmatrix_img, downscale_rate, DOWNSCALE_COLOR_TRESHOLD);
     return scaled;
 
     return bitmatrix_img;
@@ -374,23 +377,23 @@ void TestVectors() {
     // Create a window
     
     // Resize the window to a specific size (adjust width and height as needed)
-    int windowWidth = 400;  // Adjust this value to fit your screen
-    int windowHeight = 320; // Adjust this value to fit your screen
-    cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("original image", windowWidth, windowHeight);
-    cv::imshow("original image", original_img);
+    //int windowWidth = 400;  // Adjust this value to fit your screen
+    //int windowHeight = 320; // Adjust this value to fit your screen
+    //cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    //cv::resizeWindow("original image", windowWidth, windowHeight);
+    //cv::imshow("original image", original_img);
 
-    cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("treshold", windowWidth, windowHeight);
-    cv::imshow("treshold", image);
+    //cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    //cv::resizeWindow("treshold", windowWidth, windowHeight);
+    //cv::imshow("treshold", image);
 
-    cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("lines", windowWidth, windowHeight);
-    cv::imshow("lines", result);
+    //cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    //cv::resizeWindow("lines", windowWidth, windowHeight);
+    //cv::imshow("lines", result);
 
 
-    TestFunction(bitmatrix_img);
-    cv::waitKey(0);  // Wait for a key press before closing the window
+    //TestFunction(bitmatrix_img);
+    //cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
 void main() {
