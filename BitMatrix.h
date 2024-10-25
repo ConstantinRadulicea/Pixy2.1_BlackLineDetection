@@ -644,20 +644,20 @@ public:
 
 
 		// To store the points of the longest path, run BFS again and record the path
-		std::queue<_local_path> q;
+		std::deque<_local_path> q;
 		_local_path current;
 		Point2D_int p;
 		struct _local_path temp_local_path;
 		//std::vector<Point2D_int> longest_path;
 
-		q.push({ longestPathResult.point, {longestPathResult.point} });
+		q.push_back({ longestPathResult.point, {longestPathResult.point} });
 		visited->setBit(longestPathResult.point.y, longestPathResult.point.x);
 
 		while (!q.empty()) {
 			current = q.front();
 			p = current.start;
 			std::vector<Point2D_int>* path = &(current.path);
-			q.pop();
+			q.pop_front();
 
 			if (path->size() > longest_path->size()) {
 				*longest_path = *path;
@@ -677,7 +677,7 @@ public:
 					temp_local_path.start.y = newY;
 					temp_local_path.path = *path;
 					temp_local_path.path.push_back(temp_local_path.start);
-					q.push(temp_local_path);
+					q.push_back(temp_local_path);
 				}
 			}
 		}
@@ -731,7 +731,7 @@ public:
 		
 
 		// To store the points of the longest path, run BFS again and record the path
-		std::queue<_local_path *> q;
+		std::deque<_local_path *> q;
 		_local_path *current;
 		Point2D_int p;
 		struct _local_path temp_local_path, *temp_ptr_local_path;
@@ -742,14 +742,14 @@ public:
 		temp_ptr_local_path->path = new std::vector<Point2D_int>;
 		temp_ptr_local_path->path->push_back(longestPathResult.point);
 
-		q.push(temp_ptr_local_path);
+		q.push_back(temp_ptr_local_path);
 		visited->setBit(longestPathResult.point.y, longestPathResult.point.x);
 
 		while (!q.empty()) {
 			current = q.front();
 			p = current->start;
 			std::vector<Point2D_int> *path = (current->path);
-			q.pop();
+			q.pop_front();
 			used_current_path = false;
 			current_path_original_size = path->size();
 
@@ -784,7 +784,7 @@ public:
 					}
 					
 					temp_ptr_local_path->path->push_back(temp_ptr_local_path->start);
-					q.push(temp_ptr_local_path);
+					q.push_back(temp_ptr_local_path);
 				}
 			}
 			if (used_current_path == false) {

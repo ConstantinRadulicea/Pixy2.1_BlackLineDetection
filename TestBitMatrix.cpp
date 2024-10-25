@@ -7,7 +7,7 @@
 #include <vector>
 #include "approxPolyDP.h"
 
-#define DOWNSCALE_FACTOR 4
+#define DOWNSCALE_FACTOR 2
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 2
 
@@ -16,9 +16,9 @@
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
