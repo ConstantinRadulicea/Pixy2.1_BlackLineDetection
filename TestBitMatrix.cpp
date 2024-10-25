@@ -9,14 +9,15 @@
 
 #define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
+#define MIN_LINE_LENGTH 2
 
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
-#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
+#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+//#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
@@ -231,7 +232,7 @@ std::vector<std::vector<Point2D_int>> gggg(BitMatrix* image, float vector_approx
 }
 
 
-std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {    
+std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix temp(image->getRows(), image->getColumns());
     std::vector<Point2D_int> longestPath;
@@ -250,10 +251,52 @@ std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_appro
         }
         image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
 
-        if (body.countNonZero() < 2) {
+        if (body.countNonZero() < MIN_LINE_LENGTH) {
             continue;
         }
         body.findLongestPath(&longestPath, &temp);
+
+        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
+        if (approxCurve.size() > 0) {
+            vectors.push_back(approxCurve);
+        }
+        approxCurve.clear();
+
+    }
+
+    // End time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate the duration
+    std::chrono::duration<double> duration = end - start;
+    // Output the result in seconds
+    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+
+    return vectors;
+}
+
+std::vector<std::vector<Point2D_int>> gggg2_longest_path(BitMatrix* image, float vector_approximation_epsilon) {
+    BitMatrix body(image->getRows(), image->getColumns());
+    BitMatrix temp(image->getRows(), image->getColumns());
+    std::vector<Point2D_int> longestPath;
+    std::vector<Point2D_int> approxCurve;
+    std::vector<std::vector<Point2D_int>> vectors;
+    BitMatrixPosition pixelPosition;
+
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
+    BitMatrixSkeletonZS(image, &temp);
+    for (;;)
+    {
+        pixelPosition = image->getFirstSetPixel();
+        if (!(pixelPosition.valid)) {
+            break;
+        }
+        image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
+
+        if (body.countNonZero() < MIN_LINE_LENGTH) {
+            continue;
+        }
+        BitMatrix::findLongestPath2(&body, &longestPath, &temp);
 
         ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
         if (approxCurve.size() > 0) {
@@ -347,6 +390,8 @@ void TestVectors() {
     //vectors = gggg(&temp_bitmatrix_1, 3.0f);
     temp_bitmatrix_1 = bitmatrix_img;
     vectors = gggg2(&temp_bitmatrix_1, 3.0f);
+    temp_bitmatrix_1 = bitmatrix_img;
+    vectors = gggg2_longest_path(&temp_bitmatrix_1, 3.0f);
     //temp_bitmatrix_1 = bitmatrix_img;
     //vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 

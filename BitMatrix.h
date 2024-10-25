@@ -600,7 +600,6 @@ public:
 	inline void findLongestPath(std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
 		BitMatrix::findLongestPath(this, longest_path, visited);
 	}
-
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
 	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
@@ -642,7 +641,7 @@ public:
 		// Second BFS from the farthest point found
 		longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton, visited);
 		visited->setToZeros();
-		
+
 
 		// To store the points of the longest path, run BFS again and record the path
 		std::queue<_local_path> q;
@@ -657,7 +656,7 @@ public:
 		while (!q.empty()) {
 			current = q.front();
 			p = current.start;
-			std::vector<Point2D_int> *path = &(current.path);
+			std::vector<Point2D_int>* path = &(current.path);
 			q.pop();
 
 			if (path->size() > longest_path->size()) {
@@ -681,6 +680,118 @@ public:
 					q.push(temp_local_path);
 				}
 			}
+		}
+
+		//return longestPath;
+	}
+
+	// Find the longest path in the skeleton
+	// uses 1 additional BitMatrix
+	static void findLongestPath2(BitMatrix* skeleton, std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
+		// Direction vectors for 8-connected neighbors
+		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		// Start BFS from any skeleton point
+		Point2D_int start;
+		BitMatrixPosition pos;
+		Point2D_Distance farthestFromStart;
+		Point2D_Distance longestPathResult;
+		bool used_current_path = false;
+		size_t current_path_original_size = 0;
+
+		struct _local_path {
+			Point2D_int start;
+			std::vector<Point2D_int> *path;
+		};
+
+
+
+		longest_path->clear();
+		if (skeleton->countNonZero() <= 0) {
+			return;
+		}
+
+
+		pos = skeleton->getFirstSetPixel();
+		if (pos.valid == false) {
+			return;
+		}
+
+		start.x = pos.column;
+		start.y = pos.row;
+
+		//BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
+		visited->setToZeros();
+		// First BFS to find the farthest point from 'start'
+		farthestFromStart = BitMatrix::bfs(&start, skeleton, visited);
+		visited->setToZeros();
+		// Second BFS from the farthest point found
+		longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton, visited);
+		visited->setToZeros();
+		
+
+		// To store the points of the longest path, run BFS again and record the path
+		std::queue<_local_path *> q;
+		_local_path *current;
+		Point2D_int p;
+		struct _local_path temp_local_path, *temp_ptr_local_path;
+		//std::vector<Point2D_int> longest_path;
+
+		temp_ptr_local_path = new _local_path;
+		temp_ptr_local_path->start = longestPathResult.point;
+		temp_ptr_local_path->path = new std::vector<Point2D_int>;
+		temp_ptr_local_path->path->push_back(longestPathResult.point);
+
+		q.push(temp_ptr_local_path);
+		visited->setBit(longestPathResult.point.y, longestPathResult.point.x);
+
+		while (!q.empty()) {
+			current = q.front();
+			p = current->start;
+			std::vector<Point2D_int> *path = (current->path);
+			q.pop();
+			used_current_path = false;
+			current_path_original_size = path->size();
+
+			if (path->size() > longest_path->size()) {
+				*longest_path = *path;
+			}
+
+			for (int i = 0; i < 8; ++i) {
+				int newX = p.x + dx[i];
+				int newY = p.y + dy[i];
+
+				if (isValid(newX, newY, skeleton, visited)) {
+					visited->setBit(newY, newX);
+					//std::vector<Point2D_int> newPath = path;
+					//newPath.push_back(Point2D_int{ (float)newX, (float)newY });
+					//q.push({ Point2D_int{(float)newX, (float)newY}, newPath });
+
+					temp_ptr_local_path = new _local_path;
+
+					temp_ptr_local_path->start.x = newX;
+					temp_ptr_local_path->start.y = newY;
+
+					if (used_current_path == false) {
+						used_current_path = true;
+						temp_ptr_local_path->path = path;
+					}
+					else {
+						temp_ptr_local_path->path = new std::vector<Point2D_int>;
+						temp_ptr_local_path->path->reserve(current_path_original_size+1);
+						temp_ptr_local_path->path->resize(current_path_original_size);
+						memcpy(temp_ptr_local_path->path->data(), path->data(), sizeof(Point2D_int) * current_path_original_size);
+					}
+					
+					temp_ptr_local_path->path->push_back(temp_ptr_local_path->start);
+					q.push(temp_ptr_local_path);
+				}
+			}
+			if (used_current_path == false) {
+				current->path->~vector();
+				delete (current->path);
+			}
+			delete current;
 		}
 
 		//return longestPath;
