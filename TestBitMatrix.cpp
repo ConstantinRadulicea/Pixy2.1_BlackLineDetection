@@ -9,7 +9,7 @@
 
 #define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
-#define MIN_LINE_LENGTH 2
+#define MIN_LINE_LENGTH 1
 
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"

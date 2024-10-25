@@ -447,7 +447,7 @@ public:
 
 	// returns 0 on success
 	bool floodFillOnesDelete(size_t row, size_t col, BitMatrix* filledZone) {
-		std::queue<Point2D_int16_t> queue;
+		std::deque<Point2D_int16_t> queue;
 		int16_t posRow;
 		int16_t posCol;
 		BitMatrixFillFilter filter_function = BitMatrix::floodFillFilterFunctionOnes;
@@ -465,7 +465,7 @@ public:
 		// pixel of the component
 		Point2D_int16_t p = Point2D_int16_t{ (int16_t)row, (int16_t)col };
 		Point2D_int16_t currPixel;
-		queue.push(p);
+		queue.push_back(p);
 
 		// Color the pixel with the new color
 		//screen[x][y] = newC;
@@ -473,10 +473,10 @@ public:
 		// While the queue is not empty i.e. the
 		// whole component having prevC color
 		// is not colored with newC color
-		while (queue.size() > 0) {
+		while (!queue.empty()) {
 			// Dequeue the front node
 			currPixel = queue.front();
-			queue.pop();
+			queue.pop_front();
 
 			posRow = currPixel.x;
 			posCol = currPixel.y;
@@ -488,7 +488,7 @@ public:
 			{
 				p.x = (int16_t)(posRow + 1);
 				p.y = posCol;
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit((int16_t)((int16_t)(posRow + 1)), posCol);
 				this->unsetBit((int16_t)((int16_t)(posRow + 1)), posCol);
 			}
@@ -497,7 +497,7 @@ public:
 			{
 				p.x = (int16_t)(posRow - 1);
 				p.y = posCol;
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit((int16_t)(posRow - 1), posCol);
 				this->unsetBit((int16_t)(posRow - 1), posCol);
 			}
@@ -507,7 +507,7 @@ public:
 				//screen[posRow][(int16_t)(posCol + 1)] = newC;
 				p.x = posRow;
 				p.y = (int16_t)(posCol + 1);
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit(posRow, (int16_t)(posCol + 1));
 				this->unsetBit(posRow, (int16_t)(posCol + 1));
 			}
@@ -516,7 +516,7 @@ public:
 			{
 				p.x = posRow;
 				p.y = (int16_t)(posCol - 1);
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit(posRow, (int16_t)(posCol - 1));
 				this->unsetBit(posRow, (int16_t)(posCol - 1));
 			}
@@ -525,7 +525,7 @@ public:
 			{
 				p.x = (int16_t)(posRow + 1);
 				p.y = (int16_t)(posCol + 1);
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
 				this->unsetBit((int16_t)(posRow + 1), (int16_t)(posCol + 1));
 			}
@@ -534,7 +534,7 @@ public:
 			{
 				p.x = (int16_t)(posRow + 1);
 				p.y = (int16_t)(posCol - 1);
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
 				this->unsetBit((int16_t)(posRow + 1), (int16_t)(posCol - 1));
 			}
@@ -543,7 +543,7 @@ public:
 			{
 				p.x = (int16_t)(posRow - 1);
 				p.y = (int16_t)(posCol - 1);
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
 				this->unsetBit((int16_t)(posRow - 1), (int16_t)(posCol - 1));
 			}
@@ -552,7 +552,7 @@ public:
 			{
 				p.x = (int16_t)(posRow - 1);
 				p.y = (int16_t)(posCol + 1);
-				queue.push(p);
+				queue.push_back(p);
 				filledZone->setBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
 				this->unsetBit((int16_t)(posRow - 1), (int16_t)(posCol + 1));
 			}
@@ -604,8 +604,8 @@ public:
 	// uses 1 additional BitMatrix
 	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
 		// Direction vectors for 8-connected neighbors
-		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		const static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		const static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 		// Start BFS from any skeleton point
 		Point2D_int start;
 		BitMatrixPosition pos;
@@ -689,8 +689,8 @@ public:
 	// uses 1 additional BitMatrix
 	static std::vector<Point2D_int>* findLongestPath2(BitMatrix* skeleton, BitMatrix* visited) {
 		// Direction vectors for 8-connected neighbors
-		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		const static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
+		const static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
 		std::vector<Point2D_int>* longest_path = NULL;
 		// Start BFS from any skeleton point
 		Point2D_int start;
@@ -813,21 +813,24 @@ public:
 		// Direction vectors for 8-connected neighbors
 		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		Point2D_Distance current;
+		int maxDist = 0;
+		std::deque<Point2D_Distance> q;
+		Point2D_int farthest;
+		Point2D_int p;
+		int dist;
 
-		//BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
-		std::queue<Point2D_Distance> q;
-
-		q.push(Point2D_Distance{ *start, 0 });
+		q.push_back(Point2D_Distance{ *start, 0 });
 		visited->setBit(start->y, start->x);
 
-		Point2D_int farthest = *start;
-		int maxDist = 0;
+		farthest = *start;
+		
 
 		while (!q.empty()) {
-			auto current = q.front();
-			Point2D_int p = current.point;
-			int dist = current.distance;
-			q.pop();
+			current = q.front();
+			p = current.point;
+			dist = current.distance;
+			q.pop_front();
 
 			// Update the farthest point found
 			if (dist > maxDist) {
@@ -842,7 +845,7 @@ public:
 
 				if (isValid(newX, newY, skeleton, visited)) {
 					visited->setBit(newY, newX);
-					q.push(Point2D_Distance{ Point2D_int{(int)newX, (int)newY}, dist + (float)1.0 });
+					q.push_back(Point2D_Distance{ Point2D_int{(int)newX, (int)newY}, dist + (float)1.0 });
 				}
 			}
 		}

@@ -18,8 +18,10 @@ float perpendicularDistance(Point2D_int& point, Point2D_int& lineStart, Point2D_
 
 // Recursive function implementing the Ramer–Douglas–Peucker algorithm
 void ramerDouglasPeucker(std::vector<Point2D_int>* points, float epsilon, std::vector<Point2D_int>* output) {
-    if (points->size() < 2) {
-        if (points->size() == 1) {
+    size_t n_points = points->size();
+    Point2D_int temp_point;
+    if (n_points < 2) {
+        if (n_points == 1) {
             output->push_back(points->at(0));
             return;
         }
@@ -29,9 +31,10 @@ void ramerDouglasPeucker(std::vector<Point2D_int>* points, float epsilon, std::v
     // Find the point with the maximum distance from the line formed by the first and last points
     double maxDistance = 0;
     int index = -1;
+    temp_point = points->at(0);
 
-    for (size_t i = 1; i < points->size() - 1; ++i) {
-        double dist = perpendicularDistance(points->at(i), points->at(0), points->at(points->size() - 1));
+    for (size_t i = 1; i < n_points - 1; ++i) {
+        double dist = perpendicularDistance(points->at(i), temp_point, points->at(n_points - 1));
         if (dist > maxDistance) {
             maxDistance = dist;
             index = i;
