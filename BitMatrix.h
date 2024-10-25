@@ -687,10 +687,11 @@ public:
 
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
-	static void findLongestPath2(BitMatrix* skeleton, std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
+	static std::vector<Point2D_int>* findLongestPath2(BitMatrix* skeleton, BitMatrix* visited) {
 		// Direction vectors for 8-connected neighbors
 		static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
+		std::vector<Point2D_int>* longest_path = NULL;
 		// Start BFS from any skeleton point
 		Point2D_int start;
 		BitMatrixPosition pos;
@@ -706,15 +707,15 @@ public:
 
 
 
-		longest_path->clear();
+		//longest_path->clear();
 		if (skeleton->countNonZero() <= 0) {
-			return;
+			return NULL;
 		}
 
 
 		pos = skeleton->getFirstSetPixel();
 		if (pos.valid == false) {
-			return;
+			return NULL;
 		}
 
 		start.x = pos.column;
@@ -753,9 +754,14 @@ public:
 			used_current_path = false;
 			current_path_original_size = path->size();
 
-			if (path->size() > longest_path->size()) {
-				*longest_path = *path;
+			if (longest_path == NULL)
+			{
+				longest_path = path;
 			}
+			else if (path->size() > longest_path->size()) {
+				longest_path = path;
+			}
+
 
 			for (int i = 0; i < 8; ++i) {
 				int newX = p.x + dx[i];
@@ -788,13 +794,16 @@ public:
 				}
 			}
 			if (used_current_path == false) {
-				current->path->~vector();
-				delete (current->path);
+				if (current->path != longest_path)
+				{
+					current->path->~vector();
+					delete (current->path);
+				}
 			}
 			delete current;
 		}
 
-		//return longestPath;
+		return longest_path;
 	}
 
 

@@ -7,7 +7,7 @@
 #include <vector>
 #include "approxPolyDP.h"
 
-#define DOWNSCALE_FACTOR 2
+#define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 2
 
@@ -16,9 +16,9 @@
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
@@ -277,7 +277,7 @@ std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_appro
 std::vector<std::vector<Point2D_int>> gggg2_longest_path(BitMatrix* image, float vector_approximation_epsilon) {
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix temp(image->getRows(), image->getColumns());
-    std::vector<Point2D_int> longestPath;
+    std::vector<Point2D_int> *longestPath;
     std::vector<Point2D_int> approxCurve;
     std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
@@ -296,9 +296,13 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path(BitMatrix* image, float
         if (body.countNonZero() < MIN_LINE_LENGTH) {
             continue;
         }
-        BitMatrix::findLongestPath2(&body, &longestPath, &temp);
 
-        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
+        longestPath = BitMatrix::findLongestPath2(&body, &temp);
+        if (longestPath == NULL) {
+            continue;
+        }
+        ramerDouglasPeucker(longestPath, vector_approximation_epsilon, &approxCurve);
+        delete longestPath;
         if (approxCurve.size() > 0) {
             vectors.push_back(approxCurve);
         }
