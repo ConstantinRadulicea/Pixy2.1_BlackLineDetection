@@ -377,23 +377,23 @@ void TestVectors() {
     // Create a window
     
     // Resize the window to a specific size (adjust width and height as needed)
-    //int windowWidth = 400;  // Adjust this value to fit your screen
-    //int windowHeight = 320; // Adjust this value to fit your screen
-    //cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("original image", windowWidth, windowHeight);
-    //cv::imshow("original image", original_img);
+    int windowWidth = 400;  // Adjust this value to fit your screen
+    int windowHeight = 320; // Adjust this value to fit your screen
+    cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("original image", windowWidth, windowHeight);
+    cv::imshow("original image", original_img);
 
-    //cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("treshold", windowWidth, windowHeight);
-    //cv::imshow("treshold", image);
+    cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("treshold", windowWidth, windowHeight);
+    cv::imshow("treshold", image);
 
-    //cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("lines", windowWidth, windowHeight);
-    //cv::imshow("lines", result);
+    cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("lines", windowWidth, windowHeight);
+    cv::imshow("lines", result);
 
 
-    //TestFunction(bitmatrix_img);
-    //cv::waitKey(0);  // Wait for a key press before closing the window
+    TestFunction(bitmatrix_img);
+    cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
 void main() {
