@@ -54,6 +54,7 @@ public:
 	void init(size_t nRows, size_t nColumns) {
 		this->nRows = nRows;
 		this->nColumns = nColumns;
+		this->_total_bits = nRows * nColumns;
 		this->clear();
 	}
 
@@ -70,7 +71,7 @@ public:
 	}
 
 	inline size_t bitSize() {
-		return this->nRows * this->nColumns;
+		return _total_bits;
 	}
 
 	void clear() {
@@ -263,8 +264,9 @@ public:
 	static void AandNotB(BitMatrix* dst_A, BitMatrix* B)
 	{
 		BITARRAY_DATATYPE valueSrc1, valueSrc2, newValue;
+		size_t tot_blocks = dst_A->totBlocks();
 
-		for (size_t i = 0; i < dst_A->totBlocks(); i++)
+		for (size_t i = 0; i < tot_blocks; i++)
 		{
 			valueSrc2 = B->getBlockValue(i);
 			if (valueSrc2 == 0) {
@@ -992,6 +994,7 @@ private:
 	size_t nColumns;
 	size_t settedBits;
 	size_t getFirstSetPixel_last_index = 0;
+	size_t _total_bits;
 
 	BitMatrixPosition indexToPosition(size_t index, size_t bit_index) {
 		size_t row, col;
