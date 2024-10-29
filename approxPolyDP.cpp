@@ -2,17 +2,17 @@
 
 
 // Helper function to compute the perpendicular distance of a point from a line
-float perpendicularDistance(Point2D_int& point, Point2D_int& lineStart, Point2D_int& lineEnd) {
-    float dx = lineEnd.x - lineStart.x;
-    float dy = lineEnd.y - lineStart.y;
+float perpendicularDistance(Point2D_int* point, Point2D_int* lineStart, Point2D_int* lineEnd) {
+    float dx = lineEnd->x - lineStart->x;
+    float dy = lineEnd->y - lineStart->y;
 
     if (dx == 0 && dy == 0) {
         // The line is a single point
-        return sqrtf(powf(point.x - lineStart.x, 2) + powf(point.y - lineStart.y, 2));
+        return sqrtf(powf(point->x - lineStart->x, 2) + powf(point->y - lineStart->y, 2));
     }
 
     // Calculate the perpendicular distance using the formula
-    return fabs(dy * point.x - dx * point.y + lineEnd.x * lineStart.y - lineEnd.y * lineStart.x) /
+    return fabs(dy * point->x - dx * point->y + lineEnd->x * lineStart->y - lineEnd->y * lineStart->x) /
         sqrtf(dx * dx + dy * dy);
 }
 
@@ -34,7 +34,7 @@ void ramerDouglasPeucker(std::vector<Point2D_int>* points, float epsilon, std::v
     temp_point = points->at(0);
 
     for (size_t i = 1; i < n_points - 1; ++i) {
-        double dist = perpendicularDistance(points->at(i), temp_point, points->at(n_points - 1));
+        double dist = perpendicularDistance(&(points->at(i)), &temp_point, &(points->at(n_points - 1)));
         if (dist > maxDistance) {
             maxDistance = dist;
             index = i;
