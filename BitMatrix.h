@@ -952,19 +952,24 @@ public:
 
 
 	static void downscale(BitMatrix* _dst, BitMatrix* _src, size_t downscale_rate, float min_treshold) {
+		if (downscale_rate == 1) {
+			*_dst = *_src;
+			return;
+		}
+
 		BITARRAY_DATATYPE up_word, mid_word, down_word;
 		BITARRAY_DATATYPE right_up_word, right_mid_word, right_down_word;
 
-		size_t new_columns, new_rows;
+		size_t src_last_col, src_last_row;
 		size_t n_settedbits;
 		//size_t downscale_rate = 2;
 		_dst->clear();
-		new_columns = _src->getColumns() / (size_t)downscale_rate;
-		new_rows = _src->getRows() / (size_t)downscale_rate;
+		src_last_col = _src->getColumns() - downscale_rate;
+		src_last_row = _src->getRows() - downscale_rate;
 
-		for (size_t row = 0; row < _src->getRows() - downscale_rate; row += downscale_rate)
+		for (size_t row = 0; row < src_last_row; row += downscale_rate)
 		{
-			for (size_t col = 0; col < _src->getColumns() - downscale_rate; col += downscale_rate)
+			for (size_t col = 0; col < src_last_col; col += downscale_rate)
 			{
 				n_settedbits = 0;
 				for (size_t i = 0; i < downscale_rate; i++)

@@ -10,10 +10,13 @@
 #define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 1
+#define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
 
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
+//#define IMG_PATH "img/test2.png"
+//#define IMG_PATH "img/test3.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 #define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
@@ -391,11 +394,11 @@ void TestVectors() {
     
 
     //temp_bitmatrix_1 = bitmatrix_img;
-    //vectors = gggg(&temp_bitmatrix_1, 3.0f);
+    //vectors = gggg(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
     temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg2(&temp_bitmatrix_1, 3.0f);
+    vectors = gggg2(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
     temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg2_longest_path(&temp_bitmatrix_1, 3.0f);
+    vectors = gggg2_longest_path(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
     //temp_bitmatrix_1 = bitmatrix_img;
     //vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 
