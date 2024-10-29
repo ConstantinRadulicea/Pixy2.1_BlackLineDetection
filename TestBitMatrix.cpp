@@ -43,8 +43,8 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
 
     cv::Mat dst;
     //cv::Size newSize(320, 200);
-    int width = 200;
-    int height = (int)(width * (float)(320.0 / 200.0));
+    int width = 208;
+    int height = (int)(width * (float)(316.0 / 208.0));
     cv::Size newSize(height, width);
     // Resize the image
     cv::resize(image, dst, newSize, 0.0, 0.0, cv::INTER_LANCZOS4);
