@@ -22,6 +22,12 @@ typedef struct BitMatrixPosition {
 	bool valid;
 }BitMatrixPosition;
 
+typedef struct BitMatrixIndex {
+	size_t index;
+	size_t bit;
+	bool valid;
+}BitMatrixIndex;
+
 typedef struct Point2D_int16_t {
 	int16_t x;
 	int16_t y;
@@ -904,6 +910,40 @@ public:
 	}
 
 
+	BitMatrixPosition getNextSetPixel(size_t row, size_t col) {
+		BITARRAY_DATATYPE temp_datatype;
+		BitMatrixPosition pos;
+		size_t bit_index;
+		BitMatrixIndex start_index = this->PositionToIndex(BitMatrixPosition{row, col, true});
+
+		if (start_index.valid == false)
+		{
+			return BitMatrixPosition{ 0, 0, false };
+		}
+
+		temp_datatype = getBlockValue(start_index.index);
+		temp_datatype = temp_datatype >> (start_index.bit);
+		if (temp_datatype != 0)
+		{
+			//bit_index = indexOfFirstSettedBit(temp_datatype);
+			pos = this->indexToPosition(start_index.index, start_index.bit);
+			pos.valid = true;
+			return pos;
+		}
+		for (size_t i = (start_index.index + 1); i < this->data.size(); i++)
+		{
+			temp_datatype = getBlockValue(i);
+			if (temp_datatype != 0)
+			{
+				bit_index = indexOfFirstSettedBit(this->data[i]);
+				pos = this->indexToPosition(i, bit_index);
+				pos.valid = true;
+				return pos;
+			}
+		}
+		return BitMatrixPosition{ 0, 0, false };
+	}
+
 	//BitMatrixPosition getFirstSetPixelOnRow(size_t row) {
 	//	BitMatrixPosition pos;
 	//	size_t bit_index;
@@ -1020,19 +1060,9 @@ public:
 		}
 	}
 
-
-	~BitMatrix() {
-		data.~vector();
+	BitMatrixPosition indexToPosition(BitMatrixIndex _index) {
+		return indexToPosition(_index.index, _index.bit);
 	}
-
-
-private:
-	std::vector<BITARRAY_DATATYPE> data;
-	size_t nRows;
-	size_t nColumns;
-	size_t settedBits;
-	size_t getFirstSetPixel_last_index = 0;
-	size_t _total_bits;
 
 	BitMatrixPosition indexToPosition(size_t index, size_t bit_index) {
 		size_t row, col;
@@ -1054,6 +1084,33 @@ private:
 		}
 		return BitMatrixPosition{ row , col, valid };
 	}
+
+	BitMatrixIndex PositionToIndex(BitMatrixPosition pos) {
+		BitMatrixIndex _index;
+		if (pos.row > this->nRows || pos.column > this->nColumns)
+		{
+			return BitMatrixIndex{ 0, 0, false };
+		}
+		register size_t offset = (pos.row * this->nColumns) + pos.column;
+		_index.valid = true;
+		_index.index = offset / BITARRAY_DATATYPE_BITS;
+		_index.bit = offset % BITARRAY_DATATYPE_BITS;
+		return _index;
+	}
+
+	~BitMatrix() {
+		data.~vector();
+	}
+
+
+private:
+	std::vector<BITARRAY_DATATYPE> data;
+	size_t nRows;
+	size_t nColumns;
+	size_t settedBits;
+	size_t getFirstSetPixel_last_index = 0;
+	size_t _total_bits;
+
 
 	size_t indexOfFirstSettedBit(BITARRAY_DATATYPE byte) {
 		for (size_t i = 0; i < BITARRAY_DATATYPE_BITS; i++)

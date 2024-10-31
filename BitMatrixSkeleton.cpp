@@ -973,19 +973,24 @@ int iteration1_2(BitMatrix* img, BitMatrix* marker, int iter) {
     n_rows = img->getRows() - 1;
     n_cols = img->getColumns() - 1;
 
-    for (size_t row = 1; row < n_rows; row++) {
-        for (size_t col = 1; col < n_cols; col++) {
-            //if (img->getBlockValue(((img->getColumns() * row))+col) / BITARRAY_DATATYPE_BITS)
-            //{
+    row = 1;
+    col = 0;
+    //for (size_t row = 1; row < n_rows; row++) {
+    //    for (size_t col = 1; col < n_cols; col++) {
 
-            //}
-    //pos = img->getFirstSetPixel();
-    //    while (pos.valid) {
-    //        row = pos.row;
-    //        col = pos.column;
-    //        if (row <= 1 || row >= n_rows || col <= 1 || row >= n_cols) {
-    //            continue;
-    //        }
+        while (true) {
+            //row += 1;
+            col += 1;
+            pos = img->getNextSetPixel(row, col);
+            if (pos.valid == false) {
+                break;
+            }
+            row = pos.row;
+            col = pos.column;
+
+            if ((row < 1 || row >= n_rows || col < 1 || row >= n_cols)) {
+                continue;
+            }
             window.P1 = img->getBit(row, col);
             if (window.P1 == false) {
                 continue;
@@ -1043,9 +1048,9 @@ int iteration1_2(BitMatrix* img, BitMatrix* marker, int iter) {
                 marker->setBit(row, col);
                 bits_deleted++;
             }
-                }
-            }
-        //}
+            //    }
+            //}
+        }
     return bits_deleted;
 }
 
@@ -1068,7 +1073,7 @@ void BitMatrixSkeletonZS(BitMatrix* matrix, BitMatrix *marker) {
     bits_deleted += iteration1_edges_bottom(matrix, marker, 0);
     bits_deleted += iteration1_edges_left(matrix, marker, 0);
     bits_deleted += iteration1_edges_right(matrix, marker, 0);
-    bits_deleted += iteration1(matrix, marker, 0);
+    bits_deleted += iteration1_2(matrix, marker, 0);
     BitMatrix::AandNotB(matrix, marker);
 
     bits_deleted += iteration1_edge_top_left(matrix, marker, 1);
@@ -1079,7 +1084,7 @@ void BitMatrixSkeletonZS(BitMatrix* matrix, BitMatrix *marker) {
     bits_deleted += iteration1_edges_bottom(matrix, marker, 1);
     bits_deleted += iteration1_edges_left(matrix, marker, 1);
     bits_deleted += iteration1_edges_right(matrix, marker, 1);
-    bits_deleted += iteration1(matrix, marker, 1);
+    bits_deleted += iteration1_2(matrix, marker, 1);
     BitMatrix::AandNotB(matrix, marker);
 
 
