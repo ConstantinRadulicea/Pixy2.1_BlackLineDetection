@@ -874,6 +874,7 @@ int iteration1_edges_right(BitMatrix* img, BitMatrix* marker, int iter) {
     return bits_deleted;
 }
 
+
 /*
 P9  P2  P3
 P8  P1  P4
@@ -896,9 +897,9 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
                 continue;
             }
 
-            window.P2 = img->getBit(row-1, col);
-            window.P4 = img->getBit(row, col+1);
-            
+            window.P2 = img->getBit(row - 1, col);
+            window.P4 = img->getBit(row, col + 1);
+
 
             if (iter == 0) {
                 window.P6 = img->getBit(row + 1, col);
@@ -942,7 +943,7 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
 
             if (!((2 <= bit_sum) && (bit_sum <= 6))) {
                 continue;
-                
+
             }
             if (getWhiteBlackTransitions(&window) == 1) {
                 marker->setBit(row, col);
@@ -950,6 +951,101 @@ int iteration1(BitMatrix* img, BitMatrix* marker, int iter) {
             }
         }
     }
+    return bits_deleted;
+}
+
+
+
+/*
+P9  P2  P3
+P8  P1  P4
+P7  P6  P5
+*/
+int iteration1_2(BitMatrix* img, BitMatrix* marker, int iter) {
+    struct mat_9x9 window;
+    size_t bits_deleted;
+    size_t n_rows, n_cols;
+    int bit_sum;
+    BitMatrixPosition pos;
+    size_t row, col;
+
+    bits_deleted = 0;
+    n_rows = img->getRows() - 1;
+    n_cols = img->getColumns() - 1;
+
+    for (size_t row = 1; row < n_rows; row++) {
+        for (size_t col = 1; col < n_cols; col++) {
+            //if (img->getBlockValue(((img->getColumns() * row))+col) / BITARRAY_DATATYPE_BITS)
+            //{
+
+            //}
+    //pos = img->getFirstSetPixel();
+    //    while (pos.valid) {
+    //        row = pos.row;
+    //        col = pos.column;
+    //        if (row <= 1 || row >= n_rows || col <= 1 || row >= n_cols) {
+    //            continue;
+    //        }
+            window.P1 = img->getBit(row, col);
+            if (window.P1 == false) {
+                continue;
+            }
+
+            window.P2 = img->getBit(row - 1, col);
+            window.P4 = img->getBit(row, col + 1);
+
+
+            if (iter == 0) {
+                window.P6 = img->getBit(row + 1, col);
+                if ((window.P2 && window.P4 && window.P6)) {
+                    continue;
+                }
+
+                window.P8 = img->getBit(row, col - 1);
+                if ((window.P4 && window.P6 && window.P8)) {
+                    continue;
+                }
+            }
+            else if (iter == 1) {
+                window.P8 = img->getBit(row, col - 1);
+                if ((window.P2 && window.P4 && window.P8)) {
+                    continue;
+                }
+
+                window.P6 = img->getBit(row + 1, col);
+                if ((window.P2 && window.P6 && window.P8)) {
+                    continue;
+                }
+            }
+
+            window.P3 = img->getBit(row - 1, col + 1);
+            window.P5 = img->getBit(row + 1, col + 1);
+            window.P7 = img->getBit(row + 1, col - 1);
+            window.P9 = img->getBit(row - 1, col - 1);
+
+
+
+            bit_sum =
+                (int)window.P2 +
+                (int)window.P3 +
+                (int)window.P4 +
+                (int)window.P5 +
+                (int)window.P6 +
+                (int)window.P7 +
+                (int)window.P8 +
+                (int)window.P9;
+
+            if (!((2 <= bit_sum) && (bit_sum <= 6))) {
+                continue;
+
+            }
+            if (getWhiteBlackTransitions(&window) == 1) {
+                marker->setBit(row, col);
+                bits_deleted++;
+            }
+                }
+            }
+        //}
     return bits_deleted;
 }
 
@@ -988,9 +1084,9 @@ void BitMatrixSkeletonZS(BitMatrix* matrix, BitMatrix *marker) {
 
 
     while (bits_deleted > 0) {
-        bits_deleted = iteration1(matrix, marker, 0);
+        bits_deleted = iteration1_2(matrix, marker, 0);
         BitMatrix::AandNotB(matrix, marker);
-        bits_deleted += iteration1(matrix, marker, 1);
+        bits_deleted += iteration1_2(matrix, marker, 1);
         BitMatrix::AandNotB(matrix, marker);
     }
 }

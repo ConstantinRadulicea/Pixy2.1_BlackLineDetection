@@ -8,7 +8,7 @@
 #include "approxPolyDP.h"
 #include "Matrix.h"
 
-#define DOWNSCALE_FACTOR 4
+#define DOWNSCALE_FACTOR 1
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
@@ -21,11 +21,11 @@
 //#define IMG_PATH "img/test3.png"
 //#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
-#define IMG_PATH "img/20241002_194842.jpg" // curve 3
+//#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
 
 cv::Mat convertToBayerPattern(const cv::Mat& inputImage) {
@@ -354,10 +354,6 @@ void TestVectors() {
     cv::namedWindow("baiern", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("baiern", windowWidth, windowHeight);
     cv::imshow("baiern", baiern_img);
-
-    //cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    //cv::resizeWindow("treshold", windowWidth, windowHeight);
-    //cv::imshow("treshold", image);
 
     cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("lines", windowWidth, windowHeight);

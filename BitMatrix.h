@@ -903,6 +903,40 @@ public:
 		return BitMatrixPosition{ 0, 0, false };
 	}
 
+
+	//BitMatrixPosition getFirstSetPixelOnRow(size_t row) {
+	//	BitMatrixPosition pos;
+	//	size_t bit_index;
+	//	size_t block_index = (this->getColumns() * row) / BITARRAY_DATATYPE_BITS;
+
+	//	for (; i < this->data.size(); i++) {
+	//		if (this->data[i] != 0)
+	//		{
+	//			bit_index = indexOfFirstSettedBit(this->data[i]);
+	//			pos = this->indexToPosition(i, bit_index);
+	//			pos.valid = true;
+	//			return pos;
+	//		}
+	//	}
+	//	if (getFirstSetPixel_last_index >= this->data.size()) {
+	//		getFirstSetPixel_last_index = 0;
+	//	}
+
+	//	for (; i < start_index; i++) {
+	//		if (this->data[i] != 0)
+	//		{
+	//			bit_index = indexOfFirstSettedBit(this->data[i]);
+	//			pos = this->indexToPosition(i, bit_index);
+	//			pos.valid = true;
+	//			return pos;
+	//		}
+	//	}
+	//	this->settedBits = 0;
+	//	return BitMatrixPosition{ 0, 0, false };
+	//}
+
+
+
 	BitMatrixPosition getFirstUnsetPixel() {
 		for (size_t row = 0; row < this->getRows(); row++) {
 			for (size_t col = 0; col < this->getColumns(); col++)
