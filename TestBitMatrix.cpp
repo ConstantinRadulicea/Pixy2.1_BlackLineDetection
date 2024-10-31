@@ -6,24 +6,71 @@
 #include <string>
 #include <vector>
 #include "approxPolyDP.h"
+#include "Matrix.h"
 
 #define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
+#define BLACK_TRERSHOLD 0.2f
 
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/test2.png"
 //#define IMG_PATH "img/test3.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
+
+
+cv::Mat convertToBayerPattern(const cv::Mat& inputImage) {
+    if (inputImage.empty()) {
+        throw std::invalid_argument("Input image is empty.");
+    }
+
+    // Ensure the image is in BGR format
+    cv::Mat bgrImage;
+    if (inputImage.channels() == 1) {
+        cv::cvtColor(inputImage, bgrImage, cv::COLOR_GRAY2BGR);
+    }
+    else {
+        bgrImage = inputImage.clone();
+    }
+
+    // Create an empty Bayer pattern image
+    cv::Mat bayerImage(bgrImage.size(), CV_8UC1);
+
+    // Assign Bayer pattern (RGGB)
+    for (int y = 0; y < bgrImage.rows; ++y) {
+        for (int x = 0; x < bgrImage.cols; ++x) {
+            // Bayer pattern: RGGB
+            if ((y % 2 == 0) && (x % 2 == 0)) {
+                // Red pixel (R)
+                bayerImage.at<uchar>(y, x) = bgrImage.at<cv::Vec3b>(y, x)[2];
+            }
+            else if ((y % 2 == 0) && (x % 2 == 1)) {
+                // Green pixel (G1)
+                bayerImage.at<uchar>(y, x) = bgrImage.at<cv::Vec3b>(y, x)[1];
+            }
+            else if ((y % 2 == 1) && (x % 2 == 0)) {
+                // Green pixel (G2)
+                bayerImage.at<uchar>(y, x) = bgrImage.at<cv::Vec3b>(y, x)[1];
+            }
+            else {
+                // Blue pixel (B)
+                bayerImage.at<uchar>(y, x) = bgrImage.at<cv::Vec3b>(y, x)[0];
+            }
+        }
+    }
+
+    return bayerImage;
+}
+
 
 
 BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
@@ -49,6 +96,7 @@ BitMatrix imgToBitMatrix(const char* _img_path, float black_treshold) {
     // Resize the image
     cv::resize(image, dst, newSize, 0.0, 0.0, cv::INTER_LANCZOS4);
     //cv::resize(image, dst, newSize);
+    //image = convertToBayerPattern(dst);
     image = dst;
 
 
@@ -278,9 +326,10 @@ std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_appro
 }
 
 std::vector<std::vector<Point2D_int>> gggg2_longest_path(BitMatrix* image, float vector_approximation_epsilon) {
+
     BitMatrix body(image->getRows(), image->getColumns());
     BitMatrix temp(image->getRows(), image->getColumns());
-    std::vector<Point2D_int> *longestPath;
+    std::vector<Point2D_int>* longestPath;
     std::vector<Point2D_int> approxCurve;
     std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
@@ -295,6 +344,147 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path(BitMatrix* image, float
             break;
         }
         image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
+
+        if (body.countNonZero() < MIN_LINE_LENGTH) {
+            continue;
+        }
+
+        longestPath = BitMatrix::findLongestPath2(&body, &temp);
+        if (longestPath == NULL) {
+            continue;
+        }
+        ramerDouglasPeucker(longestPath, vector_approximation_epsilon, &approxCurve);
+        delete longestPath;
+        if (approxCurve.size() > 0) {
+            vectors.push_back(approxCurve);
+        }
+        approxCurve.clear();
+
+    }
+
+    // End time
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate the duration
+    std::chrono::duration<double> duration = end - start;
+    // Output the result in seconds
+    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
+
+    return vectors;
+}
+
+void interpolate(uint8_t* frame, uint16_t x, uint16_t y, uint16_t width, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    uint8_t* pixel = frame + y * width + x;
+    if (y & 1)
+    {
+        if (x & 1)
+        {
+            *r = *pixel;
+            *g = (*(pixel - 1) + *(pixel + 1) + *(pixel + width) + *(pixel - width)) >> 2;
+            *b = (*(pixel - width - 1) + *(pixel - width + 1) + *(pixel + width - 1) + *(pixel + width + 1)) >> 2;
+        }
+        else
+        {
+            *r = (*(pixel - 1) + *(pixel + 1)) >> 1;
+            *g = *pixel;
+            *b = (*(pixel - width) + *(pixel + width)) >> 1;
+        }
+    }
+    else
+    {
+        if (x & 1)
+        {
+            *r = (*(pixel - width) + *(pixel + width)) >> 1;
+            *g = *pixel;
+            *b = (*(pixel - 1) + *(pixel + 1)) >> 1;
+        }
+        else
+        {
+            *r = (*(pixel - width - 1) + *(pixel - width + 1) + *(pixel + width - 1) + *(pixel + width + 1)) >> 2;
+            *g = (*(pixel - 1) + *(pixel + 1) + *(pixel + width) + *(pixel - width)) >> 2;
+            *b = *pixel;
+        }
+    }
+}
+
+
+void baiernToBitmatrix(uint8_t* frame, BitMatrix* _matrix, uint16_t height, uint16_t width, float black_treshold) {
+    RGBcolor pixel;
+    HSVcolor hsv;
+    uint8_t luminosity;
+    _matrix->clear();
+    for (uint16_t row = 0; row < height; row++)
+    {
+        for (uint16_t col = 0; col < (width); col++) {
+
+            luminosity = frame[(row * width) + col];
+
+            if (luminosity <= (black_treshold * 255)) {
+                _matrix->setBit(row, col);
+            }
+            else {
+                _matrix->unsetBit(row, col);
+            }
+        }
+    }
+
+}
+
+
+static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_treshold) {
+    if (downscale_rate == 1) {
+        baiernToBitmatrix(_src, _dst, height, width, min_treshold);
+        return;
+    }
+
+    size_t src_last_col, src_last_row;
+    size_t n_settedbits;
+    //size_t downscale_rate = 2;
+    _dst->clear();
+    src_last_col = width - downscale_rate;
+    src_last_row = height - downscale_rate;
+
+    for (size_t row = 0; row < src_last_row; row += downscale_rate)
+    {
+        for (size_t col = 0; col < src_last_col; col += downscale_rate)
+        {
+            n_settedbits = 0;
+            for (size_t i = 0; i < downscale_rate; i++)
+            {
+                for (size_t j = 0; j < downscale_rate; j++)
+                {
+                    n_settedbits += _src[(width * (row + i)) + (col + j)];
+                }
+            }
+            if (n_settedbits <= (size_t)(((downscale_rate * downscale_rate) * (min_treshold * 255)))) {
+                _dst->setBit(row / downscale_rate, col / downscale_rate);
+            }
+        }
+    }
+}
+
+
+std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>* baiern_image, float vector_approximation_epsilon) {
+    BitMatrix image(baiern_image->getRows() / DOWNSCALE_FACTOR, baiern_image->getCols() / DOWNSCALE_FACTOR);
+    BitMatrix body(image.getRows(), image.getColumns());
+    BitMatrix temp(image.getRows(), image.getColumns());
+    std::vector<Point2D_int>* longestPath;
+    std::vector<Point2D_int> approxCurve;
+    std::vector<std::vector<Point2D_int>> vectors;
+    BitMatrixPosition pixelPosition;
+
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
+    //baiernToBitmatrix((uint8_t*)(baiern_image->data()), &image, image.getRows(), image.getColumns(), BLACK_TRERSHOLD);
+    baiernToBitmatrixDownscale(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
+    BitMatrixSkeletonZS(&image, &temp);
+    for (;;)
+    {
+        pixelPosition = image.getFirstSetPixel();
+        if (!(pixelPosition.valid)) {
+            break;
+        }
+        image.floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
 
         if (body.countNonZero() < MIN_LINE_LENGTH) {
             continue;
@@ -386,6 +576,8 @@ cv::Mat TestFunction(BitMatrix bitmatrix_img) {
 void TestVectors() {
     std::vector<std::vector<Point2D_int>> vectors;
     cv::Mat original_img = cv::imread(IMG_PATH);
+    
+
     char file_path[] = IMG_PATH;
     BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
     BitMatrix temp_bitmatrix_1 = bitmatrix_img;
@@ -399,6 +591,21 @@ void TestVectors() {
     vectors = gggg2(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
     temp_bitmatrix_1 = bitmatrix_img;
     vectors = gggg2_longest_path(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
+
+
+
+
+    cv::Mat dst;
+    //cv::Size newSize(320, 200);
+    int width = 208;
+    int height = (int)(width * (float)(316.0 / 208.0));
+    cv::Size newSize(height, width);
+    // Resize the image
+    cv::resize(original_img, dst, newSize, 0.0, 0.0, cv::INTER_LANCZOS4);
+
+    cv::Mat baiern_img = convertToBayerPattern(dst);
+    Matrix<uint8_t> temp_baiern_matrix = matToMatrix<uint8_t>(baiern_img);
+    vectors = gggg2_longest_path_baiern(&temp_baiern_matrix, VECTOR_APPROXIMATION_EPSILON);
     //temp_bitmatrix_1 = bitmatrix_img;
     //vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 
@@ -448,8 +655,16 @@ void TestVectors() {
     cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
-void main() {
 
+
+
+
+
+void main() {
     TestVectors();
 	//TestBitMatrix();
 }
+
+
+
+

@@ -2,7 +2,8 @@
 #define __RGB2HSV_H__
 
 
-#include<stdint.h>
+#include <stdint.h>
+#include <float.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -35,8 +36,9 @@ static HSVcolor rgb2hsv(RGBcolor rgbColor) {
 	float del_Max = var_Max - var_Min;             //Delta RGB value
 
 	hsvColor.V = var_Max;
-
-	if (del_Max == 0.0f)                     //This is a gray, no chroma...
+	
+		
+	if (fabs(del_Max) < FLT_EPSILON)                     //This is a gray, no chroma...
 	{
 		hsvColor.H = 0.0f;
 		hsvColor.S = 0.0f;

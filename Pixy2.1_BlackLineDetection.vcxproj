@@ -154,6 +154,7 @@
     <ClInclude Include="img3.h" />
     <ClInclude Include="img4.h" />
     <ClInclude Include="img5.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="rgb2hsv.h" />
     <ClInclude Include="BitMatrixSkeleton.h" />
   </ItemGroup>
