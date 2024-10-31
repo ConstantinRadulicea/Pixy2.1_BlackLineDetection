@@ -28,6 +28,88 @@
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
 
+
+/*
+
+R G R G R
+G B G B G
+R G R G R
+
+
+Blue pixel:
+Red = (R1 + R2 + R3 + R4) / 4
+Blue = Blue
+Green = (G1 + G2 + G3 + G4) / 4
+
+Green pixel:
+Red = (R1 + R2) / 2
+Blue = (B1 + B2) / 2
+Green = Green
+
+Red pixel:
+Red = Red
+Blue = (B1 + B2 + B3 + B4) / 4
+Green = (G1 + G2 + G3 + G4) / 4
+*/
+
+
+void interpolate(uint8_t* frame, uint16_t x, uint16_t y, uint16_t height, uint16_t width, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    uint8_t* pixel = frame + y * width + x;
+    if ((x > 0 && x < (width - 1)) && (y > 0 && y < (height - 1)))
+    {
+        if (y & 1)
+        {
+            if (x & 1)
+            {
+                *r = *pixel;
+                *g = (*(pixel - 1) + *(pixel + 1) + *(pixel + width) + *(pixel - width)) >> 2;
+                *b = (*(pixel - width - 1) + *(pixel - width + 1) + *(pixel + width - 1) + *(pixel + width + 1)) >> 2;
+            }
+            else
+            {
+                *r = (*(pixel - 1) + *(pixel + 1)) >> 1;
+                *g = *pixel;
+                *b = (*(pixel - width) + *(pixel + width)) >> 1;
+            }
+        }
+        else
+        {
+            if (x & 1)
+            {
+                *r = (*(pixel - width) + *(pixel + width)) >> 1;
+                *g = *pixel;
+                *b = (*(pixel - 1) + *(pixel + 1)) >> 1;
+            }
+            else
+            {
+                *r = (*(pixel - width - 1) + *(pixel - width + 1) + *(pixel + width - 1) + *(pixel + width + 1)) >> 2;
+                *g = (*(pixel - 1) + *(pixel + 1) + *(pixel + width) + *(pixel - width)) >> 2;
+                *b = *pixel;
+            }
+        }
+    }
+    else {
+        *r = 0;
+        *g = 0;
+        *b = 0;
+    }
+
+    if (y == 0) {
+
+    }
+    else if (y >= (height - 1)) {
+
+    }
+    else if (x == 0) {
+
+    }
+    else if (x >= (width - 1))
+    {
+
+    }
+}
+
 cv::Mat convertToBayerPattern(const cv::Mat& inputImage) {
     if (inputImage.empty()) {
         throw std::invalid_argument("Input image is empty.");
