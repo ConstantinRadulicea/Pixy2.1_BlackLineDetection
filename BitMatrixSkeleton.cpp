@@ -981,10 +981,6 @@ int iteration1_2(BitMatrix* img, BitMatrix* marker, int iter) {
         while (true) {
             //row += 1;
             col += 1;
-            if (row == 1 && col == 119)
-            {
-                int wafadc = 1;
-            }
             pos = img->getNextSetPixel(row, col);
             if (pos.valid == false) {
                 break;

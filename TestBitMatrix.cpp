@@ -8,7 +8,7 @@
 #include "approxPolyDP.h"
 #include "Matrix.h"
 
-#define DOWNSCALE_FACTOR 1
+#define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
@@ -23,7 +23,7 @@
 
 #define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
-//#define IMG_PATH "img/20241002_194812.jpg" // curve 1
+//#define IMG_PATH "img/20241002_194812.jpg" // curve 1 with noise
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
 //#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
@@ -90,24 +90,24 @@ void interpolate(uint8_t* frame, uint16_t x, uint16_t y, uint16_t height, uint16
         }
     }
     else {
-        *r = 0;
-        *g = 0;
-        *b = 0;
+        *r = 255;
+        *g = 255;
+        *b = 255;
     }
 
-    if (y == 0) {
+    //if (y == 0) {
 
-    }
-    else if (y >= (height - 1)) {
+    //}
+    //else if (y >= (height - 1)) {
 
-    }
-    else if (x == 0) {
+    //}
+    //else if (x == 0) {
 
-    }
-    else if (x >= (width - 1))
-    {
+    //}
+    //else if (x >= (width - 1))
+    //{
 
-    }
+    //}
 }
 
 cv::Mat convertToBayerPattern(const cv::Mat& inputImage) {
@@ -276,13 +276,16 @@ void baiernToBitmatrix(uint8_t* frame, BitMatrix* _matrix, uint16_t height, uint
 
 
 static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_treshold) {
-    if (downscale_rate == 1) {
-        baiernToBitmatrix(_src, _dst, height, width, min_treshold);
-        return;
-    }
 
+    RGBcolor rgb_pixel;
+    RGBcolor rgb_new_pixel;
+    float luminosity;
+    uint16_t R;
+    uint16_t G;
+    uint16_t B;
     size_t src_last_col, src_last_row;
     size_t n_settedbits;
+    size_t tot_avg_pixels = downscale_rate * downscale_rate;
     //size_t downscale_rate = 2;
     _dst->clear();
     src_last_col = width - downscale_rate;
@@ -292,15 +295,26 @@ static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t 
     {
         for (size_t col = 0; col < src_last_col; col += downscale_rate)
         {
-            n_settedbits = 0;
+            //n_settedbits = 0;
+            R = 0;
+            G = 0;
+            B = 0;
             for (size_t i = 0; i < downscale_rate; i++)
             {
                 for (size_t j = 0; j < downscale_rate; j++)
                 {
-                    n_settedbits += _src[(width * (row + i)) + (col + j)];
+                    interpolate(_src, col+j, row+i, height, width, &rgb_pixel.R, &rgb_pixel.G, &rgb_pixel.B);
+                    R += rgb_pixel.R;
+                    G += rgb_pixel.G;
+                    B += rgb_pixel.B;
+                    //n_settedbits += _src[(width * (row + i)) + (col + j)];
                 }
             }
-            if (n_settedbits <= (size_t)(((downscale_rate * downscale_rate) * (min_treshold * 255.0f)))) {
+            rgb_new_pixel.R = R / tot_avg_pixels;
+            rgb_new_pixel.G = G / tot_avg_pixels;
+            rgb_new_pixel.B = B / tot_avg_pixels;
+            luminosity = rgb2hsv(rgb_new_pixel).V;
+            if (luminosity <= min_treshold) {
                 _dst->setBit(row / downscale_rate, col / downscale_rate);
             }
         }
