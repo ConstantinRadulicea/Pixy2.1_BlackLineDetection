@@ -977,10 +977,14 @@ int iteration1_2(BitMatrix* img, BitMatrix* marker, int iter) {
     col = 0;
     //for (size_t row = 1; row < n_rows; row++) {
     //    for (size_t col = 1; col < n_cols; col++) {
-
+    window.P1 = true;
         while (true) {
             //row += 1;
             col += 1;
+            if (row == 1 && col == 119)
+            {
+                int wafadc = 1;
+            }
             pos = img->getNextSetPixel(row, col);
             if (pos.valid == false) {
                 break;
@@ -991,10 +995,12 @@ int iteration1_2(BitMatrix* img, BitMatrix* marker, int iter) {
             if ((row < 1 || row >= n_rows || col < 1 || row >= n_cols)) {
                 continue;
             }
-            window.P1 = img->getBit(row, col);
-            if (window.P1 == false) {
-                continue;
-            }
+            //window.P1 = img->getBit(row, col);
+            //if (window.P1 == false) {
+            //    continue;
+            //}
+
+            
 
             window.P2 = img->getBit(row - 1, col);
             window.P4 = img->getBit(row, col + 1);

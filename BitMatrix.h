@@ -925,8 +925,8 @@ public:
 		temp_datatype = temp_datatype >> (start_index.bit);
 		if (temp_datatype != 0)
 		{
-			//bit_index = indexOfFirstSettedBit(temp_datatype);
-			pos = this->indexToPosition(start_index.index, start_index.bit);
+			bit_index = indexOfFirstSettedBit(temp_datatype);
+			pos = this->indexToPosition(start_index.index, start_index.bit + bit_index);
 			pos.valid = true;
 			return pos;
 		}
