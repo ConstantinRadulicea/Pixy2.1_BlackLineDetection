@@ -8,24 +8,24 @@
 #include "approxPolyDP.h"
 #include "Matrix.h"
 
-#define DOWNSCALE_FACTOR 1
+#define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
-#define BLACK_TRERSHOLD 0.2f
+#define BLACK_TRERSHOLD 0.3f
 
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/test2.png"
 //#define IMG_PATH "img/test3.png"
-#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
 //#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
-//#define IMG_PATH "img/20241002_194842.jpg" // curve 3
+#define IMG_PATH "img/20241002_194842.jpg" // curve 3
 
 
 cv::Mat convertToBayerPattern(const cv::Mat& inputImage) {
@@ -218,7 +218,7 @@ static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t 
                     n_settedbits += _src[(width * (row + i)) + (col + j)];
                 }
             }
-            if (n_settedbits <= (size_t)(((downscale_rate * downscale_rate) * (min_treshold * 255)))) {
+            if (n_settedbits <= (size_t)(((downscale_rate * downscale_rate) * (min_treshold * 255.0f)))) {
                 _dst->setBit(row / downscale_rate, col / downscale_rate);
             }
         }
@@ -237,7 +237,6 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
-    //baiernToBitmatrix((uint8_t*)(baiern_image->data()), &image, image.getRows(), image.getColumns(), BLACK_TRERSHOLD);
     baiernToBitmatrixDownscale(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
     BitMatrixSkeletonZS(&image, &temp);
     for (;;)
@@ -329,7 +328,7 @@ void TestVectors() {
     }
 
 
-    cv::Mat result = cv::Mat::zeros(baiern_img.rows, baiern_img.cols, CV_8UC3);  // Create a blank canvas
+    cv::Mat result = cv::Mat::zeros(baiern_img.rows / DOWNSCALE_FACTOR, baiern_img.cols / DOWNSCALE_FACTOR, CV_8UC3);  // Create a blank canvas
     cv::RNG rng(time(0));
     for (size_t i = 0; i < approxCurve.size(); i++)
     {
