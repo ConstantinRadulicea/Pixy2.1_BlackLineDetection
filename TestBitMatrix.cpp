@@ -8,7 +8,7 @@
 #include "approxPolyDP.h"
 #include "Matrix.h"
 
-#define DOWNSCALE_FACTOR 4
+#define DOWNSCALE_FACTOR 1
 #define DOWNSCALE_COLOR_TRESHOLD 0.3f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
@@ -170,244 +170,6 @@ std::vector<cv::Point> bitMatrixToArray(BitMatrix& bit_matrix) {
 }
 
 
-void TestBitMatrix() {
-    BitMatrix bitmatrix_img, temp_bitmatrix, temp_skeleton_bitmatrix;
-    cv::Mat image, skeleton;
-    const char file_path[] = IMG_PATH;
-    bitmatrix_img = imgToBitMatrix(file_path, 0.25);
-    image = bitMatrixToMat(bitmatrix_img);
-    cv::imshow("image", image);
-
-    BitMatrixPosition temp_bitmatrixpos = bitmatrix_img.getFirstSetPixel();
-
-    temp_bitmatrix = bitmatrix_img.floodFillOnes(temp_bitmatrixpos.row, temp_bitmatrixpos.column);
-    cv::imshow("temp_bitmatrix", bitMatrixToMat(temp_bitmatrix));
-
-    BitMatrixSkeleton(&temp_bitmatrix, &temp_skeleton_bitmatrix);
-    cv::imshow("temp_skeleton_bitmatrix", bitMatrixToMat(temp_skeleton_bitmatrix));
-
-
-    
-    skeleton = bitMatrixToMat(temp_skeleton_bitmatrix);
-
-    /*
-    // Find the longest path in the skeleton
-    std::vector<cv::Point> longestPath = findLongestPath(skeleton);
-
-
-    */
-
-    std::vector<Point2D_int> longestPath_Point2D = temp_skeleton_bitmatrix.findLongestPath();
-
-    std::vector<cv::Point>longestPath;
-    for (size_t i = 0; i < longestPath_Point2D.size(); i++) {
-        longestPath.push_back(cv::Point(longestPath_Point2D[i].x, longestPath_Point2D[i].y));
-    }
-
-    // Visualize the longest path
-    cv::Mat pathImage = cv::Mat::zeros(skeleton.size(), CV_8UC3);
-    for (size_t i = 0; i < longestPath.size() - 1; ++i) {
-        cv::line(pathImage, longestPath[i], longestPath[i + 1], cv::Scalar(0, 255, 0), 1);
-    }
-    cv::imshow("Longhest path", pathImage);
-
-    std::vector<cv::Point> approxCurve;
-    //double epsilon = 1;  // Tolerance value for approximation
-    //cv::approxPolyDP(longestPath, approxCurve, epsilon, false);  // Simplify the first contour
-    
-    
-    std::vector<Point2D_int> approxCurve_Point2D;
-    double epsilon = 1;  // Tolerance value for approximation
-    approxCurve_Point2D = approxPolyDP(longestPath_Point2D, epsilon);
-
-    for (size_t i = 0; i < approxCurve_Point2D.size(); i++) {
-        approxCurve.push_back(cv::Point(approxCurve_Point2D[i].x, approxCurve_Point2D[i].y));
-    }
-
-
-    cv::Mat result = cv::Mat::zeros(skeleton.size(), CV_8UC3);  // Create a blank canvas
-
-    // Draw the simplified skeleton using the approximate curve
-    for (size_t i = 0; i < approxCurve.size() - 1; ++i) {
-        cv::line(result, approxCurve[i], approxCurve[i + 1], cv::Scalar(0, 255, 0), 1);
-    }
-
-    // Display the result
-    cv::imshow("Simplified Skeleton", result);
-    
-    cv::waitKey(0);  // Wait for a key press before closing the window
-}
-
-
-std::vector<std::vector<Point2D_int>> gggg(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D_int>> vectors;
-    BitMatrixPosition pixelPosition;
-    BitMatrix body(image->getRows(), image->getColumns());
-    BitMatrix body_skeleton(image->getRows(), image->getColumns());
-    std::vector<Point2D_int> longestPath;
-    std::vector<Point2D_int> approxCurve;
-
-    // Start time
-    auto start = std::chrono::high_resolution_clock::now();
-    for (;;)
-    {
-        pixelPosition = image->getFirstSetPixel();
-        if (!(pixelPosition.valid)) {
-            break;
-        }
-        image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
-
-        if (body.countNonZero() < 8) {
-            continue;
-        }
-        BitMatrixSkeleton(&body);
-        body.findLongestPath(&longestPath);
-
-        
-        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        if (approxCurve.size() > 1) {
-            vectors.push_back(approxCurve);
-        }
-        
-        approxCurve.clear();
-    }
-
-    // End time
-    auto end = std::chrono::high_resolution_clock::now();
-    // Calculate the duration
-    std::chrono::duration<double> duration = end - start;
-    // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
-
-    return vectors;
-}
-
-
-std::vector<std::vector<Point2D_int>> gggg2(BitMatrix* image, float vector_approximation_epsilon) {
-    BitMatrix body(image->getRows(), image->getColumns());
-    BitMatrix temp(image->getRows(), image->getColumns());
-    std::vector<Point2D_int> longestPath;
-    std::vector<Point2D_int> approxCurve;
-    std::vector<std::vector<Point2D_int>> vectors;
-    BitMatrixPosition pixelPosition;
-
-    // Start time
-    auto start = std::chrono::high_resolution_clock::now();
-    BitMatrixSkeletonZS(image, &temp);
-    for (;;)
-    {
-        pixelPosition = image->getFirstSetPixel();
-        if (!(pixelPosition.valid)) {
-            break;
-        }
-        image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
-
-        if (body.countNonZero() < MIN_LINE_LENGTH) {
-            continue;
-        }
-        body.findLongestPath(&longestPath, &temp);
-
-        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        if (approxCurve.size() > 0) {
-            vectors.push_back(approxCurve);
-        }
-        approxCurve.clear();
-
-    }
-
-    // End time
-    auto end = std::chrono::high_resolution_clock::now();
-    // Calculate the duration
-    std::chrono::duration<double> duration = end - start;
-    // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
-
-    return vectors;
-}
-
-std::vector<std::vector<Point2D_int>> gggg2_longest_path(BitMatrix* image, float vector_approximation_epsilon) {
-
-    BitMatrix body(image->getRows(), image->getColumns());
-    BitMatrix temp(image->getRows(), image->getColumns());
-    std::vector<Point2D_int>* longestPath;
-    std::vector<Point2D_int> approxCurve;
-    std::vector<std::vector<Point2D_int>> vectors;
-    BitMatrixPosition pixelPosition;
-
-    // Start time
-    auto start = std::chrono::high_resolution_clock::now();
-    BitMatrixSkeletonZS(image, &temp);
-    for (;;)
-    {
-        pixelPosition = image->getFirstSetPixel();
-        if (!(pixelPosition.valid)) {
-            break;
-        }
-        image->floodFillOnesDelete(pixelPosition.row, pixelPosition.column, &body);
-
-        if (body.countNonZero() < MIN_LINE_LENGTH) {
-            continue;
-        }
-
-        longestPath = BitMatrix::findLongestPath2(&body, &temp);
-        if (longestPath == NULL) {
-            continue;
-        }
-        ramerDouglasPeucker(longestPath, vector_approximation_epsilon, &approxCurve);
-        delete longestPath;
-        if (approxCurve.size() > 0) {
-            vectors.push_back(approxCurve);
-        }
-        approxCurve.clear();
-
-    }
-
-    // End time
-    auto end = std::chrono::high_resolution_clock::now();
-    // Calculate the duration
-    std::chrono::duration<double> duration = end - start;
-    // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << std::endl;
-
-    return vectors;
-}
-
-void interpolate(uint8_t* frame, uint16_t x, uint16_t y, uint16_t width, uint8_t* r, uint8_t* g, uint8_t* b)
-{
-    uint8_t* pixel = frame + y * width + x;
-    if (y & 1)
-    {
-        if (x & 1)
-        {
-            *r = *pixel;
-            *g = (*(pixel - 1) + *(pixel + 1) + *(pixel + width) + *(pixel - width)) >> 2;
-            *b = (*(pixel - width - 1) + *(pixel - width + 1) + *(pixel + width - 1) + *(pixel + width + 1)) >> 2;
-        }
-        else
-        {
-            *r = (*(pixel - 1) + *(pixel + 1)) >> 1;
-            *g = *pixel;
-            *b = (*(pixel - width) + *(pixel + width)) >> 1;
-        }
-    }
-    else
-    {
-        if (x & 1)
-        {
-            *r = (*(pixel - width) + *(pixel + width)) >> 1;
-            *g = *pixel;
-            *b = (*(pixel - 1) + *(pixel + 1)) >> 1;
-        }
-        else
-        {
-            *r = (*(pixel - width - 1) + *(pixel - width + 1) + *(pixel + width - 1) + *(pixel + width + 1)) >> 2;
-            *g = (*(pixel - 1) + *(pixel + 1) + *(pixel + width) + *(pixel - width)) >> 2;
-            *b = *pixel;
-        }
-    }
-}
-
-
 void baiernToBitmatrix(uint8_t* frame, BitMatrix* _matrix, uint16_t height, uint16_t width, float black_treshold) {
     RGBcolor pixel;
     HSVcolor hsv;
@@ -515,60 +277,26 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
 
 
 
-std::vector<std::vector<Point2D_int>> gggg3(BitMatrix* image, float vector_approximation_epsilon) {
-    std::vector<std::vector<Point2D_int>> vectors;
-    BitMatrixPosition pixelPosition;
-    BitMatrix visited(image->getRows(), image->getColumns());
-    BitMatrix body_skeleton(image->getRows(), image->getColumns());
-    std::vector<Point2D_int> longestPath;
-    std::vector<Point2D_int> approxCurve;
-    size_t temp_size_1;
-    body_skeleton = *image;
-    // Start time
-    auto start = std::chrono::high_resolution_clock::now();
-    auto clock_start = clock();
-    //BitMatrixSkeleton(&body_skeleton);
-    //BitMatrixSkeletonZS(&body_skeleton);
-    for (;;)
-    {
-        body_skeleton.findLongestPath(&longestPath, &visited);
-        BitMatrix::AandNotB(&body_skeleton, &visited);
-        temp_size_1 = longestPath.size();
-        if (temp_size_1 <= 0){
-            break;
-        }
-        else if (temp_size_1 < 4) {
-            continue;
-        }
-
-        ramerDouglasPeucker(&longestPath, vector_approximation_epsilon, &approxCurve);
-        if (approxCurve.size() > 1) {
-            vectors.push_back(approxCurve);
-        }
-        approxCurve.clear();
-
-    }
-
-    // End time
-    auto end = std::chrono::high_resolution_clock::now();
-    // Calculate the duration
-    std::chrono::duration<double> duration = end - start;
-    // Output the result in seconds
-    std::cout << "Function execution time: " << duration.count() << " seconds" << " clock_cycles: " << clock() - clock_start << std::endl;
-
-    return vectors;
-}
-
-cv::Mat TestFunction(BitMatrix bitmatrix_img) {
-    BitMatrixSkeletonZS(&bitmatrix_img);
-    cv::Mat res = bitMatrixToMat(bitmatrix_img);
-
+cv::Mat TestFunction(Matrix<uint8_t>* baiern_image) {
+    BitMatrix image(baiern_image->getRows() / DOWNSCALE_FACTOR, baiern_image->getCols() / DOWNSCALE_FACTOR);
+    BitMatrix temp(image.getRows(), image.getColumns());
+    cv::Mat res;
     int windowWidth = 400;  // Adjust this value to fit your screen
     int windowHeight = 320; // Adjust this value to fit your screen
 
-    cv::namedWindow("test", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("test", windowWidth, windowHeight);
-    cv::imshow("test", res);
+    baiernToBitmatrixDownscale(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
+    res = bitMatrixToMat(image);
+    cv::namedWindow("biern_downcaled", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("biern_downcaled", windowWidth, windowHeight);
+    cv::imshow("biern_downcaled", res);
+    
+    
+    BitMatrixSkeletonZS(&image, &temp);
+    res = bitMatrixToMat(image);
+    cv::namedWindow("skeleton", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("skeleton", windowWidth, windowHeight);
+    cv::imshow("skeleton", res);
+
     return res;
 }
 
@@ -576,23 +304,6 @@ cv::Mat TestFunction(BitMatrix bitmatrix_img) {
 void TestVectors() {
     std::vector<std::vector<Point2D_int>> vectors;
     cv::Mat original_img = cv::imread(IMG_PATH);
-    
-
-    char file_path[] = IMG_PATH;
-    BitMatrix bitmatrix_img = imgToBitMatrix(file_path, 0.3);
-    BitMatrix temp_bitmatrix_1 = bitmatrix_img;
-    cv::Mat image = bitMatrixToMat(bitmatrix_img);
-    std::cout << "Black pixels: " << bitmatrix_img.countNonZero() << std::endl;
-    
-
-    //temp_bitmatrix_1 = bitmatrix_img;
-    //vectors = gggg(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
-    temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg2(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
-    temp_bitmatrix_1 = bitmatrix_img;
-    vectors = gggg2_longest_path(&temp_bitmatrix_1, VECTOR_APPROXIMATION_EPSILON);
-
-
 
 
     cv::Mat dst;
@@ -606,8 +317,6 @@ void TestVectors() {
     cv::Mat baiern_img = convertToBayerPattern(dst);
     Matrix<uint8_t> temp_baiern_matrix = matToMatrix<uint8_t>(baiern_img);
     vectors = gggg2_longest_path_baiern(&temp_baiern_matrix, VECTOR_APPROXIMATION_EPSILON);
-    //temp_bitmatrix_1 = bitmatrix_img;
-    //vectors = gggg3(&temp_bitmatrix_1, 3.0f);
 
 
     std::vector<std::vector<cv::Point>> approxCurve;
@@ -620,7 +329,7 @@ void TestVectors() {
     }
 
 
-    cv::Mat result = cv::Mat::zeros(bitmatrix_img.getRows(), bitmatrix_img.getColumns(), CV_8UC3);  // Create a blank canvas
+    cv::Mat result = cv::Mat::zeros(baiern_img.rows, baiern_img.cols, CV_8UC3);  // Create a blank canvas
     cv::RNG rng(time(0));
     for (size_t i = 0; i < approxCurve.size(); i++)
     {
@@ -641,17 +350,22 @@ void TestVectors() {
     cv::namedWindow("original image", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("original image", windowWidth, windowHeight);
     cv::imshow("original image", original_img);
+    
 
-    cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
-    cv::resizeWindow("treshold", windowWidth, windowHeight);
-    cv::imshow("treshold", image);
+    cv::namedWindow("baiern", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    cv::resizeWindow("baiern", windowWidth, windowHeight);
+    cv::imshow("baiern", baiern_img);
+
+    //cv::namedWindow("treshold", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
+    //cv::resizeWindow("treshold", windowWidth, windowHeight);
+    //cv::imshow("treshold", image);
 
     cv::namedWindow("lines", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("lines", windowWidth, windowHeight);
     cv::imshow("lines", result);
 
 
-    TestFunction(bitmatrix_img);
+    TestFunction(&temp_baiern_matrix);
     cv::waitKey(0);  // Wait for a key press before closing the window
 }
 
