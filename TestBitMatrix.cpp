@@ -19,9 +19,9 @@
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/test2.png"
 //#define IMG_PATH "img/test3.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1 with noise
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
@@ -324,14 +324,10 @@ static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t 
 static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_treshold) {
 
     RGBcolor rgb_pixel;
-    RGBcolor rgb_new_pixel;
-    float luminosity;
     size_t src_last_col, src_last_row;
     size_t n_settedbits;
-    size_t tot_avg_pixels = downscale_rate * downscale_rate;
-    size_t min_setted_bits = (size_t)(DOWNSCALE_COLOR_TRESHOLD * (float)tot_avg_pixels);
+    size_t min_setted_bits = (size_t)(DOWNSCALE_COLOR_TRESHOLD * (float)(downscale_rate * downscale_rate));
     uint8_t min_color_treshold = (uint8_t)(min_treshold * 255.0f);
-    //size_t downscale_rate = 2;
     _dst->clear();
     src_last_col = width - downscale_rate;
     src_last_row = height - downscale_rate;
@@ -345,18 +341,16 @@ static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src
             {
                 for (size_t j = 0; j < downscale_rate; j++)
                 {
-                    //interpolate(_src, col + j, row + i, height, width, &rgb_pixel.R, &rgb_pixel.G, &rgb_pixel.B);
-                    //if (rgb2greyscale(rgb_pixel) <= (uint8_t)(min_treshold * 255.0f)) {
-                    //    n_settedbits++;
-                    //}
                     if (_src[((row + i) * width) + (col + j)] < min_color_treshold) {
                         n_settedbits++;
+                        if (n_settedbits > min_setted_bits) {
+                            _dst->setBit(row / downscale_rate, col / downscale_rate);
+                            goto next_window;
+                        }
                     }
                 }
             }
-            if (n_settedbits > min_setted_bits) {
-                _dst->setBit(row / downscale_rate, col / downscale_rate);
-            }
+        next_window:{}
         }
     }
 }
@@ -397,7 +391,6 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
             vectors.push_back(approxCurve);
         }
         approxCurve.clear();
-
     }
 
     // End time
