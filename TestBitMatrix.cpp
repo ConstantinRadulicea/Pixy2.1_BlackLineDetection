@@ -8,6 +8,8 @@
 #include "approxPolyDP.h"
 #include "Matrix.h"
 
+#define CAM_RES2_WIDTH          316
+#define CAM_RES2_HEIGHT         208
 #define DOWNSCALE_FACTOR 4
 #define DOWNSCALE_COLOR_TRESHOLD 0.2f
 #define MIN_LINE_LENGTH 1
@@ -355,14 +357,36 @@ static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src
 }
 
 
-std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>* baiern_image, float vector_approximation_epsilon) {
-    BitMatrix image(baiern_image->getRows() / DOWNSCALE_FACTOR, baiern_image->getCols() / DOWNSCALE_FACTOR);
-    BitMatrix body(image.getRows(), image.getColumns());
-    BitMatrix temp(image.getRows(), image.getColumns());
+
+std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>* baiern_image, float vector_approximation_epsilon, size_t _downscale_factor) {
+    static size_t frame_height = CAM_RES2_HEIGHT;
+    static size_t frame_width = CAM_RES2_WIDTH;
+    static size_t downscale_factor = 1;
+    static size_t scaled_down_frame_height = CAM_RES2_HEIGHT;
+    static size_t scaled_down_frame_width = CAM_RES2_WIDTH;
+
+    //frame_width = baiern_image->getCols();
+    //frame_height = baiern_image->getRows();
+
+
+    BitMatrix image(frame_height, frame_width);
+    BitMatrix body(frame_height, frame_width);
+    BitMatrix temp(frame_height, frame_width);
     std::vector<Point2D_int>* longestPath;
     std::vector<Point2D_int> approxCurve;
     std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
+
+    if (_downscale_factor != downscale_factor)
+    {
+        downscale_factor = _downscale_factor;
+        scaled_down_frame_width = frame_width / downscale_factor;
+        scaled_down_frame_height = frame_height / downscale_factor;
+
+        image.resize_no_shrinktofit(scaled_down_frame_height, scaled_down_frame_width);
+        body.resize_no_shrinktofit(scaled_down_frame_height, scaled_down_frame_width);
+        temp.resize_no_shrinktofit(scaled_down_frame_height, scaled_down_frame_width);
+    }
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
@@ -435,15 +459,15 @@ void TestVectors() {
 
     cv::Mat dst;
     //cv::Size newSize(320, 200);
-    int width = 208;
-    int height = (int)(width * (float)(316.0 / 208.0));
-    cv::Size newSize(height, width);
+    int width = CAM_RES2_HEIGHT;
+    int height = (int)(width * (float)(CAM_RES2_WIDTH / CAM_RES2_HEIGHT));
+    cv::Size newSize(CAM_RES2_WIDTH, CAM_RES2_HEIGHT);
     // Resize the image
     cv::resize(original_img, dst, newSize, 0.0, 0.0, cv::INTER_LANCZOS4);
 
     cv::Mat baiern_img = convertToBayerPattern(dst);
     Matrix<uint8_t> temp_baiern_matrix = matToMatrix<uint8_t>(baiern_img);
-    vectors = gggg2_longest_path_baiern(&temp_baiern_matrix, VECTOR_APPROXIMATION_EPSILON);
+    vectors = gggg2_longest_path_baiern(&temp_baiern_matrix, VECTOR_APPROXIMATION_EPSILON, DOWNSCALE_FACTOR);
 
 
     std::vector<std::vector<cv::Point>> approxCurve;

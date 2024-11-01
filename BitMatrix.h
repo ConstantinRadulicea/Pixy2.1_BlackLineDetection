@@ -61,6 +61,42 @@ public:
 		this->nRows = nRows;
 		this->nColumns = nColumns;
 		this->_total_bits = nRows * nColumns;
+
+		if (this->bitSize() % BITARRAY_DATATYPE_BITS) {
+			this->_total_blocks = (this->_total_bits / BITARRAY_DATATYPE_BITS) + 1;
+		}
+		else {
+			this->_total_blocks = (this->_total_bits / BITARRAY_DATATYPE_BITS);
+		}
+		data.reserve(this->_total_blocks);
+		data.resize(this->_total_blocks);
+
+		this->clear();
+	}
+
+	void resize_no_shrinktofit(size_t _nRows, size_t _nColumns) {
+		size_t new_total_bits = _nRows * _nColumns;
+		bool grow_buffer = false;
+		if (new_total_bits > this->_total_bits) {
+			grow_buffer = true;
+		}
+
+		this->nRows = _nRows;
+		this->nColumns = _nColumns;
+		this->_total_bits = new_total_bits;
+
+		if (this->bitSize() % BITARRAY_DATATYPE_BITS) {
+			this->_total_blocks = (this->_total_bits / BITARRAY_DATATYPE_BITS) + 1;
+		}
+		else {
+			this->_total_blocks = (this->_total_bits / BITARRAY_DATATYPE_BITS);
+		}
+
+		if (grow_buffer) {
+			data.reserve(this->_total_blocks);
+			data.resize(this->_total_blocks);
+		}
+
 		this->clear();
 	}
 
@@ -73,7 +109,7 @@ public:
 	}
 
 	inline size_t totBlocks() {
-		return data.size();
+		return this->_total_blocks;
 	}
 
 	inline size_t bitSize() {
@@ -81,19 +117,7 @@ public:
 	}
 
 	void clear() {
-		size_t arrSize = 0;
-		this->data.clear();
-
-		if (this->bitSize() % BITARRAY_DATATYPE_BITS) {
-			arrSize = ((nRows * nColumns) / BITARRAY_DATATYPE_BITS) + 1;
-		}
-		else {
-			arrSize = ((nRows * nColumns) / BITARRAY_DATATYPE_BITS);
-		}
-		data.reserve(arrSize);
-		data.resize(arrSize);
 		this->setToZeros();
-		this->settedBits = 0;
 	}
 
 	void free() {
@@ -317,7 +341,7 @@ public:
 	}
 
 	inline void setToZeros() {
-		memset(this->data.data(), 0, this->data.size() * sizeof(BITARRAY_DATATYPE));
+		memset(this->data.data(), 0, this->totBlocks() * sizeof(BITARRAY_DATATYPE));
 		//for (size_t i = 0; i < this->totBlocks(); i++)
 		//{
 		//	this->setBlockValue(i, (BITARRAY_DATATYPE)0);
@@ -327,12 +351,12 @@ public:
 	}
 
 	inline void setToOnes() {
-		memset(this->data.data(), 255, this->data.size() * sizeof(BITARRAY_DATATYPE));
+		memset(this->data.data(), 255, this->totBlocks() * sizeof(BITARRAY_DATATYPE));
 		//for (size_t i = 0; i < this->totBlocks(); i++)
 		//{
 		//	this->setBlockValue(i, (BITARRAY_DATATYPE)1);
 		//}
-		this->settedBits = this->data.size() * sizeof(BITARRAY_DATATYPE) * 8;
+		this->settedBits = this->totBlocks() * sizeof(BITARRAY_DATATYPE) * 8;
 	}
 
 	inline bool isInsideBoundaries(size_t row, size_t col) {
@@ -769,7 +793,7 @@ public:
 		size_t bit_index;
 		size_t i = getFirstSetPixel_last_index;
 		size_t start_index = getFirstSetPixel_last_index;
-		size_t data_size = this->data.size();
+		size_t data_size = this->totBlocks();
 		for (; i < data_size; i++) {
 			if (this->data[i] != 0)
 			{
@@ -817,7 +841,7 @@ public:
 			pos.valid = true;
 			return pos;
 		}
-		data_size = this->data.size();
+		data_size = this->totBlocks();
 		for (size_t i = (start_index.index + 1); i < data_size; i++)
 		{
 			temp_datatype = getBlockValue(i);
@@ -917,6 +941,7 @@ private:
 	size_t settedBits;
 	size_t getFirstSetPixel_last_index = 0;
 	size_t _total_bits;
+	size_t _total_blocks;
 
 
 	size_t indexOfFirstSettedBit(BITARRAY_DATATYPE byte) {
