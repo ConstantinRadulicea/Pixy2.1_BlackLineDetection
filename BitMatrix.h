@@ -294,8 +294,8 @@ public:
 
 	inline void logicAnd(BitMatrix& B) {
 		BITARRAY_DATATYPE valueSrc, valueB, newValue;
-
-		for (size_t i = 0; i < this->totBlocks(); i++)
+		size_t tot_blocks = this->totBlocks();
+		for (size_t i = 0; i < tot_blocks; i++)
 		{
 			valueSrc = this->getBlockValue(i);
 			valueB = B.getBlockValue(i);
@@ -306,8 +306,8 @@ public:
 
 	inline void logicOr(BitMatrix& B) {
 		BITARRAY_DATATYPE valueSrc, valueB, newValue;
-
-		for (size_t i = 0; i < this->totBlocks(); i++)
+		size_t tot_blocks = this->totBlocks();
+		for (size_t i = 0; i < tot_blocks; i++)
 		{
 			valueSrc = this->getBlockValue(i);
 			valueB = B.getBlockValue(i);
@@ -336,7 +336,7 @@ public:
 	}
 
 	inline bool isInsideBoundaries(size_t row, size_t col) {
-		if (row < 0 || row >= this->getRows() || col < 0 || col >= this->getColumns()) {
+		if (row < 0 || row >= this->nRows || col < 0 || col >= this->nColumns) {
 			return false;
 		}
 		return true;
@@ -592,110 +592,10 @@ public:
 		return filledZone;
 	}
 
-
-	inline std::vector<Point2D_int> findLongestPath() {
-		std::vector<Point2D_int> path;
-		BitMatrix visited(this->getRows(), this->getColumns());
-		findLongestPath(this, &path, &visited);
-		return path;
-	}
-
-	inline void findLongestPath(std::vector<Point2D_int>* longest_path) {
-		BitMatrix visited(this->getRows(), this->getColumns());
-		BitMatrix::findLongestPath(this, longest_path, &visited);
-	}
-
-	inline void findLongestPath(std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
-		BitMatrix::findLongestPath(this, longest_path, visited);
-	}
 	// Find the longest path in the skeleton
 	// uses 1 additional BitMatrix
-	static void findLongestPath(BitMatrix* skeleton, std::vector<Point2D_int>* longest_path, BitMatrix* visited) {
-		// Direction vectors for 8-connected neighbors
-		const static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
-		const static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
-		// Start BFS from any skeleton point
-		Point2D_int start;
-		BitMatrixPosition pos;
-		Point2D_Distance farthestFromStart;
-		Point2D_Distance longestPathResult;
-
-		struct _local_path {
-			Point2D_int start;
-			std::vector<Point2D_int> path;
-		};
-
-
-
-		longest_path->clear();
-		if (skeleton->countNonZero() <= 0) {
-			return;
-		}
-
-
-		pos = skeleton->getFirstSetPixel();
-		if (pos.valid == false) {
-			return;
-		}
-
-		start.x = pos.column;
-		start.y = pos.row;
-
-		//BitMatrix visited(skeleton->getRows(), skeleton->getColumns());
-		visited->setToZeros();
-		// First BFS to find the farthest point from 'start'
-		farthestFromStart = BitMatrix::bfs(&start, skeleton, visited);
-		visited->setToZeros();
-		// Second BFS from the farthest point found
-		longestPathResult = BitMatrix::bfs(&(farthestFromStart.point), skeleton, visited);
-		visited->setToZeros();
-
-
-		// To store the points of the longest path, run BFS again and record the path
-		std::deque<_local_path> q;
-		_local_path current;
-		Point2D_int p;
-		struct _local_path temp_local_path;
-		//std::vector<Point2D_int> longest_path;
-
-		q.push_back({ longestPathResult.point, {longestPathResult.point} });
-		visited->setBit(longestPathResult.point.y, longestPathResult.point.x);
-
-		while (!q.empty()) {
-			current = q.front();
-			p = current.start;
-			std::vector<Point2D_int>* path = &(current.path);
-			q.pop_front();
-
-			if (path->size() > longest_path->size()) {
-				*longest_path = *path;
-			}
-
-			for (int i = 0; i < 8; ++i) {
-				int newX = p.x + dx[i];
-				int newY = p.y + dy[i];
-
-				if (isValid(newX, newY, skeleton, visited)) {
-					visited->setBit(newY, newX);
-					//std::vector<Point2D_int> newPath = path;
-					//newPath.push_back(Point2D_int{ (float)newX, (float)newY });
-					//q.push({ Point2D_int{(float)newX, (float)newY}, newPath });
-
-					temp_local_path.start.x = newX;
-					temp_local_path.start.y = newY;
-					temp_local_path.path = *path;
-					temp_local_path.path.push_back(temp_local_path.start);
-					q.push_back(temp_local_path);
-				}
-			}
-		}
-
-		//return longestPath;
-	}
-
-	// Find the longest path in the skeleton
-	// uses 1 additional BitMatrix
-	static std::vector<Point2D_int>* findLongestPath2(BitMatrix* skeleton, BitMatrix* visited) {
+	// the returned vector is dynamically allocated and must be freed (use delete operator)
+	static std::vector<Point2D_int>* findLongestPath(BitMatrix* skeleton, BitMatrix* visited) {
 		// Direction vectors for 8-connected neighbors
 		const static int dx[8] = { -1, 0, 1, 1, 1, 0, -1, -1 };
 		const static int dy[8] = { 1, 1, 1, 0, -1, -1, -1, 0 };
@@ -896,7 +796,6 @@ public:
 		return BitMatrixPosition{ 0, 0, false };
 	}
 
-
 	BitMatrixPosition getNextSetPixel(size_t row, size_t col) {
 		BITARRAY_DATATYPE temp_datatype;
 		BitMatrixPosition pos;
@@ -932,87 +831,6 @@ public:
 		}
 		return BitMatrixPosition{ 0, 0, false };
 	}
-
-	//BitMatrixPosition getFirstSetPixelOnRow(size_t row) {
-	//	BitMatrixPosition pos;
-	//	size_t bit_index;
-	//	size_t block_index = (this->getColumns() * row) / BITARRAY_DATATYPE_BITS;
-
-	//	for (; i < this->data.size(); i++) {
-	//		if (this->data[i] != 0)
-	//		{
-	//			bit_index = indexOfFirstSettedBit(this->data[i]);
-	//			pos = this->indexToPosition(i, bit_index);
-	//			pos.valid = true;
-	//			return pos;
-	//		}
-	//	}
-	//	if (getFirstSetPixel_last_index >= this->data.size()) {
-	//		getFirstSetPixel_last_index = 0;
-	//	}
-
-	//	for (; i < start_index; i++) {
-	//		if (this->data[i] != 0)
-	//		{
-	//			bit_index = indexOfFirstSettedBit(this->data[i]);
-	//			pos = this->indexToPosition(i, bit_index);
-	//			pos.valid = true;
-	//			return pos;
-	//		}
-	//	}
-	//	this->settedBits = 0;
-	//	return BitMatrixPosition{ 0, 0, false };
-	//}
-
-
-
-	BitMatrixPosition getFirstUnsetPixel() {
-		for (size_t row = 0; row < this->nRows; row++) {
-			for (size_t col = 0; col < this->nColumns; col++)
-			{
-				if (this->getBit(row, col) == false)
-				{
-					return BitMatrixPosition{ row, col, true };
-				}
-			}
-		}
-		return BitMatrixPosition{ 0, 0, false };
-	}
-
-	static void downscale_3(BitMatrix* _dst, BitMatrix* _src, float min_treshold) {
-		BITARRAY_DATATYPE up_word, mid_word, down_word;
-		BITARRAY_DATATYPE right_up_word, right_mid_word, right_down_word;
-
-		size_t new_columns, new_rows;
-		size_t n_settedbits;
-
-		_dst->clear();
-		new_columns = _src->getColumns() / (size_t)3;
-		new_rows = _src->getRows() / (size_t)3;
-
-		for (size_t row = 1; row < _src->getRows() - 1; row += 3)
-		{
-			for (size_t col = 1; col < _src->getColumns() - 1; col += 3)
-			{
-				n_settedbits = 0;
-				n_settedbits += (size_t)(_src->getBit(row - 1, col - 1) & true);
-				n_settedbits += (size_t)(_src->getBit(row - 1, col) & true);
-				n_settedbits += (size_t)(_src->getBit(row - 1, col + 1) & true);
-				n_settedbits += (size_t)(_src->getBit(row, col - 1) & true);
-				n_settedbits += (size_t)(_src->getBit(row, col) & true);
-				n_settedbits += (size_t)(_src->getBit(row, col + 1) & true);
-				n_settedbits += (size_t)(_src->getBit(row + 1, col - 1) & true);
-				n_settedbits += (size_t)(_src->getBit(row + 1, col) & true);
-				n_settedbits += (size_t)(_src->getBit(row + 1, col + 1) & true);
-
-				if (n_settedbits >= (size_t)(9.0f * min_treshold)) {
-					_dst->setBit(row / 3, col / 3);
-				}
-			}
-		}
-
-	}
-
 
 	static void downscale(BitMatrix* _dst, BitMatrix* _src, size_t downscale_rate, float min_treshold) {
 		if (downscale_rate == 1) {

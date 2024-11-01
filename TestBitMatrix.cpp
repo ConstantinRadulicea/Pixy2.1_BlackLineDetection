@@ -19,9 +19,9 @@
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/test2.png"
 //#define IMG_PATH "img/test3.png"
-#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1 with noise
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
@@ -321,13 +321,12 @@ static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t 
     }
 }
 
-static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_treshold) {
-
+static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_black_treshold_percentual, float window_black_pixels_percentual) {
     RGBcolor rgb_pixel;
     size_t src_last_col, src_last_row;
     size_t n_settedbits;
-    size_t min_setted_bits = (size_t)(DOWNSCALE_COLOR_TRESHOLD * (float)(downscale_rate * downscale_rate));
-    uint8_t min_color_treshold = (uint8_t)(min_treshold * 255.0f);
+    size_t min_setted_bits = (size_t)(window_black_pixels_percentual * (float)(downscale_rate * downscale_rate));
+    uint8_t min_color_treshold = (uint8_t)(min_black_treshold_percentual * 255.0f);
     _dst->clear();
     src_last_col = width - downscale_rate;
     src_last_row = height - downscale_rate;
@@ -367,7 +366,7 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
-    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
+    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD, DOWNSCALE_COLOR_TRESHOLD);
     BitMatrixSkeletonZS(&image, &temp);
     for (;;)
     {
@@ -381,7 +380,7 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
             continue;
         }
 
-        longestPath = BitMatrix::findLongestPath2(&body, &temp);
+        longestPath = BitMatrix::findLongestPath(&body, &temp);
         if (longestPath == NULL) {
             continue;
         }
@@ -412,7 +411,7 @@ cv::Mat TestFunction(Matrix<uint8_t>* baiern_image) {
     int windowWidth = 400;  // Adjust this value to fit your screen
     int windowHeight = 320; // Adjust this value to fit your screen
 
-    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
+    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD, DOWNSCALE_COLOR_TRESHOLD);
     res = bitMatrixToMat(image);
     cv::namedWindow("biern_downcaled", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("biern_downcaled", windowWidth, windowHeight);
