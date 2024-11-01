@@ -8,9 +8,10 @@
 #include "approxPolyDP.h"
 #include "Matrix.h"
 
-#define CAM_RES2_WIDTH          316
-#define CAM_RES2_HEIGHT         208
+#define CAM_RES2_WIDTH 316
+#define CAM_RES2_HEIGHT 208
 #define DOWNSCALE_FACTOR 4
+#define MIN_DOWNSCALE_FACTOR 1
 #define DOWNSCALE_COLOR_TRESHOLD 0.2f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
@@ -21,9 +22,9 @@
 //#define IMG_PATH "img/test1.png"
 //#define IMG_PATH "img/test2.png"
 //#define IMG_PATH "img/test3.png"
-//#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
+#define IMG_PATH "img/20241002_194857.jpg" // intersection 1
 
-#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
+//#define IMG_PATH "img/20241002_194755.jpg" // straight with start lines
 //#define IMG_PATH "img/20241002_194910.jpg" // intersection shiny
 //#define IMG_PATH "img/20241002_194812.jpg" // curve 1 with noise
 //#define IMG_PATH "img/20241002_194947.jpg" // curve 2
@@ -361,7 +362,7 @@ static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src
 std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>* baiern_image, float vector_approximation_epsilon, size_t _downscale_factor) {
     static size_t frame_height = CAM_RES2_HEIGHT;
     static size_t frame_width = CAM_RES2_WIDTH;
-    static size_t downscale_factor = 1;
+    static size_t downscale_factor = MIN_DOWNSCALE_FACTOR;
     static size_t scaled_down_frame_height = CAM_RES2_HEIGHT;
     static size_t scaled_down_frame_width = CAM_RES2_WIDTH;
 
@@ -377,8 +378,14 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
     std::vector<std::vector<Point2D_int>> vectors;
     BitMatrixPosition pixelPosition;
 
+    // Start time
+    auto start = std::chrono::high_resolution_clock::now();
+
     if (_downscale_factor != downscale_factor)
     {
+        if (_downscale_factor < MIN_DOWNSCALE_FACTOR) {
+            _downscale_factor = MIN_DOWNSCALE_FACTOR;
+        }
         downscale_factor = _downscale_factor;
         scaled_down_frame_width = frame_width / downscale_factor;
         scaled_down_frame_height = frame_height / downscale_factor;
@@ -388,9 +395,7 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
         temp.resize_no_shrinktofit(scaled_down_frame_height, scaled_down_frame_width);
     }
 
-    // Start time
-    auto start = std::chrono::high_resolution_clock::now();
-    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD, DOWNSCALE_COLOR_TRESHOLD);
+    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), downscale_factor, BLACK_TRERSHOLD, DOWNSCALE_COLOR_TRESHOLD);
     BitMatrixSkeletonZS(&image, &temp);
     for (;;)
     {

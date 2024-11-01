@@ -68,8 +68,8 @@ public:
 		else {
 			this->_total_blocks = (this->_total_bits / BITARRAY_DATATYPE_BITS);
 		}
-		data.reserve(this->_total_blocks);
-		data.resize(this->_total_blocks);
+		this->data.reserve(this->_total_blocks);
+		this->data.resize(this->_total_blocks);
 
 		this->clear();
 	}
@@ -85,7 +85,7 @@ public:
 		this->nColumns = _nColumns;
 		this->_total_bits = new_total_bits;
 
-		if (this->bitSize() % BITARRAY_DATATYPE_BITS) {
+		if (this->_total_bits % BITARRAY_DATATYPE_BITS) {
 			this->_total_blocks = (this->_total_bits / BITARRAY_DATATYPE_BITS) + 1;
 		}
 		else {
@@ -93,11 +93,11 @@ public:
 		}
 
 		if (grow_buffer) {
-			data.reserve(this->_total_blocks);
-			data.resize(this->_total_blocks);
+			this->data.reserve(this->_total_blocks);
+			this->data.resize(this->_total_blocks);
 		}
 
-		this->clear();
+		//this->clear();
 	}
 
 	inline size_t getRows() {
@@ -113,7 +113,7 @@ public:
 	}
 
 	inline size_t bitSize() {
-		return _total_bits;
+		return this->_total_bits;
 	}
 
 	void clear() {
