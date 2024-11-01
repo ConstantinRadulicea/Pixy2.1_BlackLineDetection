@@ -861,20 +861,6 @@ public:
 		return { farthest, (float)maxDist };
 	}
 
-
-	inline BitMatrixPosition getFirstSetPixel2() {
-		for (size_t row = 0; row < this->getRows(); row++) {
-			for (size_t col = 0; col < this->getColumns(); col++)
-			{
-				if (this->getBit(row, col) == true)
-				{
-					return BitMatrixPosition{ row, col, true };
-				}
-			}
-		}
-		return BitMatrixPosition{ 0, 0, false };
-	}
-
 	BitMatrixPosition getFirstSetPixel() {
 		if (this->settedBits <= 0) {
 			return BitMatrixPosition{ 0, 0, false };
@@ -883,7 +869,8 @@ public:
 		size_t bit_index;
 		size_t i = getFirstSetPixel_last_index;
 		size_t start_index = getFirstSetPixel_last_index;
-		for (; i < this->data.size(); i++) {
+		size_t data_size = this->data.size();
+		for (; i < data_size; i++) {
 			if (this->data[i] != 0)
 			{
 				bit_index = indexOfFirstSettedBit(this->data[i]);
@@ -892,7 +879,7 @@ public:
 				return pos;
 			}
 		}
-		if (getFirstSetPixel_last_index >= this->data.size()) {
+		if (getFirstSetPixel_last_index >= data_size) {
 			getFirstSetPixel_last_index = 0;
 		}
 
@@ -914,6 +901,7 @@ public:
 		BITARRAY_DATATYPE temp_datatype;
 		BitMatrixPosition pos;
 		size_t bit_index;
+		size_t data_size;
 		BitMatrixIndex start_index = this->PositionToIndex(BitMatrixPosition{row, col, true});
 
 		if (start_index.valid == false)
@@ -930,7 +918,8 @@ public:
 			pos.valid = true;
 			return pos;
 		}
-		for (size_t i = (start_index.index + 1); i < this->data.size(); i++)
+		data_size = this->data.size();
+		for (size_t i = (start_index.index + 1); i < data_size; i++)
 		{
 			temp_datatype = getBlockValue(i);
 			if (temp_datatype != 0)
@@ -978,8 +967,8 @@ public:
 
 
 	BitMatrixPosition getFirstUnsetPixel() {
-		for (size_t row = 0; row < this->getRows(); row++) {
-			for (size_t col = 0; col < this->getColumns(); col++)
+		for (size_t row = 0; row < this->nRows; row++) {
+			for (size_t col = 0; col < this->nColumns; col++)
 			{
 				if (this->getBit(row, col) == false)
 				{
@@ -1067,16 +1056,16 @@ public:
 	BitMatrixPosition indexToPosition(size_t index, size_t bit_index) {
 		size_t row, col;
 		bool valid = false;
-		row = ((index * BITARRAY_DATATYPE_BITS) + bit_index) / this->getColumns();
-		col = ((index * BITARRAY_DATATYPE_BITS) + bit_index) % this->getColumns();
-		if (row >= this->getRows()) {
+		row = ((index * BITARRAY_DATATYPE_BITS) + bit_index) / this->nColumns;
+		col = ((index * BITARRAY_DATATYPE_BITS) + bit_index) % this->nColumns;
+		if (row >= this->nRows) {
 			valid = false;
 		}
 		else {
 			valid = true;
 		}
 
-		if (col >= this->getColumns()) {
+		if (col >= this->nColumns) {
 			valid = false;
 		}
 		else {
