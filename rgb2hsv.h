@@ -62,4 +62,9 @@ static HSVcolor rgb2hsv(RGBcolor rgbColor) {
 	return hsvColor;
 }
 
+
+inline uint8_t rgb2greyscale(RGBcolor rgbColor) {
+	return (uint8_t)(((float)rgbColor.R * 0.299f) + ((float)rgbColor.G * 0.587f) + ((float)rgbColor.B * 0.114f));
+}
+
 #endif // !__RGB2HSV_H__

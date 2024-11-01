@@ -9,7 +9,7 @@
 #include "Matrix.h"
 
 #define DOWNSCALE_FACTOR 4
-#define DOWNSCALE_COLOR_TRESHOLD 0.3f
+#define DOWNSCALE_COLOR_TRESHOLD 0.2f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
 #define BLACK_TRERSHOLD 0.3f
@@ -321,6 +321,46 @@ static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t 
     }
 }
 
+static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_treshold) {
+
+    RGBcolor rgb_pixel;
+    RGBcolor rgb_new_pixel;
+    float luminosity;
+    size_t src_last_col, src_last_row;
+    size_t n_settedbits;
+    size_t tot_avg_pixels = downscale_rate * downscale_rate;
+    size_t min_setted_bits = (size_t)(DOWNSCALE_COLOR_TRESHOLD * (float)tot_avg_pixels);
+    uint8_t min_color_treshold = (uint8_t)(min_treshold * 255.0f);
+    //size_t downscale_rate = 2;
+    _dst->clear();
+    src_last_col = width - downscale_rate;
+    src_last_row = height - downscale_rate;
+
+    for (size_t row = 0; row < src_last_row; row += downscale_rate)
+    {
+        for (size_t col = 0; col < src_last_col; col += downscale_rate)
+        {
+            n_settedbits = 0;
+            for (size_t i = 0; i < downscale_rate; i++)
+            {
+                for (size_t j = 0; j < downscale_rate; j++)
+                {
+                    //interpolate(_src, col + j, row + i, height, width, &rgb_pixel.R, &rgb_pixel.G, &rgb_pixel.B);
+                    //if (rgb2greyscale(rgb_pixel) <= (uint8_t)(min_treshold * 255.0f)) {
+                    //    n_settedbits++;
+                    //}
+                    if (_src[((row + i) * width) + (col + j)] < min_color_treshold) {
+                        n_settedbits++;
+                    }
+                }
+            }
+            if (n_settedbits > min_setted_bits) {
+                _dst->setBit(row / downscale_rate, col / downscale_rate);
+            }
+        }
+    }
+}
+
 
 std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>* baiern_image, float vector_approximation_epsilon) {
     BitMatrix image(baiern_image->getRows() / DOWNSCALE_FACTOR, baiern_image->getCols() / DOWNSCALE_FACTOR);
@@ -333,7 +373,7 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
-    baiernToBitmatrixDownscale(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
+    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
     BitMatrixSkeletonZS(&image, &temp);
     for (;;)
     {
@@ -379,7 +419,7 @@ cv::Mat TestFunction(Matrix<uint8_t>* baiern_image) {
     int windowWidth = 400;  // Adjust this value to fit your screen
     int windowHeight = 320; // Adjust this value to fit your screen
 
-    baiernToBitmatrixDownscale(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
+    baiernToBitmatrixDownscale_minPooling(&image, (uint8_t*)(baiern_image->data()), baiern_image->getRows(), baiern_image->getCols(), DOWNSCALE_FACTOR, BLACK_TRERSHOLD);
     res = bitMatrixToMat(image);
     cv::namedWindow("biern_downcaled", cv::WINDOW_NORMAL); // WINDOW_NORMAL allows resizing
     cv::resizeWindow("biern_downcaled", windowWidth, windowHeight);
