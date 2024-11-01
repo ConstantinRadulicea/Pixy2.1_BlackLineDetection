@@ -499,7 +499,6 @@ void TestVectors() {
 
     // Display the result
     // Create a window
-    
     // Resize the window to a specific size (adjust width and height as needed)
     int windowWidth = 400;  // Adjust this value to fit your screen
     int windowHeight = 320; // Adjust this value to fit your screen
