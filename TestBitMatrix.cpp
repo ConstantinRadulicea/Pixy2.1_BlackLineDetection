@@ -10,12 +10,16 @@
 
 #define CAM_RES2_WIDTH 316
 #define CAM_RES2_HEIGHT 208
+
+//#define CAM_RES2_WIDTH (316 * 4)
+//#define CAM_RES2_HEIGHT (208 * 4)
+
 #define DOWNSCALE_FACTOR 4
 #define MIN_DOWNSCALE_FACTOR 1
 #define DOWNSCALE_COLOR_TRESHOLD 0.2f
 #define MIN_LINE_LENGTH 1
 #define VECTOR_APPROXIMATION_EPSILON 4.0f / (float)DOWNSCALE_FACTOR
-#define BLACK_TRERSHOLD 0.3f
+#define BLACK_TRERSHOLD 0.25f
 
 //#define IMG_PATH "img/img1.png"
 //#define IMG_PATH "img/black.png"
@@ -366,17 +370,13 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
     static size_t scaled_down_frame_height = CAM_RES2_HEIGHT;
     static size_t scaled_down_frame_width = CAM_RES2_WIDTH;
 
-    //frame_width = baiern_image->getCols();
-    //frame_height = baiern_image->getRows();
-
-
-    BitMatrix image(frame_height, frame_width);
-    BitMatrix body(frame_height, frame_width);
-    BitMatrix temp(frame_height, frame_width);
-    std::vector<Point2D_int>* longestPath;
-    std::vector<Point2D_int> approxCurve;
-    std::vector<std::vector<Point2D_int>> vectors;
-    BitMatrixPosition pixelPosition;
+    static BitMatrix image(frame_height, frame_width);
+    static BitMatrix body(frame_height, frame_width);
+    static BitMatrix temp(frame_height, frame_width);
+    static std::vector<Point2D_int>* longestPath;
+    static std::vector<Point2D_int> approxCurve;
+    static std::vector<std::vector<Point2D_int>> vectors;
+    static BitMatrixPosition pixelPosition;
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
@@ -472,7 +472,9 @@ void TestVectors() {
 
     cv::Mat baiern_img = convertToBayerPattern(dst);
     Matrix<uint8_t> temp_baiern_matrix = matToMatrix<uint8_t>(baiern_img);
-    vectors = gggg2_longest_path_baiern(&temp_baiern_matrix, VECTOR_APPROXIMATION_EPSILON, DOWNSCALE_FACTOR);
+    for (size_t i = 0; i < 10; i++) {
+        vectors = gggg2_longest_path_baiern(&temp_baiern_matrix, VECTOR_APPROXIMATION_EPSILON, DOWNSCALE_FACTOR);
+    }
 
 
     std::vector<std::vector<cv::Point>> approxCurve;

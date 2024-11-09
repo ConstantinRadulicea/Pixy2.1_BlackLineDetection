@@ -132,7 +132,7 @@ public:
 
 	inline bool getBit(register size_t row, register size_t col) {
 		register size_t offset = (row * this->nColumns) + col;
-		return 1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
+		return (BITARRAY_DATATYPE)1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
 	}
 	
 	inline void setBitValue(size_t row, size_t col, bool value) {
@@ -152,11 +152,11 @@ public:
 	}
 
 	inline void setBit(register size_t row, register size_t col) {
-		if (this->getBit(row, col) == true) {	// bit already setted
+		if (this->getBit(row, col)) {	// bit already setted
 			return;
 		}
-		size_t offset = (row * this->nColumns) + col;
-		size_t index = offset / BITARRAY_DATATYPE_BITS;
+		register size_t offset = (row * this->nColumns) + col;
+		register size_t index = offset / BITARRAY_DATATYPE_BITS;
 		this->data[index] = (BITARRAY_DATATYPE)(this->data[index]) | (BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % (size_t)BITARRAY_DATATYPE_BITS));
 		this->settedBits++;
 	}
@@ -165,10 +165,10 @@ public:
 		this->setBit(y, x);
 	}
 
-	inline void unsetBit(size_t row, size_t col) {
-		size_t offset;
-		BITARRAY_DATATYPE value;
-		if (this->getBit(row, col) == false) {	// bit already unsetted
+	inline void unsetBit(register size_t row, register size_t col) {
+		register size_t offset;
+		register BITARRAY_DATATYPE value;
+		if (!(this->getBit(row, col))) {	// bit already unsetted
 			return;
 		}
 		offset = (row * this->nColumns) + col;
@@ -192,8 +192,8 @@ public:
 		}
 	}
 
-	inline void setBlockValue(size_t index, BITARRAY_DATATYPE value) {
-		BITARRAY_DATATYPE oldValue;
+	inline void setBlockValue(register size_t index, register BITARRAY_DATATYPE value) {
+		register BITARRAY_DATATYPE oldValue;
 		oldValue = this->getBlockValue(index);
 
 		if (oldValue == value) {
