@@ -30,6 +30,21 @@
     <ClCompile Include="BitMatrixThinningK3M.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pixy2_libs\common\src\chirp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pixy2_libs\host\libpixyusb2\src\libpixyusb2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pixy2_libs\host\libpixyusb2\src\usblink.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pixy2_libs\host\libpixyusb2\src\util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main_pixy_line.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rgb2hsv.h">

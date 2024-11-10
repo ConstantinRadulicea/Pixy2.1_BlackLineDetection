@@ -71,12 +71,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opencv\build\x64\vc16\lib;C:\opencv\build\x64\vc16\lib;$(LibraryPath);C:\opencv\build\x64\vc16\lib;$(LibraryPath);$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Programming\Pixy2.1_BlackLineDetection\libusb-1.0.27\include;C:\Programming\Pixy2.1_BlackLineDetection\pixy2_libs\host\libpixyusb2\include;C:\Programming\Pixy2.1_BlackLineDetection\pixy2_libs\host\arduino\libraries\Pixy2;C:\Programming\Pixy2.1_BlackLineDetection\pixy2_libs\common\inc;C:\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Programming\Pixy2.1_BlackLineDetection\libusb-1.0.27\VS2022\MS64\static;C:\opencv\build\x64\vc16\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\opencv\build\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opencv\build\x64\vc16\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);C:\opencv\build\x64\vc16\lib;$(LibraryPath);$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Programming\Pixy2.1_BlackLineDetection\libusb-1.0.27\include;C:\opencv\build\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Programming\Pixy2.1_BlackLineDetection\libusb-1.0.27\VS2022\MS64\static;C:\opencv\build\x64\vc16\lib;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -110,13 +110,13 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opencv_world4100d.lib;opencv_world4100.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world4100d.lib;opencv_world4100.lib;libusb-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -141,6 +141,11 @@
     <ClCompile Include="BitMatrixSkeleton.cpp" />
     <ClCompile Include="BitMatrixThinningK3M.cpp" />
     <ClCompile Include="geometry2D.cpp" />
+    <ClCompile Include="main_pixy_line.cpp" />
+    <ClCompile Include="pixy2_libs\common\src\chirp.cpp" />
+    <ClCompile Include="pixy2_libs\host\libpixyusb2\src\libpixyusb2.cpp" />
+    <ClCompile Include="pixy2_libs\host\libpixyusb2\src\usblink.cpp" />
+    <ClCompile Include="pixy2_libs\host\libpixyusb2\src\util.cpp" />
     <ClCompile Include="TestBitMatrix.cpp" />
   </ItemGroup>
   <ItemGroup>

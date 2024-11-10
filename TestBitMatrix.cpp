@@ -328,40 +328,6 @@ static void baiernToBitmatrixDownscale(BitMatrix* _dst, uint8_t* _src, uint16_t 
     }
 }
 
-static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src, uint16_t height, uint16_t width, size_t downscale_rate, float min_black_treshold_percentual, float window_black_pixels_percentual) {
-    RGBcolor rgb_pixel;
-    size_t src_last_col, src_last_row;
-    size_t n_settedbits;
-    size_t min_setted_bits = (size_t)(window_black_pixels_percentual * (float)(downscale_rate * downscale_rate));
-    uint8_t min_color_treshold = (uint8_t)(min_black_treshold_percentual * 255.0f);
-    _dst->clear();
-    src_last_col = width - downscale_rate;
-    src_last_row = height - downscale_rate;
-
-    for (size_t row = 0; row < src_last_row; row += downscale_rate)
-    {
-        for (size_t col = 0; col < src_last_col; col += downscale_rate)
-        {
-            n_settedbits = 0;
-            for (size_t i = 0; i < downscale_rate; i++)
-            {
-                for (size_t j = 0; j < downscale_rate; j++)
-                {
-                    if (_src[((row + i) * width) + (col + j)] < min_color_treshold) {
-                        n_settedbits++;
-                        if (n_settedbits > min_setted_bits) {
-                            _dst->setBit(row / downscale_rate, col / downscale_rate);
-                            goto next_window;
-                        }
-                    }
-                }
-            }
-        next_window:{}
-        }
-    }
-}
-
-
 
 std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>* baiern_image, float vector_approximation_epsilon, size_t _downscale_factor) {
     static size_t frame_height = CAM_RES2_HEIGHT;
@@ -377,6 +343,8 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
     static std::vector<Point2D_int> approxCurve;
     static std::vector<std::vector<Point2D_int>> vectors;
     static BitMatrixPosition pixelPosition;
+
+    vectors.clear();
 
     // Start time
     auto start = std::chrono::high_resolution_clock::now();
@@ -430,7 +398,6 @@ std::vector<std::vector<Point2D_int>> gggg2_longest_path_baiern(Matrix<uint8_t>*
 
     return vectors;
 }
-
 
 
 cv::Mat TestFunction(Matrix<uint8_t>* baiern_image) {
