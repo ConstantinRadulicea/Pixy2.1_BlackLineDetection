@@ -47,7 +47,7 @@ typedef bool (*BitMatrixFillFilter)(size_t row, size_t col, BitMatrix* bit_matri
 #define BITARRAY_DATATYPE unsigned int					//unsigned long long int //unsigned char //unsigned int
 #define BITARRAY_DATATYPE_MAX_VALUE	UINT_MAX					//ULLONG_MAX //UCHAR_MAX //UINT_MAX
 #define BITARRAY_DATATYPE_BITS	(sizeof(BITARRAY_DATATYPE) * 8)
-
+#define LOG2_BITARRAY_DATATYPE_BITS 5		// LOG2(BITARRAY_DATATYPE_BITS)
 
 class BitMatrix
 {
@@ -131,9 +131,17 @@ public:
 		this->data.shrink_to_fit();
 	}
 
-	inline bool getBit(register size_t row, register size_t col) {
-		register size_t offset = (row * this->nColumns) + col;
-		return (BITARRAY_DATATYPE)1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
+	//inline bool getBit(size_t row, size_t col) {
+	//	size_t offset = (row * this->nColumns) + col;
+	//	return (BITARRAY_DATATYPE)1 & (this->data[offset / BITARRAY_DATATYPE_BITS] >> (offset % BITARRAY_DATATYPE_BITS));
+	//}
+
+
+	inline bool getBit(size_t row, size_t col) const {
+		size_t offset = row * this->nColumns + col;
+		size_t dataIndex = offset >> LOG2_BITARRAY_DATATYPE_BITS;
+		size_t bitIndex = offset & (BITARRAY_DATATYPE_BITS - 1);
+		return (this->data[dataIndex] >> bitIndex) & 1;
 	}
 	
 	inline void setBitValue(size_t row, size_t col, bool value) {
@@ -152,31 +160,55 @@ public:
 		return this->getBit(y, x);
 	}
 
-	inline void setBit(register size_t row, register size_t col) {
-		if (this->getBit(row, col)) {	// bit already setted
-			return;
+	//inline void setBit(size_t row, size_t col) {
+	//	if (this->getBit(row, col)) {	// bit already setted
+	//		return;
+	//	}
+	//	size_t offset = (row * this->nColumns) + col;
+	//	size_t index = offset / BITARRAY_DATATYPE_BITS;
+	//	this->data[index] = (BITARRAY_DATATYPE)(this->data[index]) | (BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % (size_t)BITARRAY_DATATYPE_BITS));
+	//	this->settedBits++;
+	//}
+
+
+	inline void setBit(size_t row, size_t col) {
+		size_t offset = (row * this->nColumns) + col;
+		size_t index = offset >> LOG2_BITARRAY_DATATYPE_BITS;
+		BITARRAY_DATATYPE bitMask = (BITARRAY_DATATYPE)1 << (offset & (BITARRAY_DATATYPE_BITS - 1));
+
+		if (!(this->data[index] & bitMask)) {
+			this->data[index] |= bitMask;
+			++this->settedBits;
 		}
-		register size_t offset = (row * this->nColumns) + col;
-		register size_t index = offset / BITARRAY_DATATYPE_BITS;
-		this->data[index] = (BITARRAY_DATATYPE)(this->data[index]) | (BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % (size_t)BITARRAY_DATATYPE_BITS));
-		this->settedBits++;
 	}
 
 	inline void setBitXY(size_t x, size_t y) {
 		this->setBit(y, x);
 	}
 
-	inline void unsetBit(register size_t row, register size_t col) {
-		register size_t offset;
-		register BITARRAY_DATATYPE value;
-		if (!(this->getBit(row, col))) {	// bit already unsetted
-			return;
+	//inline void unsetBit(size_t row, size_t col) {
+	//	size_t offset;
+	//	BITARRAY_DATATYPE value;
+	//	if (!(this->getBit(row, col))) {	// bit already unsetted
+	//		return;
+	//	}
+	//	offset = (row * this->nColumns) + col;
+	//	value = this->data[offset / BITARRAY_DATATYPE_BITS];
+	//	value = value & ~((BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % BITARRAY_DATATYPE_BITS)));
+	//	this->data[offset / BITARRAY_DATATYPE_BITS] = value;
+	//	this->settedBits--;
+	//}
+
+
+	inline void unsetBit(size_t row, size_t col) {
+		size_t offset = (row * this->nColumns) + col;
+		size_t index = offset >> LOG2_BITARRAY_DATATYPE_BITS;
+		BITARRAY_DATATYPE bitMask = (BITARRAY_DATATYPE)1 << (offset & (BITARRAY_DATATYPE_BITS - 1));
+
+		if (this->data[index] & bitMask) {
+			this->data[index] &= ~bitMask;
+			--this->settedBits;
 		}
-		offset = (row * this->nColumns) + col;
-		value = this->data[offset / BITARRAY_DATATYPE_BITS];
-		value = value & ~((BITARRAY_DATATYPE)((BITARRAY_DATATYPE)1 << (offset % BITARRAY_DATATYPE_BITS)));
-		this->data[offset / BITARRAY_DATATYPE_BITS] = value;
-		this->settedBits--;
 	}
 
 	inline void unsetBitXY(size_t x, size_t y) {
@@ -184,17 +216,17 @@ public:
 	}
 
 	inline BITARRAY_DATATYPE getBlockValue(size_t index) {
-		if (index == (this->totBlocks()-1))
+		if (index < this->totBlocks())
 		{
-			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> ((size_t)BITARRAY_DATATYPE_BITS) - (this->bitSize() % (size_t)BITARRAY_DATATYPE_BITS));
+			return this->data.at(index);
 		}
 		else {
-			return this->data.at(index);
+			return this->data.at(index) & (((BITARRAY_DATATYPE)BITARRAY_DATATYPE_MAX_VALUE) >> ((size_t)BITARRAY_DATATYPE_BITS) - (this->bitSize() % (size_t)BITARRAY_DATATYPE_BITS));
 		}
 	}
 
-	inline void setBlockValue(register size_t index, register BITARRAY_DATATYPE value) {
-		register BITARRAY_DATATYPE oldValue;
+	inline void setBlockValue( size_t index, BITARRAY_DATATYPE value) {
+		BITARRAY_DATATYPE oldValue;
 		oldValue = this->getBlockValue(index);
 
 		if (oldValue == value) {
@@ -753,7 +785,7 @@ public:
 		Point2D_int p;
 		int dist;
 
-		q.push_back(Point2D_Distance{ *start, 0 });
+		q.push_back(Point2D_Distance{ *start, 0.0f });
 		visited->setBit(start->y, start->x);
 
 		farthest = *start;
@@ -786,7 +818,8 @@ public:
 		return { farthest, (float)maxDist };
 	}
 
-	BitMatrixPosition getFirstSetPixel() {
+
+BitMatrixPosition getFirstSetPixel() {
 		if (this->settedBits <= 0) {
 			return BitMatrixPosition{ 0, 0, false };
 		}
@@ -923,7 +956,7 @@ public:
 		{
 			return BitMatrixIndex{ 0, 0, false };
 		}
-		register size_t offset = (pos.row * this->nColumns) + pos.column;
+		 size_t offset = (pos.row * this->nColumns) + pos.column;
 		_index.valid = true;
 		_index.index = offset / BITARRAY_DATATYPE_BITS;
 		_index.bit = offset % BITARRAY_DATATYPE_BITS;
@@ -984,10 +1017,18 @@ private:
 		return !(bit_matrix->getBit(row, col));
 	}
 
+	//// Utility function to check if a point is valid
+	//static bool isValid(int col, int row, BitMatrix* main, BitMatrix* visited) {
+	//	return (col >= 0 && col < main->getColumns() && row >= 0 && row < main->getRows() &&
+	//		main->getBit(row, col) == true && visited->getBit(row, col) == false);
+	//}
+
 	// Utility function to check if a point is valid
 	static bool isValid(int col, int row, BitMatrix* main, BitMatrix* visited) {
-		return (col >= 0 && col < main->getColumns() && row >= 0 && row < main->getRows() &&
-			main->getBit(row, col) == true && visited->getBit(row, col) == false);
+		if (col < 0 || col >= main->getColumns() || row < 0 || row >= main->getRows()) {
+			return false;
+		}
+		return main->getBit(row, col) && !visited->getBit(row, col);
 	}
 };
 
