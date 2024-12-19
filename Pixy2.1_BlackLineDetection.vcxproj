@@ -141,6 +141,8 @@
     <ClCompile Include="BitMatrixSkeleton.cpp" />
     <ClCompile Include="BitMatrixThinningK3M.cpp" />
     <ClCompile Include="geometry2D.cpp" />
+    <ClCompile Include="LinesRoutine.cpp" />
+    <ClCompile Include="LinesRoutine.h" />
     <ClCompile Include="main_pixy_line.cpp" />
     <ClCompile Include="pixy2_libs\common\src\chirp.cpp" />
     <ClCompile Include="pixy2_libs\host\libpixyusb2\src\libpixyusb2.cpp" />

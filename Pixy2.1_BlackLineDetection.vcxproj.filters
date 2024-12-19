@@ -45,6 +45,12 @@
     <ClCompile Include="main_pixy_line.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LinesRoutine.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LinesRoutine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rgb2hsv.h">

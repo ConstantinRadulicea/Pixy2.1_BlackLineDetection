@@ -1038,7 +1038,8 @@ static void baiernToBitmatrixDownscale_minPooling(BitMatrix* _dst, uint8_t* _src
 	size_t src_last_col, src_last_row;
 	size_t n_settedbits;
 	size_t min_setted_bits = (size_t)(window_black_pixels_percentual * (float)(downscale_rate * downscale_rate));
-	uint8_t min_color_treshold = (uint8_t)(min_black_treshold_percentual * 255.0f);
+
+	uint8_t min_color_treshold = (uint8_t)(min_black_treshold_percentual * (float)(UINT8_MAX));
 	_dst->clear();
 	src_last_col = width - downscale_rate;
 	src_last_row = height - downscale_rate;
