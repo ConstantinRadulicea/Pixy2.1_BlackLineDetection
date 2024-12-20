@@ -25,11 +25,11 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
 
-#define M_PI       3.14159265358979323846   // pi
-#define M_PI_2     1.57079632679489661923   // pi/2
-#define DEG_TO_RAD 0.01745329251994329576
-#define RAD_TO_DEG 57.2957795130823208767
-#define G_CONSTANT 9.80665
+#define M_PI       3.14159265358979323846f   // pi
+#define M_PI_2     1.57079632679489661923f   // pi/2
+#define DEG_TO_RAD 0.01745329251994329576f
+#define RAD_TO_DEG 57.2957795130823208767f
+#define G_CONSTANT 9.80665f
 
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
@@ -52,7 +52,7 @@ typedef struct ParabolaABC {
 	float A;
 	float B;
 	float C;
-};
+}ParabolaABC;
 
 typedef struct LineABC {
 	float Ax;
@@ -98,6 +98,11 @@ float NormalizePiToNegPi(float angle);
 LineABC xAxisABC();
 
 LineABC yAxisABC();
+
+int isValidLineABC(LineABC line);
+
+// result = A - B;
+LineABC LineAbcSubtraction(LineABC A, LineABC B);
 
 // polynomial_coefficients[0] = x^2
 // polynomial_coefficients[1] = x
@@ -153,6 +158,12 @@ LineMQ lineABC2MQ(LineABC line);
 
 LineABC perpendicularToLinePassingThroughPointABC(LineABC line, Point2D point);
 
+LineABC rotateLineAroundPoint(LineABC line, Point2D point, float angle);
+
+Point2D rotatePointAroundPoint(Point2D point, Point2D center, float angle);
+
+LineSegment rotateLineSegmentAroundPoint(LineSegment lineSegment, Point2D center, float angle);
+
 float angleBetweenLinesABC(LineABC line1, LineABC line2);
 
 LineABC points2lineABC(Point2D point1, Point2D point2);
@@ -197,4 +208,6 @@ float angleBw3Points2D(Point2D origin, Point2D point_b, Point2D point_c);
 float NormalizeZeroToPi(float angle);
 
 int isNumber(const char* str, size_t str_length);
+
+Point2D closestPointToSegment(Point2D point, LineSegment seg);
 #endif // !__GEOMETRY2D_H__

@@ -35,6 +35,22 @@ LineABC yAxisABC() {
 	return line;
 }
 
+int isValidLineABC(LineABC line) {
+	if (floatCmp(line.Ax, 0.0f) == 0 && floatCmp(line.By, 0.0f) == 0) {
+		return 0;
+	}
+	return 1;
+}
+
+// result = A - B;
+LineABC LineAbcSubtraction(LineABC A, LineABC B) {
+	LineABC res;
+	res.Ax = A.Ax - B.Ax;
+	res.By = A.By - B.By;
+	res.C = A.C - B.C;
+	return res;
+}
+
 // polynomial_coefficients[0] = x^2
 // polynomial_coefficients[1] = x
 // polynomial_coefficients[3] = 1
@@ -61,6 +77,13 @@ int floatCmp(float num1, float num2) {
 		return 1;
 	}
 	return -1;
+}
+
+int arePoints2DEqual(Point2D point1, Point2D point2) {
+	if (floatCmp(point1.x, point2.x) == 0 && floatCmp(point1.y, point2.y) == 0) {
+		return 1;
+	}
+	return 0;
 }
 
 int gaussianElimination3(float A[3][3 + 1], float x[3], int n) {
@@ -372,6 +395,10 @@ int isLineParallelToYaxisABC(LineABC line) {
 
 float angleBetweenLinesMQ(LineMQ line1, LineMQ line2) {
 	float angle;
+	if (floatCmp((line1.m * line2.m), -1.0f) == 0) {
+		return M_PI_2;
+	}
+
 	angle = atanf(fabsf((line1.m - line2.m)) / (1.0f + (line1.m * line2.m)));
 	return angle;
 }
@@ -503,34 +530,81 @@ LineABC perpendicularToLinePassingThroughPointABC(LineABC line, Point2D point) {
 	return perpendicularLine;
 }
 
+LineABC rotateLineAroundPoint(LineABC line, Point2D point, float angle) {
+	// Calculate the cosine and sine of the angle
+	float cosTheta = cos(angle);
+	float sinTheta = sin(angle);
+
+	// Rotate the A and B components
+	float newA = line.Ax * cosTheta - line.By * sinTheta;
+	float newB = line.Ax * sinTheta + line.By * cosTheta;
+
+	// Adjust C for rotation around the point (x0, y0)
+	//float newC = line.C - (line.Ax * point.x + line.By * point.y);
+	//newC = newC + (newA * point.x + newB * point.y);
+
+	// Step 2: Correct C to keep the line's position relative to the rotation point
+	float rotatedC = line.C + point.x * (line.Ax - newA) + point.y * (line.By - newB);
+
+	// Return the rotated line
+	LineABC rotatedLine;
+	rotatedLine.Ax = newA;
+	rotatedLine.By = newB;
+	rotatedLine.C = rotatedC;
+
+	return rotatedLine;
+}
+
+
+Point2D rotatePointAroundPoint(Point2D point, Point2D center, float angle) {
+	// Translate the point to the origin (relative to the center point)
+	float translatedX = point.x - center.x;
+	float translatedY = point.y - center.y;
+
+	// Calculate the rotated coordinates
+	float cosTheta = cosf(angle);
+	float sinTheta = sinf(angle);
+	float rotatedX = translatedX * cosTheta - translatedY * sinTheta;
+	float rotatedY = translatedX * sinTheta + translatedY * cosTheta;
+
+	// Translate the point back to the original center
+	Point2D rotatedPoint;
+	rotatedPoint.x = rotatedX + center.x;
+	rotatedPoint.y = rotatedY + center.y;
+
+	return rotatedPoint;
+}
+
+LineSegment rotateLineSegmentAroundPoint(LineSegment lineSegment, Point2D center, float angle) {
+	LineSegment rotatedLineSegment;
+	rotatedLineSegment.A = rotatePointAroundPoint(lineSegment.A, center, angle);
+	rotatedLineSegment.B = rotatePointAroundPoint(lineSegment.B, center, angle);
+	return rotatedLineSegment;
+}
+
 float angleBetweenLinesABC(LineABC line1, LineABC line2) {
 	float angle;
+	int are_parallel;
+	int are_perpendicular;
 	LineMQ line1Mq, line2Mq;
 
-	if (isLineParallelToXaxisABC(line1) && isLineParallelToXaxisABC(line2)) {
-		return 0.0f;	/* line1 // line2 // Y */
+	are_parallel = areParallelABC(line1, line2);
+	if (are_parallel) {
+		return 0.0f;
+	}
+	are_perpendicular = arePerpenticularABC(line1, line2);
+	if (are_perpendicular) {
+		return M_PI_2;
 	}
 
 	if (isLineParallelToYaxisABC(line1))
 	{
-		if (isLineParallelToXaxisABC(line2)) {
-			return M_PI_2;
-		}
-		else if (isLineParallelToYaxisABC(line2)) {
-			return 0.0f;	/* line1 // line2 // Y */
-		}
 		line1Mq = lineABC2MQ(line2);
 		line2Mq.m = 0;
 		line2Mq.q = 0;
 		angle = M_PI_2 - angleBetweenLinesMQ(line1Mq, line2Mq);
 	}
 	else if (isLineParallelToYaxisABC(line2)) {
-		if (isLineParallelToXaxisABC(line1)) {
-			return M_PI_2;
-		}
-		else if (isLineParallelToYaxisABC(line1)) {
-			return 0.0f;	/* line1 // line2 // Y */
-		}
 		line1Mq = lineABC2MQ(line1);
 		line2Mq.m = 0;
 		line2Mq.q = 0;
@@ -548,6 +622,11 @@ float angleBetweenLinesABC(LineABC line1, LineABC line2) {
 LineABC points2lineABC(Point2D point1, Point2D point2) {
 	LineMQ lineMq;
 	LineABC lineAbc;
+
+	if (arePoints2DEqual(point1, point2)) {
+		return LineABC{ 0.0f, 0.0f, 0.0f };
+	}
+
 
 	if (floatCmp(point1.x, point2.x) == 0) { // perpendicular to y axis
 		lineAbc = yAxisABC();
@@ -716,7 +795,7 @@ float triangleAngleA(float AC, float CB, float BA) {
 	if (floatCmp(AC, 0.0f) == 0 || floatCmp(BA, 0.0f) == 0) {
 		return 0.0f;
 	}
-	
+
 	angle = acosf(((AC * AC) + (BA * BA) - (CB * CB)) / (2.0f * AC * BA));
 	return angle;
 }
@@ -758,7 +837,7 @@ Point2D projectPointOnLineABC(Point2D point, LineABC line) {
 	return projectionPoint.point;
 }
 
-int isPointOnSegment(LineSegment segment, Point2D point) {	
+int isPointOnSegment(LineSegment segment, Point2D point) {
 	if (
 		((point.y < segment.A.y) != (point.y < segment.B.y)) &&
 		((point.x < segment.A.x) != (point.x < segment.B.x)) &&
@@ -1105,7 +1184,7 @@ IntersectionPoints2D_2 intersectionBwCircles(Point2D circleCenter_1, float circl
 float NormalizePiToNegPi(float angle)
 {
 	float newAngle = angle;
-	while (newAngle <= -M_PI) newAngle += (2.0f*M_PI);
+	while (newAngle <= -M_PI) newAngle += (2.0f * M_PI);
 	while (newAngle > M_PI) newAngle -= (2.0f * M_PI);
 	return newAngle;
 }
@@ -1121,36 +1200,66 @@ float NormalizeZeroToPi(float angle) {
 
 
 int isNumber(const char* str, size_t str_length) {
-    int dots = 0;
-    int numbers = 0;
+	int dots = 0;
+	int numbers = 0;
+	int pluses = 0, minuses = 0;
 
-    for (size_t i = 0; i < str_length; i++)
-    {
-        if (str[i] >= '0' && str[i] <= '9') {
-            numbers++;
-        }
-        else if (str[i] == '.') {
-            dots++;
-            if (dots > 1) {
-                break;
-            }
-        }
-        else if (str[i] == ' ') {
-            if (numbers > 0 || dots > 0) {
-                break;
-            }
-        }
-        else if (str[i] == '\0') {
-            break;
-        }
-        else {
-            break;
-        }
-    }
-    if (numbers > 0) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
+	for (size_t i = 0; i < str_length; i++)
+	{
+		if (str[i] >= '0' && str[i] <= '9') {
+			numbers++;
+		}
+		else if (str[i] == '+') {
+			pluses++;
+			if (pluses > 1) {
+				break;
+			}
+		}
+		else if (str[i] == '-') {
+			minuses++;
+			if (minuses > 1) {
+				break;
+			}
+		}
+		else if (str[i] == '.') {
+			dots++;
+			if (dots > 1) {
+				break;
+			}
+		}
+		else if (str[i] == ' ') {
+			if (numbers > 0 || dots > 0 || pluses > 0 || minuses > 0) {
+				break;
+			}
+		}
+		else if (str[i] == '\0') {
+			break;
+		}
+		else {
+			break;
+		}
+	}
+	if (numbers > 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
+
+
+
+Point2D closestPointToSegment(Point2D point, LineSegment seg) {
+	Point2D closest_point;
+	LineABC seg_line;
+
+	seg_line = points2lineABC(seg.A, seg.B);
+	closest_point = projectPointOnLineABC(point, seg_line);
+	if (isPointOnSegment(seg, closest_point) != 0) {
+		return closest_point;
+	}
+	if (euclidianDistance(point, seg.A) < euclidianDistance(point, seg.B)) {
+		return seg.A;
+	}
+	return seg.B;
 }

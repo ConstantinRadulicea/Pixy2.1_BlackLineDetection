@@ -164,6 +164,7 @@
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="rgb2hsv.h" />
     <ClInclude Include="BitMatrixSkeleton.h" />
+    <ClInclude Include="VectorLine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="edges.csv" />

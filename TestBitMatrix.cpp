@@ -286,6 +286,33 @@ void lineToNParray(std::vector<Point2D_int> line) {
 	std::cout << out << std::endl;
 }
 
+void lineToXY(std::vector<Point2D_int> line) {
+	std::string out_x, out_y;
+	size_t i;
+	out_x.append("x = [");
+	out_y.append("y = [");
+	for (i = 0; i < line.size(); i++)
+	{
+		std::string point;
+		point = std::to_string(line[i].x);
+		point.append(" ");
+		out_x.append(point);
+		point = std::to_string(line[i].y);
+		point.append(" ");
+		out_y.append(point);
+	}
+	if (i > 0) {
+		out_x.pop_back();
+		out_y.pop_back();
+	}
+	out_x.append("];");
+	out_y.append("];");
+	std::cout << out_x << std::endl;
+	std::cout << out_y << std::endl;
+}
+
+
+
 void TestVectors() {
 	std::vector<std::vector<Point2D_int>> vectors;
 	cv::Mat original_img = cv::imread(IMG_PATH);
@@ -307,6 +334,7 @@ void TestVectors() {
 	std::vector<std::vector<cv::Point>> approxCurve;
 	for (size_t i = 0; i < vectors.size(); i++) {
 		lineToNParray(vectors[i]);
+		lineToXY(vectors[i]);
 		std::vector<cv::Point> temp;
 		approxCurve.push_back(temp);
 		for (size_t j = 0; j < vectors[i].size(); j++) {
